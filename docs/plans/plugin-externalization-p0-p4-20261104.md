@@ -1,6 +1,6 @@
 # 插件外置 P0-P4 作战计划（2026-11-04 基线）
 
-> 本文件是当前计划，不是历史快照。状态事实以 `origin/main` = `ecf93daf`、PR #211/#215/#216 和本文引用的 CI run 为准。执行前先按第 6 节重新核对；状态变化时追加记录，不要改写已经发生的证据。
+> 本文件是当前计划，不是历史快照。状态事实以 `origin/main` = `8da4b78e`、PR #211/#216/#218/#222 和本文引用的 CI run 为准；2026-11-04 的旧证据保留在 2.1、2.2 与附录 A。执行前先按第 6 节重新核对；状态变化时追加记录，不要改写已经发生的证据。
 
 ## 1 目标与执行规则
 
@@ -27,18 +27,18 @@ P0 到 P4 是同一件事的五个阶段，不是五个独立项目。
 
 ## 2 状态总表
 
-采集时间 2026-11-04 23:25 +08。`origin/main` = `ecf93daf71bc587d046a54012243f8d47a5bff97`，第一父链为 `bf1b5738` → `9674604c` → `dc9b8fba` → `432cc03a` → `ecf93daf`。
+2026-11-05 03:40 刷新：`origin/main` = `8da4b78e0bf1db15a1747e2a83903af99599a550`，第一父链为 `8da4b78e` → `9f6c06db` → `a2b9a546` → `36111a90`。下表状态按该快照更新，明细见 2.3；2.1 与 2.2 是 2026-11-04 23:25 的旧快照，保持原样。
 
 | 层 | 范围 | 状态 | 证据 |
 |---|---|---|---|
-| P0 | 目标 DSH 单源到 `0.2.1-rc.5` | 进行中，draft #211 不能单独合 | head `94df1b37`；`sdk_version` 为 `0.2.1-rc.5`、upstream 为 `b830ec95`、lock 仍为 `911b0499…`、Cordis `4.0.5`；CI run `41817908263` 的 b0 与 merge-gate 红、test 与 lint 绿；preflight run `41817908094` 红；`mergeable=false`（dirty） |
+| P0 | 目标 DSH 单源到 `0.2.1-rc.5` | 已完成 | #211 merged `9f6c06db`，head `150197b1`；CI `41886050465` success；10 个作者仓按 rc.5 / kit 0.1.1 重建，主仓组合锁、来源清单与证据锁回填；密封 artifact `13348198215`、sha256 `02ed3c37…`、20 成员，seal run `41880213998`；作者 artifact 14 天有效，**2026-11-18 到期** |
 | P1 | 插件卫生，幽灵 import、无效 inject、类型检查 | 已完成 | #210 merged，head `2a419584`，merge `9674604c`；CI `41816034553` success；5 个 `client.tsx` 改从 `@deepseek-ai/cordis` 导入，5 个包各自 3 条 `dsh.client.inject` 全部删除，kit 增加 `checkClientTypes()` |
 | P2a | provenance 与 client banner 收进 kit | 已完成 | #213 merged，head `ef1cc6d8`，merge `ecf93daf`；CI `41835511757` success；kit 新增 `./provenance` 与 `./client-banner`，9 个 `build.mjs` 与 8 个 banner 改向，`repository_edges` 26 → 17，`cross_package_edges` 28 → 45 |
 | P2b | tool policy 单源与官方工具漂移门禁 | 已完成 | #214 merged，head `6849fc4c`，merge `432cc03a`；CI `41828359712` success；`dsh-plugins/query-agent/src/tool-policy.ts` 加 `dsh-plugins/query-agent/config/{query-agent-tool-policy,dsh-official-tools}.v1.json`，68 个官方工具名，25 项行为逐条等价 |
 | P2c | component catalog 移出插件源码 | 已完成 | #212 merged，head `ec83fe52`，merge `dc9b8fba`；CI `41823447654` success；`backend/contracts/component-catalog.json` 7014 bytes、sha256 `8e2161fa…`，`board_spec.py` 导入期不再读 `dsh-plugins/` |
-| P2d | 生成物收进独立 contracts 包 | 已实现，CI 全绿，待合并授权 | head `9557f84b`，base `ecf93daf`，110 files +1800/−687；preflight `41853858184` pass 7m39s；CI `41853858267` 全绿（2 个按路径 skipped），b0 15m4s、test 16m43s、merge-gate pass；`mergeable_state=clean` |
-| P3 | 换私有协议为 rc.5 公开面 | 未开工，源码阻塞已清除 | 无分支、无 PR；2026-11-04 已对 `b830ec95` 源码逐面复验，12 个 API 面全部有结论（见 2.2）；剩余阻塞是 4 个产品决策，不是代码 |
-| P4 | 最后拆仓并删除主仓插件源码 | 未开工 | 无分支、无 PR；`deletion_gate=BLOCKED`，原因为 `remote_main_not_verified` 与 `production_only_closure_not_recorded`；硬依赖 P3、10 作者仓迁移和删除门禁 |
+| P2d | 生成物收进独立 contracts 包 | 已完成 | #216 merged `36111a90`，head `107d2324`；CI `41874816482` success；110 files +1800/−687；b0 / test / merge-gate 绿 |
+| P3 | 换私有协议为 rc.5 公开面 | 部分完成：P3-0/P3-1/P3-2/P3-5 已合并；P3-3/P3-4 等产品决策 | #218 merged `a2b9a546`，head `a823b0d9`，CI `41880532530` success（P3-0 影子门禁 + P3-1 disposer）；#222 merged `8da4b78e`，head `2df54efe`，CI `41895117591` success（P3-2 Config / typed tools + P3-5 TurnEndReason）；P3-3 等 D4，P3-4 等 D1/D2/D3 |
+| P4 | 最后拆仓并删除主仓插件源码 | 未开工 | 无分支、无 PR；`deletion_gate=BLOCKED`，原因为 `remote_main_not_verified` 与 `production_only_closure_not_recorded`；硬依赖 P3-3/P3-4 完成、10 作者仓迁移和删除门禁 |
 
 ### 2.1 写作时校正的六处事实
 
@@ -67,52 +67,59 @@ P0 到 P4 是同一件事的五个阶段，不是五个独立项目。
 | 外部连接 | ACP 完整，SDK 有缺口 | ACP 有 `session/cancel` 与 tool_call id；SDK 无 cancel，prompt 无客户端 requestId |
 | Config 与 typed tools | 可用 | 插件 `export const Config` 加 `defineTool` 可替代 `/internal/native/*` 与固定端口，无需上游新面 |
 
+### 2.3 2026-11-05 状态刷新
+
+P2d #216、P0 #211、P3-0/P3-1 #218、P3-2/P3-5 #222 已依次合并，§3.1 的“P2d → kit → 作者包 → 锁回填 → #211”串行链全部走完。P4 的阻塞从“P0 未完成”改为“P3-3/P3-4 未完成 + 10 作者仓迁移”。
+
+- 作者 artifact 有效期 14 天，**2026-11-18 到期**（CHANGELOG 与 STATUS 同口径）。到期后 sealed 组合不能只靠旧 artifact 复验，必须重跑作者 CI 或重新密封；主仓 sealed artifact `13348198215` 本身是 2027-02-02 过期，两个日期不要混用。
+- P3-3 仍等 D4（ACP 主线 vs SDK 主线）；P3-4 仍等 D1/D2/D3（标题、hero 徽章、设置入口）。这四项只有人能定，代码侧没有新增阻塞。
+- B0 flake 跟进见 C14：`test_native_success_save_cockpit_roundtrip_and_negatives` 在 run `41871881222` / job `126720993582` attempt 1 记 `1 failed, 1048 passed`，同分支后续 head `107d2324` 的 run `41874816482` 通过。**未修**，精确诊断与剩余风险写在该卡片。
+
 ## 3 依赖图与串行链
 
 ### 3.1 主链
 
 ```text
-P2d #216 合并
+P2d #216 合并（36111a90）
       |
       v
-kit tarball（P0-0）
+kit 0.1.1 → 10 个作者仓按 rc.5 重建 → 主仓锁链回填 + sealed artifact（已完成）
       |
       v
-10 个作者仓按 rc.5 重建 pack（P0-1，可并行）
+#211 合并（9f6c06db），P0 完成
       |
       v
-主仓锁链回填 + 重新密封 artifact（P0-2，严格串行单 writer）
+P3-0/P3-1 (#218) 与 P3-2/P3-5 (#222) 已合并
       |
       v
-#211 rebase + preflight + 合并（P0-3）
-      |
-      v
-P3 代码迁移（P3-0 到 P3-5）→ P4 拆仓
+P3-3（等 D4）/ P3-4（等 D1-D3）→ P4 拆仓
 ```
 
 ### 3.2 四个拒绝点
 
-1. 作者 peer 校验。`scripts/crm-calibration/composition-inputs.mjs` 的 `validateCompositionPacks` 调 `inspectDeclaredPlugin(..., {dshSdkVersion, cordisVersion})`，作者 pack manifest 声明的 peer 必须等于 rc.5 与 4.0.5，否则 `CRM_COMPOSITION_*_DSH_PIN` 失败，b0 必红。这是 #211 b0 当前红的直接原因。
+1. 作者 peer 校验。`scripts/crm-calibration/composition-inputs.mjs` 的 `validateCompositionPacks` 调 `inspectDeclaredPlugin(..., {dshSdkVersion, cordisVersion})`，作者 pack manifest 声明的 peer 必须等于 rc.5 与 4.0.5，否则 `CRM_COMPOSITION_*_DSH_PIN` 失败，b0 必红。这是 #211 合并前 b0 红的直接原因；P0 已按此重建作者 pack。
 2. 锁链摘要绑定。profile digest、`config/shinemage-composition-packs.lock.json`、`config/shinemage-composition-pack-manifest.v1.json`、sealing 分支、`config/shinemage-composition-artifact.lock.json` 之间逐层 sha256 绑定，改一层必须重算下游，只能单 writer 顺序回填。
-3. sealed artifact 分支。密封 workflow 只接受两个硬编码分支，两条都已与 main 分叉（2026-11-04 核对，`codex/rc3-composition-artifact-20261024` 为 ahead 5、behind 347，`codex/warehouse-composition-inputs-20261026` 为 ahead 17、behind 125），本轮必须重建，不能复用旧 artifact。
-4. 冲突面。#211 与 main 冲突，P2d 又把生成物移到 `dsh-plugins/contracts/` 并改多个 `package.json` 邻域。顺序必须是 #216 先落，再 rebase #211。
+3. sealed artifact 分支。密封 workflow 只接受两个硬编码分支，两条都已与 main 分叉（2026-11-04 核对，`codex/rc3-composition-artifact-20261024` 为 ahead 5、behind 347，`codex/warehouse-composition-inputs-20261026` 为 ahead 17、behind 125），P0 已按 rc.5 重建并密封，未复用旧 artifact。
+4. 冲突面。#211 与 main 冲突，P2d 又把生成物移到 `dsh-plugins/contracts/` 并改多个 `package.json` 邻域。实际顺序已按 #216 先落、再 rebase #211 执行。
 
-### 3.3 现在可以并行的工作
+### 3.3 并行通道（2026-11-05）
 
-| 通道 | 工作 | 位置 | 现在能否开始 | 冲突面 |
+| 通道 | 工作 | 位置 | 状态 | 冲突面 |
 |---|---|---|---|---|
-| W1 | #216 评审与合并授权 | 现有 PR | 可以，CI 已全绿 | 与 #211 争 `package.json` 邻域，先落 W1 |
-| W2 | P3-0 影子门禁、P3-1 disposer 收口 | 新 worktree off `ecf93daf` | 可以，不碰 pin 和锁 | 与 P2d 文件大体不重叠；与 #211 争 `package.json` 时先让 W1 |
-| W3 | kit tarball 构建、作者仓 patch 草案、锁链重算脚本自测 | `/tmp` 与只读作者仓 | 可以，只写 `/tmp` | 无主仓写入 |
-| W4 | 10 作者仓重建、推分支、触发 CI | 10 个作者仓 | 需授权 | 与主仓锁链是串行输入 |
-| W5 | 主仓锁链回填与 artifact 密封 | 主仓 `config/` 与 sealing 分支 | 需授权，且必须等 W4 完成 | 共享热点，只能单 writer |
+| W1 | #216 评审与合并授权 | 现有 PR | 已完成（`36111a90`） | 与 #211 争 `package.json` 邻域，先落 W1 |
+| W2 | P3-0 影子门禁、P3-1 disposer 收口 | 新 worktree off `ecf93daf` | 已完成（#218 `a2b9a546`） | 与 P2d 文件大体不重叠；与 #211 争 `package.json` 时先让 W1 |
+| W3 | kit tarball 构建、作者仓 patch 草案、锁链重算脚本自测 | `/tmp` 与只读作者仓 | 已完成（kit 0.1.1） | 无主仓写入 |
+| W4 | 10 作者仓重建、推分支、触发 CI | 10 个作者仓 | 已完成（rc.5 / kit 0.1.1） | 与主仓锁链是串行输入 |
+| W5 | 主仓锁链回填与 artifact 密封 | 主仓 `config/` 与 sealing 分支 | 已完成（artifact `13348198215`） | 共享热点，只能单 writer |
 | W6 | 交付层真实演练 T02/T03/T06/T07/T09/E1 | 隔离实例与文档 | 需授权或人工窗口 | 与插件代码无文件冲突 |
 
-结论。现在可以并行的是 W1、W2、W3。W4 与 W5 必须授权且串行。P3-2 与 P3-3 会改 `dsh-plugins/*/package.json` 和 profile，建议在 #211 合入后做，避免第二次 rebase。P4 在所有前置完成前不启动。
+结论。W1 到 W5 已随 P0 完成，现在只剩 W6 可并行。P3-3 与 P3-4 在 D1-D4 决策后开工；P4 在 P3 与 10 作者仓迁移完成后启动。
 
 ## 4 任务卡
 
 每张卡包含目标、输入、入口、验收、阻塞和授权。授权只写“需要人做什么”，不代表本计划已经授权。
+
+2026-11-05：C01–C08、C11 已完成（merge `36111a90` / `9f6c06db` / `a2b9a546` / `8da4b78e`）；C09、C10 等 D1–D4；C12 等 P3 完成；C13、C14 为跟进。
 
 ### C01 P2d #216 收口
 
@@ -408,6 +415,20 @@ node --test scripts/ci/composition-pack-inputs.test.mjs
 | T09 公网切换 | 把验证过的版本切到公网 | 杭州与 Cloudflare 现役 | 切换、健康检查、回退路径 | 单独授权；本计划不覆盖 |
 | E1 看板接线 | 第二入口上传后接入驾驶舱 | #206 后端与 #207 前端已合 | 上传、只读 SQL、生成看板、保存重开真实联调 | 需真实附件与人工验收 |
 
+### C14 B0 native-save 503 flake（跟进）
+
+**目标** 关闭 `backend/tests/test_analytics_first_purchase_native.py::test_native_success_save_cockpit_roundtrip_and_negatives` 的偶发 503，不用测试侧重试掩盖。
+
+**证据** run `41871881222` job `126720993582` attempt 1：`1 failed, 1048 passed`，失败点是 `incomplete.status_code == 422` 实际得到 503；同一测试的 captured log 有 `B0 STATE_UNAVAILABLE; new dispatch paused until reconciliation`。该 run 的 attempt 2 被取消；同分支后续 head `107d2324` 的 run `41874816482` b0 通过（15m40s）。本机整文件 30 次、批次前缀 602 项均通过，未复现。
+
+**诊断** 503 来自 RunStore 读连接：`_connection(readonly=True)` 每次新开连接且 `timeout=0.1`；WAL 下普通写锁不会阻塞读（`test_analytics_jobs.py` 已断言 “WAL reader still works”），所以不是 writer 持锁。失败与同进程 dispatcher tick 的 STATE_UNAVAILABLE 同时出现，最可能是连接频繁开/关时撞上 WAL recovery/checkpoint 或临时 I/O 的 100 ms 窗口；`tick()` 又把任何 `sqlite3.DatabaseError` 统一记成 STATE_UNAVAILABLE 并暂停准入。已排除跨测试共享状态：每个 app 用独立 `tmp_path/state`，10 文件 212 项批次内 fd 12–15、线程 10–13 且无增长，也没有全局 sqlite monkeypatch。
+
+**剩余风险** 同一 100 ms 窗口仍可命中任意读路径，按合同返回可重试 503，概率低但未关闭；CI 若再次出现应保留 job 日志并记录具体 sqlite 错误类型。
+
+**未做/下一步** 生产侧候选是给只读连接更长的 busy timeout，或复用读连接 / 显式 WAL recovery 策略；两者都会改动 0.1s fail-closed 准入语义和现有 contention 测试（`test_analytics_native_runtime.py`、`test_analytics_jobs.py`），需要单独评审，不在本 PR 做。测试侧加重试或放宽断言会掩盖合同问题，明确不做。
+
+**授权** 无产品决策；改生产锁语义前单独评审。
+
 ## 5 只有人才能决定的事项
 
 ### 5.1 rc.5 产品决策
@@ -433,9 +454,9 @@ PR #215 已经修掉机械项（test 四片、pip 不触发 b0、path matrix 补
 
 | 编号 | PR | 当前状态 | 建议与前置 |
 |---|---|---|---|
-| D5 | #216 P2d | open，`mergeable_state=clean`，preflight、b0、test、merge-gate 全绿 | 评审通过后即可合。它是 #211 rebase 的前置 |
-| D6 | #215 CI 精简 | open，`mergeable_state=clean`，全部检查绿（含 merge-gate） | 与 P0 无代码依赖，可独立合。合并后 CI 行为变化，下一轮看 test 四片与 push-main 无 b0 |
-| D7 | #211 P0 | draft，`mergeable=false`，b0、preflight、merge-gate 红 | 只能在 C03 与 C04 完成后合。合并前必须 rebase 到含 #216 的 main，并确认锁链指向新 pack |
+| D5 | #216 P2d | 已合并 `36111a90` | 关闭；它是 #211 rebase 的前置 |
+| D6 | #215 CI 精简 | 已合并 `c2f627cb` | 关闭；test 四片与 push-main 无 b0 已上线 |
+| D7 | #211 P0 | 已合并 `9f6c06db` | 关闭；作者 artifact 2026-11-18 到期，到期前不要把它当作长期输入 |
 
 ### 5.4 其它需要授权的动作
 
@@ -449,20 +470,18 @@ PR #215 已经修掉机械项（test 四片、pip 不触发 b0、path matrix 补
 
 ## 6 如何接续
 
-1. 先读 `AGENTS.md`、本文件、`STATUS.md`、`docs/operating/verification.md`，再读 PR #211、#215、#216 的 body。不要只读会话摘要。
+1. 先读 `AGENTS.md`、本文件、`STATUS.md`、`docs/operating/verification.md`，再读 #211/#216/#218/#222 的 body（均已合并）。不要只读会话摘要。
 2. 核对 live 状态。
 
 ```bash
-gh pr list -R tyuanww/fuqing-crm-analytics --state all --limit 20
-gh pr view 211 -R tyuanww/fuqing-crm-analytics --json state,isDraft,mergeable,headRefOid
-gh pr view 216 -R tyuanww/fuqing-crm-analytics --json state,mergeable,headRefOid
-gh pr view 215 -R tyuanww/fuqing-crm-analytics --json state,mergeable,headRefOid
+gh pr list -R tyuanww/fuqing-crm-analytics --state open
+gh pr checks <n> -R tyuanww/fuqing-crm-analytics
 git log --oneline origin/main -12
 ```
 
-3. 判断入口。若 #216 未合，先做 C01，不要开 #211 rebase。若 #216 已合且 #211 仍红，按 C02 到 C05 顺序推进，不要跳步。
-4. 需要并行时按 3.3 选通道。W2 的 P3-0 与 P3-1 可以立即开，但不要改版本 pin、锁和 `STATUS.md`。
-5. 先做只写 `/tmp` 的准备工作。kit tarball、作者仓 patch 草案、锁链重算脚本自测都不需要仓库授权；写作者仓或主仓 `config/` 前停下来要授权。
+3. 判断入口。P0、P2d、P3-0、P3-1、P3-2、P3-5 已完成；下一步只取决于 D1–D4 的决策，先做 P3-3/P3-4，再做 P4。不要重开 #211/#216。
+4. 需要并行时按 3.3 选通道。W1–W5 已完成，只剩 W6；P3-3 与 P3-4 会改 `dsh-plugins/*/package.json` 与 profile，同一时刻只让一个 writer 动这些热点。
+5. 只写 `/tmp` 的准备工作已完成；后续写作者仓、主仓 `config/`、sealing 分支或删 `dsh-plugins/` 仍需单独授权。
 6. 每完成一张卡，把 PR 号、run id、artifact、摘要写回本文件的对应卡片或追加“执行记录”，不要覆盖旧证据。
 7. 遇到 5.1 到 5.4 的决策点，把选项和后果发给用户，不要替用户选。默认建议不构成授权。
 8. 报告时按“结论、证据、未做、下一步”四段写。没有真实 run 的项写 `NOT_RUN`，不要写“应该通过”。
@@ -476,21 +495,25 @@ git log --oneline origin/main -12
 - 10 个作者仓的内部实现。每个仓怎么改 peer、怎么改断言、怎么重生成 lock，以各仓 `DEVELOPMENT.md` 与 CI 为准；本文只定义输入、证据格式和顺序。
 - DSH 上游改动。本计划不打补丁、不提上游 PR、不 vendor 上游源码。
 - 数据迁移、缓存预热、真实 DuckDB 操作和旧 CRM 业务逻辑。
-- Dependabot 遗留（#204、#202、#199、#174、#171、#169、#168）。它们与插件链无直接依赖，单独排期。
+- Dependabot 遗留已清零（#204、#199、#174、#169、#168 关闭，#202、#171 合并）；pydantic 与 pydantic-core 的 ignore 已按成对冻结对齐。
 - rc.5 源码复验报告的入库。报告当前只在会话产物中，建议 P3 开工时整理进 `docs/architecture/`，本文不复述全部源码位置。
 - `STATUS.md` 与 `CHANGELOG.md` 的本轮更新。为避免与 #211、#215、#216 冲突，本文不修改这两个文件；P0 收口时由单 writer 统一补记。
 
-## 附录 A 证据索引（2026-11-04 核对）
+## 附录 A 证据索引（2026-11-04 核对，2026-11-05 追加）
 
 | 对象 | 值 |
 |---|---|
-| main | `ecf93daf71bc587d046a54012243f8d47a5bff97` |
+| main（2026-11-04 快照） | `ecf93daf71bc587d046a54012243f8d47a5bff97` |
+| main（2026-11-05） | `8da4b78e0bf1db15a1747e2a83903af99599a550` |
 | P1 merge | `9674604c`（#210），head `2a419584`，CI `41816034553` |
 | P2c merge | `dc9b8fba`（#212），head `ec83fe52`，CI `41823447654` |
 | P2b merge | `432cc03a`（#214），head `6849fc4c`，CI `41828359712` |
 | P2a merge | `ecf93daf`（#213），head `ef1cc6d8`，CI `41835511757` |
-| P2d | #216，head `9557f84b`，CI `41853858267`，preflight `41853858184` |
-| P0 | #211，head `94df1b37`，CI `41817908263`，preflight `41817908094` |
-| CI 精简 | #215，head `00ddef77`，CI `41846033884`，preflight `41846033847` |
+| P2d merge | `36111a90`（#216），head `107d2324`，CI `41874816482` |
+| P0 merge | `9f6c06db`（#211），head `150197b1`，CI `41886050465`；seal run `41880213998`，artifact `13348198215`（`02ed3c37…`，20 成员，2027-02-02 过期） |
+| P3-0/P3-1 merge | `a2b9a546`（#218），head `a823b0d9`，CI `41880532530` |
+| P3-2/P3-5 merge | `8da4b78e`（#222），head `2df54efe`，CI `41895117591` |
+| CI 精简 | #215，`c2f627cb` |
 | rc.5 | `b830ec95`，Cordis `4.0.5`，lock `911b0499…` |
-| kit | `0.1.0`，private，新 tarball 待 C02 产出 |
+| kit | `0.1.1`，已用于 10 作者仓 rc.5 重建 |
+| 作者 artifact | 14 天有效，2026-11-18 到期 |

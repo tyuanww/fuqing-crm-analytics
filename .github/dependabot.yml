@@ -17,9 +17,13 @@ updates:
     ignore:
       - dependency-name: "duckdb"
         update-types: ["version-update:semver-major", "version-update:semver-minor"]
-      # Current Pydantic 2.13.5 requires exactly core 2.46.5.
-      # Any newer core cannot be installed independently of this parent, so the
-      # whole range is ignored until Pydantic itself moves. Revisit both together.
+      # Pydantic 2.13.5 pins pydantic-core==2.46.5 exactly. Ignoring only the
+      # core lets a lone pydantic minor bump land and make the lock
+      # unsatisfiable (closed PR #220: pydantic 2.14.2 wants core 2.50.2).
+      # Ignore both until one planned upgrade moves requirements.txt and the
+      # two matching lock lines together; no auto-merge.
+      - dependency-name: "pydantic"
+        versions: [">2.13.5,<3.0.0"]
       - dependency-name: "pydantic-core"
         versions: [">2.46.5,<3.0.0"]
   - package-ecosystem: "npm"
