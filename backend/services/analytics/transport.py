@@ -52,6 +52,11 @@ protocol structurally. ``runtime.py`` and ``first_purchase/native_identity.py``
 are part of the pinned standalone-kernel file list, so they type against this
 module without importing it at runtime (``TYPE_CHECKING`` only); the seam adds
 no runtime dependency and no package file.
+
+``RoutedTransport`` is the canary-only implementation of the same protocol: it
+owns one bridge and one ACP transport and sends each dispatch/observe/cancel to
+the transport persisted on the intent. It is constructed only for
+``transport=canary``; the default bridge runtime never imports it.
 """
 
 from __future__ import annotations
@@ -81,3 +86,63 @@ class HostTransport(Protocol):
 
     def call(self, operation: str, payload: Mapping[str, Any]) -> dict[str, Any]:
         """Run one documented operation; raise on any transport failure."""
+
+
+class RoutedTransport:
+    """Canary-only router: the persisted intent transport owns the operation.
+
+    ``transport=bridge`` and ``transport=acp`` keep one concrete transport for
+    the whole runtime; only the canary computes a different transport per
+    intent. Routing here reads ``payload["transport"]`` (the value persisted in
+    ``dispatch_intents``), never a fresh policy decision, so a retry or a
+    restart reconciles the same path. Any other value raises instead of
+    falling back to the bridge. ``identity`` remains bridge-only because the
+    ACP seam has no identity operation, and ``health`` requires both owned
+    paths: admission closes rather than dispatching half a canary.
+    """
+
+    def __init__(self, bridge: HostTransport, acp: HostTransport | None = None, *,
+                 canary_reason: str | None = None):
+        if not callable(getattr(bridge, "call", None)):
+            raise ValueError("routed transport requires a bridge transport")
+        if acp is not None and not callable(getattr(acp, "call", None)):
+            raise ValueError("routed ACP transport must implement call")
+        self.bridge = bridge
+        self.acp = acp
+        self.canary_available = acp is not None
+        self.canary_reason = canary_reason
+
+    @property
+    def callback_token(self):
+        """Expose the ACP callback token so the ACP routes mount in canary mode."""
+        return getattr(self.acp, "callback_token", None)
+
+    def attach_binding_sink(self, sink) -> None:
+        attach = getattr(self.acp, "attach_binding_sink", None)
+        if callable(attach):
+            attach(sink)
+
+    def close(self) -> None:
+        close = getattr(self.acp, "close", None)
+        if callable(close):
+            close()
+
+    def call(self, operation: str, payload: Mapping[str, Any]) -> dict[str, Any]:
+        if operation not in TRANSPORT_OPERATIONS:
+            raise ValueError("unsupported transport operation")
+        if operation == "health":
+            bridge_ready = self.bridge.call("health", {}).get("ready") is True
+            if self.acp is None:
+                return {"ready": bridge_ready, "transports": {"bridge": bridge_ready}}
+            acp_ready = self.acp.call("health", {}).get("ready") is True
+            return {"ready": bridge_ready and acp_ready,
+                    "transports": {"bridge": bridge_ready, "acp": acp_ready}}
+        if operation == "identity":
+            return self.bridge.call(operation, payload)
+        recorded = payload.get("transport") if isinstance(payload, Mapping) else None
+        if recorded == "bridge":
+            return self.bridge.call(operation, payload)
+        if recorded == "acp" and self.acp is not None:
+            return self.acp.call(operation, payload)
+        raise ValueError("dispatch intent has no executable recorded transport")
+

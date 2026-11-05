@@ -14,7 +14,7 @@ from backend.contracts.analytics import (
     AnalyticsConversationRequest,
     AnalyticsRunRequest,
 )
-from backend.services.analytics.jobs import ExecutionObservation
+from backend.services.analytics.jobs import ExecutionObservation, TransportPolicy
 from backend.tests.analytics_run_support import (
     actor,
     make_store,
@@ -25,13 +25,18 @@ from backend.tests.analytics_run_support import (
 SESSION = "native-session"
 
 
+def acp_store(path):
+    # ACP binding is only legal for an intent recorded for the ACP transport.
+    return make_store(path, transport_policy=TransportPolicy(mode="acp"))
+
+
 def native_request(key="native-1"):
     return {"sessionId": SESSION, "requestId": key, "mode": "queue",
             "content": [{"type": "text", "text": "合成渠道"}], "clientTimeZone": "Asia/Shanghai"}
 
 
 def bound_run(tmp_path):
-    store = make_store(tmp_path / "state")
+    store = acp_store(tmp_path / "state")
     conversation = store.create_conversation(
         actor(), "native", AnalyticsConversationRequest(), runtime_session_id=SESSION,
     )
@@ -90,7 +95,7 @@ def test_kernel_restart_fences_unsettled_bindings_as_lost_and_releases_the_slot(
 
     # A new RunStore on the same directory is exactly what a kernel restart
     # sees; its recover() must fence the unsettled binding, not forget it.
-    fresh = make_store(tmp_path / "state")
+    fresh = acp_store(tmp_path / "state")
     recovered = fresh.recover()
     # An ACP-bound attempt cannot settle in the new process, so it is fenced
     # rather than returned as a bridge intent to reconcile.
@@ -151,7 +156,7 @@ def test_the_binding_table_is_additive_on_an_existing_v2_state_file(tmp_path):
         con.execute("DROP TABLE acp_bindings")
     # Reopening a v2 store without the table must create it without touching
     # user_version, the profile hash or any existing evidence.
-    reopened = make_store(tmp_path / "state")
+    reopened = acp_store(tmp_path / "state")
     with sqlite_connection(reopened.path) as con:
         assert con.execute("PRAGMA user_version").fetchone()[0] == 2
         tables = {row[0] for row in con.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()}

@@ -112,7 +112,8 @@ def _attach_first_purchase_assets(app, config, run_store, registry) -> None:
     app.state.cockpit_store = cockpit_store
 
 
-def create_first_purchase_native_app(config, *, bridge=None, source_identities=None):
+def create_first_purchase_native_app(config, *, bridge=None, source_identities=None,
+                                      transport_policy=None):
     runtime_token, gateway_token = config["runtime_token"], config["gateway_token"]
     if len(runtime_token) < 32 or len(gateway_token) < 32 or runtime_token == gateway_token:
         raise ValueError("separate explicit local capabilities required")
@@ -149,7 +150,8 @@ def create_first_purchase_native_app(config, *, bridge=None, source_identities=N
             raise
 
     fixture = create_first_purchase_fixture(snapshot)
-    store = RunStore(state_dir, B0ResourceProfile(**B0_SMALL_FIXTURE_PROFILE), family="first_purchase")
+    store = RunStore(state_dir, B0ResourceProfile(**B0_SMALL_FIXTURE_PROFILE), family="first_purchase",
+                     transport_policy=transport_policy)
     def conversation(principal):
         return store.create_conversation(
             principal, "native-first-purchase", FirstPurchaseConversationRequest(),

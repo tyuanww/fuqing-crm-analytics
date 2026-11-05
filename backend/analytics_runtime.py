@@ -8,6 +8,7 @@ from backend.services.analytics.runtime_ports import bridge_origin, runtime_port
 
 import asyncio
 import json
+import logging
 import secrets
 import sys
 from contextlib import asynccontextmanager
@@ -34,7 +35,7 @@ from backend.contracts.analytics_query_run import (
 )
 from backend.services.analytics.access import AnalyticsError, AnalyticsPrincipal, B0IdentityRegistry
 from backend.services.analytics.cockpit import CockpitStore
-from backend.services.analytics.jobs import RunStore
+from backend.services.analytics.jobs import RunStore, TransportPolicy
 from backend.services.analytics.saved_analyses import SavedAnalysisStore
 from backend.services.analytics.resource_profile import B0ResourceProfile, B0_SMALL_FIXTURE_PROFILE
 from backend.services.analytics.runtime import (
@@ -244,7 +245,7 @@ def _attach_asset_http(app, config, run_store, registry) -> None:
         return _error_response(AnalyticsError(422, "INVALID_REQUEST", message), request.state.analytics_request_id)
 
 
-def _query_runtime_app(config, *, bridge=None):
+def _query_runtime_app(config, *, bridge=None, transport_policy=None):
     session_ids = config.get("session_ids")
     if (not isinstance(session_ids, list) or len(session_ids) != 2 or len(set(session_ids)) != 2
             or any(not isinstance(item, str) or not item for item in session_ids)):
@@ -271,7 +272,7 @@ def _query_runtime_app(config, *, bridge=None):
             return None
 
     store = RunStore(Path(config["state_dir"]), B0ResourceProfile(**B0_SMALL_FIXTURE_PROFILE),
-                     family=QUERY_RUN_FAMILY)
+                     family=QUERY_RUN_FAMILY, transport_policy=transport_policy)
     conversations = {}
     for index, session_id in enumerate(session_ids):
         conversations[session_id] = store.create_conversation(
@@ -354,29 +355,52 @@ def build_host_transport(config):
 
     ACP is a deployment switch, never a fallback: selecting it without its
     generated profile wiring fails closed at health instead of reaching the
-    loopback bridge. The import is local so this module (and the standalone
-    first-purchase kernel that pins ``runtime.py``) keeps no ACP dependency.
+    loopback bridge. ``canary`` owns both paths and records one per intent; if
+    the ACP wiring is absent it degrades to a bridge-only canary (every intent
+    is recorded bridge) rather than guessing an ACP path. The import is local so
+    this module (and the standalone first-purchase kernel that pins
+    ``runtime.py``) keeps no ACP dependency.
     """
-    kind = config.get("transport", "bridge")
-    if kind == "bridge":
+    policy = TransportPolicy.from_config(config, acp_available=True)
+    if policy.mode == "bridge":
         return HostBridge(bridge_origin(config), config["runtime_token"])
-    if kind == "acp":
+    if policy.mode == "acp":
         from backend.services.analytics.acp_transport import AcpTransport
         return AcpTransport.from_config(config)
-    raise ValueError("unsupported host transport")
+    from backend.services.analytics.acp_transport import AcpTransport
+    from backend.services.analytics.transport import RoutedTransport
+    bridge = HostBridge(bridge_origin(config), config["runtime_token"])
+    try:
+        acp = AcpTransport.from_config({**config, "transport": "acp"})
+        reason = None
+    except (ValueError, OSError) as error:
+        # Fail closed to the known-good default path. The reason is logged and
+        # the store is told ACP is unavailable, so no intent can be recorded
+        # for a path this runtime cannot execute.
+        reason = f"acp_prerequisites_missing: {error}"
+        logging.getLogger(__name__).warning("canary ACP path unavailable; every intent stays bridge: %s", error)
+        acp = None
+    return RoutedTransport(bridge, acp, canary_reason=reason)
+
+
+def transport_policy(config, host=None) -> TransportPolicy:
+    """Build the accept-time policy from the same switch the transport used."""
+    available = bool(getattr(host, "canary_available", False))
+    return TransportPolicy.from_config(config, acp_available=available)
 
 
 def runtime_app(config, *, bridge=None):
     host = bridge if bridge is not None else build_host_transport(config)
+    policy = transport_policy(config, host)
     family = config.get("family", "b0")
     if family == QUERY_RUN_FAMILY:
-        app = _query_runtime_app(config, bridge=host)
+        app = _query_runtime_app(config, bridge=host, transport_policy=policy)
         _attach_acp_callback(app, host, config)
         assert_native_routes(app, family)
         return app
     if family == "first_purchase":
         from backend.analytics_first_purchase_native import create_first_purchase_native_app
-        app = create_first_purchase_native_app(config, bridge=host)
+        app = create_first_purchase_native_app(config, bridge=host, transport_policy=policy)
         _attach_acp_callback(app, host, config)
         assert_native_routes(app, family)
         return app
@@ -397,7 +421,8 @@ def runtime_app(config, *, bridge=None):
         except AnalyticsError:
             return None
 
-    store = RunStore(Path(config["state_dir"]), B0ResourceProfile(**B0_SMALL_FIXTURE_PROFILE))
+    store = RunStore(Path(config["state_dir"]), B0ResourceProfile(**B0_SMALL_FIXTURE_PROFILE),
+                     transport_policy=policy)
     conv = store.create_conversation(actor, "native-primary", AnalyticsConversationRequest(), runtime_session_id=session_id)
     workers = WorkerManager(store, resolve_actor, SyntheticFixture(**config["fixture"]))
     dispatcher = RunDispatcher(store, resolve_actor, host, workers=workers)
