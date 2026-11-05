@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 
@@ -420,3 +421,65 @@ def test_b0_prepare_cache_producer_matches_the_pr_consumer() -> None:
 
     guard = "Verify the restored preparation or fall back to a full prepare"
     assert _named_step(producer, guard)["env"]["B0_CACHE_HIT"] == _named_step(consumer, guard)["env"]["B0_CACHE_HIT"]
+
+
+# --- release workflow upstream pin -----------------------------------------
+# The rc.5 upstream was previously inlined as rc.1 `477b4f42` in nine places:
+# one evidence attestation subject-path and eight publish checks. Both release
+# workflows now resolve the runtime asset name from the single authoritative
+# `dsh-plugins/plugin-kit/toolchain.json`; a second inline copy fails here.
+
+TOOLCHAIN_PATH = REPO_ROOT / "dsh-plugins" / "plugin-kit" / "toolchain.json"
+INLINE_RUNTIME_RE = re.compile(r"shinemage-dsh-upstream-runtime-[0-9a-f]{40}\.tar\.zst")
+
+
+def test_release_workflows_bind_the_runtime_pin_to_toolchain_json() -> None:
+    """两个 release workflow 的 runtime pin 必须只有 toolchain.json 一个来源。"""
+    toolchain = json.loads(TOOLCHAIN_PATH.read_text(encoding="utf-8"))
+    upstream_sha = toolchain["upstream_sha"]
+    assert re.fullmatch(r"[0-9a-f]{40}", upstream_sha)
+    assert re.fullmatch(r"[0-9a-f]{64}", toolchain["upstream_lock_sha256"])
+    runtime_name = f"shinemage-dsh-upstream-runtime-{upstream_sha}.tar.zst"
+
+    evidence = (WORKFLOWS_DIR / "dsh-release-evidence.yml").read_text(encoding="utf-8")
+    publish = (WORKFLOWS_DIR / "dsh-release-publish.yml").read_text(encoding="utf-8")
+
+    for name, text in (
+        ("dsh-release-evidence.yml", evidence),
+        ("dsh-release-publish.yml", publish),
+    ):
+        # No inlined artifact name and no inlined pin value: neither the rc.1
+        # drift nor a fresh second copy of the current SHA can return.
+        assert INLINE_RUNTIME_RE.findall(text) == [], name
+        assert "477b4f42" not in text, name
+        assert upstream_sha not in text, name
+        assert runtime_name not in text, name
+
+    # Evidence reads the default toolchain source inside the checked-out tag.
+    assert (
+        "import { DSH_UPSTREAM_SHA } from './scripts/release/toolchain.mjs'"
+        in evidence
+    )
+    assert 'runtime_name="shinemage-dsh-upstream-runtime-${sha}.tar.zst"' in evidence
+
+    # Publish never checks out the source: it reads the toolchain bytes at the
+    # exact reviewed SHA, then derives the same runtime name.
+    assert (
+        'contents/dsh-plugins/plugin-kit/toolchain.json?ref=$REVIEWED_SHA'
+        in publish
+    )
+    assert "jq -er '.upstream_sha" in publish
+    assert 'RUNTIME_NAME="shinemage-dsh-upstream-runtime-${UPSTREAM_SHA}.tar.zst"' in publish
+
+    # The nine former literals now consume the resolved values exactly:
+    # 1 evidence subject-path + 8 publish checks. Counts are quote-agnostic so
+    # an equivalent refactor (single/double quotes, ${VAR}) does not trip them.
+    evidence_refs = len(re.findall(r"steps\.upstream\.outputs\.runtime_name", evidence))
+    publish_sha_refs = len(re.findall(r"os\.environ\[['\"]UPSTREAM_SHA['\"]\]", publish))
+    publish_name_env_refs = len(re.findall(r"os\.environ\[['\"]RUNTIME_NAME['\"]\]", publish))
+    publish_name_shell_refs = len(re.findall(r'"\$\{?RUNTIME_NAME\}?"', publish))
+    assert evidence_refs == 1
+    assert publish_sha_refs == 1
+    assert publish_name_env_refs == 5
+    assert publish_name_shell_refs == 2
+    assert evidence_refs + publish_sha_refs + publish_name_env_refs + publish_name_shell_refs == 9

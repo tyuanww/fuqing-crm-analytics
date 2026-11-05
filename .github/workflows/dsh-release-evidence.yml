@@ -50,6 +50,18 @@ jobs:
         id: python
         with:
           python-version: '3.14'
+      - name: Resolve the authoritative upstream pin
+        id: upstream
+        # Derive the runtime asset name from the same toolchain.json the
+        # checked-out tag built its preflight bundle with. The SHA is not
+        # inlined here: a second copy would silently drift from the pin.
+        run: |
+          set -euo pipefail
+          sha="$(node --input-type=module -e "import { DSH_UPSTREAM_SHA } from './scripts/release/toolchain.mjs'; console.log(DSH_UPSTREAM_SHA)")"
+          [[ "$sha" =~ ^[0-9a-f]{40}$ ]]
+          runtime_name="shinemage-dsh-upstream-runtime-${sha}.tar.zst"
+          printf 'UPSTREAM_SHA=%s\nRUNTIME_NAME=%s\n' "$sha" "$runtime_name" >> "$GITHUB_ENV"
+          printf 'runtime_name=%s\n' "$runtime_name" >> "$GITHUB_OUTPUT"
       - name: Check zstd release dependency
         run: |
           set -euo pipefail
@@ -176,7 +188,7 @@ jobs:
       - name: Attest the exact pinned upstream runtime artifact
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
-          subject-path: .context/release-evidence/${{ inputs.release_tag }}/shinemage-dsh-upstream-runtime-477b4f420553e8a52c2fbccc464d7561b239c443.tar.zst
+          subject-path: .context/release-evidence/${{ inputs.release_tag }}/${{ steps.upstream.outputs.runtime_name }}
       - name: Upload evidence (never publish)
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:

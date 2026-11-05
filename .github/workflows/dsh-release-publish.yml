@@ -30,6 +30,22 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
+      - name: Resolve the authoritative upstream pin
+        # Publish does not check out the reviewed source. Read the pin from the
+        # same toolchain.json the evidence run checked out, pinned to the
+        # reviewed SHA, so the expected asset name cannot drift from the
+        # artifact contract. The bytes are read, never executed.
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REVIEWED_SHA: ${{ inputs.reviewed_sha }}
+        run: |
+          set -euo pipefail
+          [[ "$REVIEWED_SHA" =~ ^[0-9a-f]{40}$ ]]
+          gh api "repos/$GITHUB_REPOSITORY/contents/dsh-plugins/plugin-kit/toolchain.json?ref=$REVIEWED_SHA" \
+            --jq '.content' | base64 -d > "$RUNNER_TEMP/toolchain.json"
+          UPSTREAM_SHA="$(jq -er '.upstream_sha | select(test("^[0-9a-f]{40}$"))' "$RUNNER_TEMP/toolchain.json")"
+          RUNTIME_NAME="shinemage-dsh-upstream-runtime-${UPSTREAM_SHA}.tar.zst"
+          printf 'UPSTREAM_SHA=%s\nRUNTIME_NAME=%s\n' "$UPSTREAM_SHA" "$RUNTIME_NAME" >> "$GITHUB_ENV"
       - name: Download and authenticate the exact evidence run
         env:
           GH_TOKEN: ${{ github.token }}
@@ -119,7 +135,7 @@ jobs:
           PY
           fi
           python3 - "$RUNNER_TEMP/draft-release.json" "$RUNNER_TEMP/dsh-evidence" "$RELEASE_TAG" "$REVIEWED_SHA" <<'PY'
-          import hashlib, json, pathlib, sys
+          import hashlib, json, os, pathlib, sys
           release = json.loads(pathlib.Path(sys.argv[1]).read_text())
           root = pathlib.Path(sys.argv[2]); tag, sha = sys.argv[3:]
           assert release['tag_name'] == tag
@@ -135,11 +151,11 @@ jobs:
           manifest = json.loads(manifest_path.read_text())
           assert manifest['schema_version'] == 'release-manifest/v1'
           assert manifest['release_tag'] == tag and manifest['source_sha'] == sha
-          assert manifest['dsh_upstream_sha'] == '477b4f420553e8a52c2fbccc464d7561b239c443'
+          assert manifest['dsh_upstream_sha'] == os.environ['UPSTREAM_SHA']
           runtime = manifest['upstream_runtime']
           assert runtime['role'] == 'upstream-runtime-bundle'
           assert runtime['upstream_sha'] == manifest['dsh_upstream_sha']
-          assert runtime['name'] == 'shinemage-dsh-upstream-runtime-477b4f420553e8a52c2fbccc464d7561b239c443.tar.zst'
+          assert runtime['name'] == os.environ['RUNTIME_NAME']
           assert hashlib.sha256(pre_path.read_bytes()).hexdigest() == manifest['pre_manifest_sha256']
           sums = {}
           for line in sums_path.read_text().splitlines():
@@ -162,7 +178,7 @@ jobs:
           assert runtime_entry['status'] == 'PASS' and runtime_entry['sha256'] == runtime['sha256']
           PY
           SOURCE_ARTIFACT=$(find "$RUNNER_TEMP/dsh-evidence" -type f -name "$RELEASE_TAG.tar.zst" -print -quit)
-          RUNTIME_ARTIFACT=$(find "$RUNNER_TEMP/dsh-evidence" -type f -name 'shinemage-dsh-upstream-runtime-477b4f420553e8a52c2fbccc464d7561b239c443.tar.zst' -print -quit)
+          RUNTIME_ARTIFACT=$(find "$RUNNER_TEMP/dsh-evidence" -type f -name "$RUNTIME_NAME" -print -quit)
           test -n "$SOURCE_ARTIFACT" && test -n "$RUNTIME_ARTIFACT"
           gh attestation verify "$SOURCE_ARTIFACT" --repo "$GITHUB_REPOSITORY" --source-ref "refs/tags/$RELEASE_TAG" --source-digest "$REVIEWED_SHA" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/dsh-release-evidence.yml" --format json
           gh attestation verify "$RUNTIME_ARTIFACT" --repo "$GITHUB_REPOSITORY" --source-ref "refs/tags/$RELEASE_TAG" --source-digest "$REVIEWED_SHA" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/dsh-release-evidence.yml" --format json
@@ -202,7 +218,7 @@ jobs:
           }
           for path in \
             "$RUNNER_TEMP/dsh-evidence/$RELEASE_TAG.tar.zst" \
-            "$RUNNER_TEMP/dsh-evidence/shinemage-dsh-upstream-runtime-477b4f420553e8a52c2fbccc464d7561b239c443.tar.zst" \
+            "$RUNNER_TEMP/dsh-evidence/$RUNTIME_NAME" \
             "$RUNNER_TEMP/dsh-evidence/pre-manifest.v1.json" \
             "$RUNNER_TEMP/dsh-evidence/release-manifest.v1.json" \
             "$RUNNER_TEMP/dsh-evidence/SHA256SUMS" \
@@ -242,7 +258,7 @@ jobs:
           gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID" > "$RUNNER_TEMP/draft-publication-release.json"
           gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID/assets?per_page=100" > "$RUNNER_TEMP/draft-publication-assets.json"
           python3 - "$RUNNER_TEMP/draft-publication-release.json" "$RUNNER_TEMP/draft-publication-assets.json" "$RUNNER_TEMP/dsh-evidence" "$RELEASE_TAG" "$REVIEWED_SHA" "$EVIDENCE_RUN_ID" <<'PY'
-          import json, pathlib, sys
+          import json, os, pathlib, sys
           release = json.loads(pathlib.Path(sys.argv[1]).read_text())
           assets = json.loads(pathlib.Path(sys.argv[2]).read_text())
           root = pathlib.Path(sys.argv[3]); tag, sha, run_id = sys.argv[4:]
@@ -250,7 +266,7 @@ jobs:
           is_draft = release['draft'] is True and release.get('immutable') is not True
           is_published = release['draft'] is False and release.get('immutable') is True
           assert is_draft or is_published, release
-          required = [f'{tag}.tar.zst', 'shinemage-dsh-upstream-runtime-477b4f420553e8a52c2fbccc464d7561b239c443.tar.zst', 'pre-manifest.v1.json', 'release-manifest.v1.json', 'SHA256SUMS', 'ci-evidence-index.v1.json']
+          required = [f'{tag}.tar.zst', os.environ['RUNTIME_NAME'], 'pre-manifest.v1.json', 'release-manifest.v1.json', 'SHA256SUMS', 'ci-evidence-index.v1.json']
           by_name = {asset['name']: asset for asset in assets}
           assert all(name in by_name for name in required), sorted(set(required) - set(by_name))
           def digest(name):
@@ -287,10 +303,10 @@ jobs:
           gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID" > "$RUNNER_TEMP/pre-publish-release.json"
           gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID/assets?per_page=100" > "$RUNNER_TEMP/pre-publish-assets.json"
           python3 - "$RUNNER_TEMP/pre-publish-release.json" "$RUNNER_TEMP/pre-publish-assets.json" "$RELEASE_TAG" <<'PY'
-          import json, pathlib, sys
+          import json, os, pathlib, sys
           release = json.loads(pathlib.Path(sys.argv[1]).read_text())
           actual = {item['name'] for item in json.loads(pathlib.Path(sys.argv[2]).read_text())}
-          required = {f'{sys.argv[3]}.tar.zst', 'shinemage-dsh-upstream-runtime-477b4f420553e8a52c2fbccc464d7561b239c443.tar.zst', 'pre-manifest.v1.json', 'release-manifest.v1.json', 'SHA256SUMS', 'ci-evidence-index.v1.json'}
+          required = {f'{sys.argv[3]}.tar.zst', os.environ['RUNTIME_NAME'], 'pre-manifest.v1.json', 'release-manifest.v1.json', 'SHA256SUMS', 'ci-evidence-index.v1.json'}
           assert required <= actual, sorted(required - actual)
           assert release['tag_name'] == sys.argv[3]
           assert (release['draft'] is True and release.get('immutable') is not True) or (release['draft'] is False and release.get('immutable') is True), release
@@ -333,12 +349,12 @@ jobs:
           gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID" > "$RUNNER_TEMP/published-release-with-assets.json"
           gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID/assets?per_page=100" > "$RUNNER_TEMP/release-assets-with-assets.json"
           python3 - "$RUNNER_TEMP/published-release-with-assets.json" "$RUNNER_TEMP/release-assets-with-assets.json" "$RUNNER_TEMP/dsh-evidence" "$RELEASE_TAG" "$REVIEWED_SHA" "$EVIDENCE_RUN_ID" <<'PY'
-          import hashlib, json, pathlib, sys
+          import hashlib, json, os, pathlib, sys
           release = json.loads(pathlib.Path(sys.argv[1]).read_text())
           assets = json.loads(pathlib.Path(sys.argv[2]).read_text())
           root = pathlib.Path(sys.argv[3]); tag, sha, run_id = sys.argv[4:]
           assert release['tag_name'] == tag and release['draft'] is False and release.get('immutable') is True, release
-          required = [f'{tag}.tar.zst', 'shinemage-dsh-upstream-runtime-477b4f420553e8a52c2fbccc464d7561b239c443.tar.zst', 'pre-manifest.v1.json', 'release-manifest.v1.json', 'SHA256SUMS', 'ci-evidence-index.v1.json']
+          required = [f'{tag}.tar.zst', os.environ['RUNTIME_NAME'], 'pre-manifest.v1.json', 'release-manifest.v1.json', 'SHA256SUMS', 'ci-evidence-index.v1.json']
           by_name = {asset['name']: asset for asset in assets}
           assert all(name in by_name for name in required), sorted(set(required) - set(by_name))
           def digest(name):
@@ -389,14 +405,14 @@ jobs:
           fi
           [[ "$TAG_TARGET" == "$REVIEWED_SHA" ]] || { echo "TAG_TARGET_CHANGED_FINAL expected=$REVIEWED_SHA actual=$TAG_TARGET" >&2; exit 1; }
           python3 - "$RUNNER_TEMP/final-release.json" "$RUNNER_TEMP/final-release-assets.json" "$RUNNER_TEMP/dsh-evidence/release-publication.v1.json" "$RELEASE_TAG" <<'PY'
-          import hashlib, json, pathlib, sys
+          import hashlib, json, os, pathlib, sys
           release = json.loads(pathlib.Path(sys.argv[1]).read_text())
           assets = {item['name']: item for item in json.loads(pathlib.Path(sys.argv[2]).read_text())}
           sidecar_path = pathlib.Path(sys.argv[3]); tag = sys.argv[4]
           sidecar = json.loads(sidecar_path.read_text())
           assert release['tag_name'] == tag and release['draft'] is False and release.get('immutable') is True, release
           assert sidecar['status'] == 'PUBLISHED_VERIFIED' and sidecar['draft'] is False and sidecar['immutable'] is True
-          required = {f'{tag}.tar.zst', 'shinemage-dsh-upstream-runtime-477b4f420553e8a52c2fbccc464d7561b239c443.tar.zst', 'pre-manifest.v1.json', 'release-manifest.v1.json', 'SHA256SUMS', 'ci-evidence-index.v1.json'}
+          required = {f'{tag}.tar.zst', os.environ['RUNTIME_NAME'], 'pre-manifest.v1.json', 'release-manifest.v1.json', 'SHA256SUMS', 'ci-evidence-index.v1.json'}
           sidecar_by_name = {item['name']: item for item in sidecar['assets']}
           assert set(sidecar_by_name) == required
           for name in required:

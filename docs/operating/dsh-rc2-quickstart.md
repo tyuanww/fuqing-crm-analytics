@@ -33,7 +33,7 @@ DSH_UPSTREAM_RUNTIME_BUNDLE=/path/to/upstream-runtime.tar.zst \
 固定 DSH checkout 必须与 profile 中的 upstream SHA 完全一致；不能用浮动分支、`latest` 或现场 `git pull`。
 
 <a id="dsh-quickstart-runtime"></a>
-runtime bundle 必须由固定上游 checkout 生成，文件名必须包含 `477b4f420553e8a52c2fbccc464d7561b239c443`，并通过 zstd 流校验。
+runtime bundle 必须由固定上游 checkout 生成，文件名必须包含 `b830ec950faba0a46dda564be3e2d854afed94f1`（`dsh-plugins/plugin-kit/toolchain.json` 的 `upstream_sha`，rc.5），并通过 zstd 流校验。`dsh-release-evidence.yml` 与 `dsh-release-publish.yml` 不再内联这个 SHA：前者在 reviewed tag 上从 `scripts/release/toolchain.mjs` 解析，后者只读 reviewed SHA 的 `toolchain.json`，并由 `backend/tests/test_github_actions_hardening.py` 保证没有第二份内联 pin。C15 探针（2026-11-05，rc.5 `b830ec95`）确认 DSH runtime 不属于 `.ci` 组合密封的 20 个成员，reseal 不会发现 runtime pin 漂移；`DSH_CLIENT_TITLE` 仍由 operator 在重建 runtime 时显式设置，默认不启用。
 
 <a id="dsh-quickstart-artifact"></a>
 候选输出目录必须是新的可写目录；artifact、manifest、SHA256SUMS 和 state journal 使用同一候选身份，不覆盖已有证据。
