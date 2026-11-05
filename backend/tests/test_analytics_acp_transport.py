@@ -600,6 +600,25 @@ def test_sigkill_loses_settlement_and_the_next_call_reconnects(tmp_path):
         receiver.close()
 
 
+def test_settled_evidence_survives_a_later_child_exit(tmp_path):
+    # Exit is proven by the prompt response, so a later process death cannot
+    # retract it; only an unsettled prompt is lost with the child.
+    server = FakeAcpServer()
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0)
+    try:
+        receiver.call("health", {})
+        payload = dispatch_payload()
+        receiver.call("dispatch", payload)
+        settled = observe_until(receiver, payload, "SUCCEEDED")
+        child = server.child
+        child.kill()
+        assert wait_until(lambda: child.poll() is not None)
+        again = receiver.call("observe", payload)
+        assert again == settled
+    finally:
+        receiver.close()
+
+
 def test_reconnect_is_bounded_to_two_spawn_attempts(tmp_path):
     server = FakeAcpServer()
     server.fail_initialize = True
