@@ -3,8 +3,18 @@ import test from 'node:test';
 import { mkdtemp, readFile, writeFile, mkdir, copyFile, rm } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
+import { fileURLToPath } from 'node:url';
 import { serviceDigest as hash } from '../release/service-compatibility.mjs';
+import { checkServiceDependencyPins, readDependencyTables } from '../crm-calibration/service-manifest-pins.mjs';
 import { packFirstPurchaseKernel, prepareFirstPurchaseKernel, verifyFirstPurchaseKernel } from './first-purchase-kernel-artifacts.mjs';
+
+const root = fileURLToPath(new URL('../..', import.meta.url));
+
+test('service dependency tables are generated from requirements-lock.txt', async () => {
+  // B0 runs for every services/ change, so a hand-edited manifest fails here
+  // even when the 4-shard Python plan does not select the service tests.
+  assert.deepEqual(await checkServiceDependencyPins(root), []);
+});
 
 test('query archive requires an exact Git identity before any packaging', async () => {
   for (const revision of ['main', '43630981', '', undefined]) {
@@ -36,7 +46,9 @@ test('actual query archive cold install, immutable checks, and dependency closur
     const args = { receiptPath, expectedSha, python, wheelhouse };
     const installed = await prepareFirstPurchaseKernel({ ...args, output: join(temporary, 'install') });
     assert.equal(installed.receipt.runtime_mode, 'offline-hashed-wheel-install');
-    assert.equal(JSON.parse(installed.manifest).dependencies.duckdb, '1.5.6');
+    const tables = await readDependencyTables(root);
+    assert.equal(JSON.parse(installed.manifest).dependencies.duckdb,
+      tables.tables.get('analytics-first-purchase-kernel').duckdb);
     await assert.rejects(prepareFirstPurchaseKernel({ ...args, output: installed.output }), /EEXIST/);
     const target = join(installed.app, 'backend/analytics_worker.py');
     await writeFile(target, '# corrupted owned test extraction\n');

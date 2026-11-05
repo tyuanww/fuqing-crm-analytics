@@ -1,0 +1,90 @@
+{
+  "schema_version": "shinemage-service-dependency-closure/v1",
+  "source": "requirements-lock.txt",
+  "tables": {
+    "analytics-first-purchase": {
+      "packages": [
+        "annotated-doc",
+        "annotated-types",
+        "anyio",
+        "click",
+        "fastapi",
+        "h11",
+        "idna",
+        "pydantic",
+        "pydantic-core",
+        "starlette",
+        "typing-extensions",
+        "typing-inspection",
+        "uvicorn"
+      ],
+      "manifests": [
+        "services/analytics-first-purchase/package.json",
+        "services/analytics-first-purchase/compatibility-baseline.json"
+      ]
+    },
+    "analytics-first-purchase-kernel": {
+      "packages": [
+        "annotated-doc",
+        "annotated-types",
+        "anyio",
+        "click",
+        "duckdb",
+        "fastapi",
+        "h11",
+        "idna",
+        "psutil",
+        "pydantic",
+        "pydantic-core",
+        "starlette",
+        "typing-extensions",
+        "typing-inspection",
+        "uvicorn"
+      ],
+      "manifests": [
+        "services/analytics-first-purchase-kernel/package.json"
+      ]
+    },
+    "crm-knowledge": {
+      "packages": [
+        "annotated-doc",
+        "annotated-types",
+        "anyio",
+        "click",
+        "fastapi",
+        "h11",
+        "idna",
+        "pydantic",
+        "pydantic-core",
+        "starlette",
+        "typing-extensions",
+        "typing-inspection",
+        "uvicorn"
+      ],
+      "manifests": [
+        "services/crm-knowledge/package.json"
+      ]
+    },
+    "crm-metrics": {
+      "packages": [
+        "annotated-doc",
+        "annotated-types",
+        "anyio",
+        "click",
+        "duckdb",
+        "fastapi",
+        "h11",
+        "idna",
+        "pydantic",
+        "pydantic-core",
+        "starlette",
+        "typing-extensions",
+        "typing-inspection",
+        "uvicorn"
+      ],
+      "manifests": [
+        "services/crm-metrics/package.json"
+      ]
+    }
+  }
+}
