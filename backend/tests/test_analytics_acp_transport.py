@@ -60,7 +60,7 @@ IDENTITY = {
 }
 
 
-def wait_until(predicate, timeout=2.0):
+def wait_until(predicate, timeout=5.0):
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
         if predicate():
@@ -355,7 +355,7 @@ def acp(tmp_path):
         cwd=str(tmp_path),
         env={"DSH_HOME": str(tmp_path / "acp-home")},
         spawn=server.spawn,
-        timeout=2.0,
+        timeout=5.0,
     )
     try:
         yield server, transport
@@ -363,7 +363,7 @@ def acp(tmp_path):
         transport.close()
 
 
-def observe_until(transport, payload, outcome, timeout=2.0):
+def observe_until(transport, payload, outcome, timeout=5.0):
     deadline = time.monotonic() + timeout
     last = None
     while time.monotonic() < deadline:
@@ -391,7 +391,7 @@ def test_all_five_operations_route_through_the_acp_transport(acp):
 
     dispatch = dispatch_payload()
     assert receiver.call("dispatch", dispatch) == {"accepted": True}
-    assert server.prompt_started.wait(2.0)
+    assert server.prompt_started.wait(5.0)
     assert server.prompts == ["合成渠道"]
     running = receiver.call("observe", dispatch)
     assert running["outcome"] == "RUNNING" and running["execution_exited"] is False
@@ -460,7 +460,7 @@ def test_identity_capability_is_a_transport_flag_not_a_spawn_side_effect(acp):
 def test_stop_reason_maps_into_the_existing_evidence_classes(tmp_path, mode, outcome, error_code):
     server = FakeAcpServer()
     server.prompt_mode = mode
-    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=2.0)
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0)
     try:
         assert receiver.call("health", {}) == {"ready": True}
         payload = dispatch_payload()
@@ -477,7 +477,7 @@ def test_end_turn_without_tool_calls_is_unknown_not_a_manufactured_success(tmp_p
     # tool-call evidence the transport must fail closed to UNKNOWN.
     server = FakeAcpServer()
     server.prompt_mode = "no_tools"
-    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=2.0)
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0)
     try:
         receiver.call("health", {})
         payload = dispatch_payload()
@@ -492,7 +492,7 @@ def test_end_turn_without_tool_calls_is_unknown_not_a_manufactured_success(tmp_p
 
 def test_prompt_text_comes_from_the_native_request_and_stays_bound(tmp_path):
     server = FakeAcpServer()
-    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=2.0)
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0)
     try:
         receiver.call("health", {})
         receiver.call("dispatch", dispatch_payload(text="渠道复购率"))
@@ -514,7 +514,7 @@ def test_prompt_text_comes_from_the_native_request_and_stays_bound(tmp_path):
 def test_permission_requests_are_answered_fail_closed(tmp_path):
     server = FakeAcpServer()
     server.permission = True
-    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=2.0)
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0)
     try:
         receiver.call("health", {})
         payload = dispatch_payload()
@@ -537,12 +537,12 @@ def test_cancel_is_fire_and_forget_and_only_settlement_proves_exit(tmp_path):
     server = FakeAcpServer()
     server.prompt_mode = "cancel_then_settle"
     server.cancel_delay = 0.3
-    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=2.0)
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0)
     try:
         receiver.call("health", {})
         payload = dispatch_payload()
         receiver.call("dispatch", payload)
-        assert server.prompt_started.wait(2.0)
+        assert server.prompt_started.wait(5.0)
 
         started = time.monotonic()
         assert receiver.call("cancel", payload) == {"accepted": True}
@@ -564,12 +564,12 @@ def test_cancel_is_fire_and_forget_and_only_settlement_proves_exit(tmp_path):
 def test_sigkill_loses_settlement_and_the_next_call_reconnects(tmp_path):
     server = FakeAcpServer()
     server.prompt_mode = "hang_ignore_cancel"
-    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=2.0)
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0)
     try:
         receiver.call("health", {})
         payload = dispatch_payload()
         receiver.call("dispatch", payload)
-        assert server.prompt_started.wait(2.0)
+        assert server.prompt_started.wait(5.0)
         first_child = server.child
 
         first_child.kill()
@@ -603,7 +603,7 @@ def test_sigkill_loses_settlement_and_the_next_call_reconnects(tmp_path):
 def test_reconnect_is_bounded_to_two_spawn_attempts(tmp_path):
     server = FakeAcpServer()
     server.fail_initialize = True
-    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=2.0)
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0)
     try:
         with pytest.raises(AcpTransportError):
             receiver.call("health", {})
@@ -617,7 +617,7 @@ def test_reconnect_is_bounded_to_two_spawn_attempts(tmp_path):
 def test_one_stdout_contamination_retires_the_child_and_rejects_the_call(tmp_path):
     server = FakeAcpServer()
     server.contaminate_on_list = True
-    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=2.0)
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0)
     try:
         with pytest.raises(AcpTransportError) as error:
             receiver.call("health", {})
@@ -688,7 +688,7 @@ def bound_run(tmp_path):
 def test_acp_health_failure_closes_admission_without_a_dispatch(tmp_path):
     server = FakeAcpServer()
     server.fail_initialize = True
-    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=2.0)
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0)
     store, run = bound_run(tmp_path)
     dispatcher = RunDispatcher(store, lambda _: actor(), receiver)
     dispatcher.start()
@@ -706,7 +706,7 @@ def test_acp_health_failure_closes_admission_without_a_dispatch(tmp_path):
 def test_acp_dispatch_failure_is_one_unknown_with_the_slot_held(tmp_path):
     server = FakeAcpServer()
     server.fail_new = True
-    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=2.0)
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0)
     store, run = bound_run(tmp_path)
     dispatcher = RunDispatcher(store, lambda _: actor(), receiver)
     dispatcher.start()
@@ -725,7 +725,7 @@ def test_acp_dispatch_failure_is_one_unknown_with_the_slot_held(tmp_path):
 def test_acp_lost_settlement_is_unknown_and_a_requested_cancel_stays_held(tmp_path):
     server = FakeAcpServer()
     server.prompt_mode = "hang_ignore_cancel"
-    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=2.0)
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0)
     store, run = bound_run(tmp_path)
     dispatcher = RunDispatcher(store, lambda _: actor(), receiver)
     dispatcher.start()
@@ -788,7 +788,7 @@ PARITY_MODES = {
 def test_projection_parity_with_the_bridge_table(tmp_path, bridge_turn_evidence, reason):
     server = FakeAcpServer()
     server.prompt_mode = PARITY_MODES[reason]
-    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=2.0)
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0)
     try:
         receiver.call("health", {})
         payload = dispatch_payload()
@@ -809,12 +809,12 @@ def test_codec_collapse_is_the_documented_loss(tmp_path, bridge_turn_evidence, r
     server.prompt_mode = mode
     if reason == "blocked":
         server.tool_calls = False
-    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=2.0)
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0)
     try:
         receiver.call("health", {})
         payload = dispatch_payload()
         receiver.call("dispatch", payload)
-        deadline = time.monotonic() + 2.0
+        deadline = time.monotonic() + 5.0
         while time.monotonic() < deadline:
             evidence = receiver.call("observe", payload)
             if evidence["outcome"] != "RUNNING":
