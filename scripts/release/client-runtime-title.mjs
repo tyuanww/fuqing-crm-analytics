@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { existsSync, globSync, mkdirSync, readFileSync, realpathSync, statSync, writeFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join, relative, resolve } from 'node:path';
 
 /** Build-time switch. Unset or empty means "leave the pinned official bytes alone". */
 export const CLIENT_TITLE_ENV = 'DSH_CLIENT_TITLE';
@@ -20,6 +20,7 @@ const CLIENT_ARTIFACT_PATTERNS = [
 ];
 const WEB_FRONTEND_PACKAGE = '@deepseek-ai/dsh-web-frontend';
 const UI_LAYOUT_PACKAGE = '@deepseek-ai/dsh-client-ui-layout';
+const WEB_APP_PACKAGE = '@deepseek-ai/dsh-web-app';
 
 const slash = value => value.replaceAll('\\', '/');
 
@@ -216,18 +217,48 @@ export async function applyClientTitle(workspace, { environment = process.env, d
   return { ...build, runtime_paths: runtimePaths };
 }
 
+/**
+ * Ordered bases the deployed tree can hold a package under.
+ *
+ * `pnpm deploy` only links the deploy target's own production dependencies at
+ * the top level. The client packages are peer aliases of the web bundle, so a
+ * real rc.5 deploy keeps them elsewhere: `runtime-bundle.mjs` seeds
+ * `@deepseek-ai/dsh-client-ui-layout` and its siblings into
+ * `node_modules/.pnpm/node_modules`, and `@deepseek-ai/dsh-web-frontend` is
+ * reachable through `@deepseek-ai/dsh-web-app`'s own `node_modules`. Resolving
+ * only from the deployed `lib/bin.js` therefore misses both packages; each
+ * base below is searched through that same require so the entry's resolution
+ * semantics and the in-tree boundary check are preserved.
+ */
+function deployedResolutionBases(deployed) {
+  return [
+    deployed, // top-level `node_modules`, still the layout of an npm-style deploy
+    join(deployed, 'node_modules', '.pnpm'), // pnpm virtual store: `<base>/node_modules/<name>`
+    join(deployed, 'node_modules', '.pnpm', 'node_modules', WEB_APP_PACKAGE), // `dsh-web-app/node_modules`
+    join(deployed, 'node_modules', WEB_APP_PACKAGE), // top-level `dsh-web-app` symlink, same nested lookup
+  ];
+}
+
 function deployedPackageRoot(deployed, name) {
   const requireFromDeployed = createRequire(join(deployed, 'lib', 'bin.js'));
-  try {
-    const root = dirname(requireFromDeployed.resolve(`${name}/package.json`));
-    const resolved = realpathSync(root);
-    const boundary = realpathSync(deployed);
+  const boundary = realpathSync(deployed);
+  const attempted = [];
+  for (const base of deployedResolutionBases(deployed)) {
+    let resolved;
+    try {
+      resolved = realpathSync(dirname(requireFromDeployed.resolve(`${name}/package.json`, { paths: [base] })));
+    } catch (error) {
+      if (error?.code === 'MODULE_NOT_FOUND') {
+        const label = relative(deployed, base) || '.';
+        attempted.push(label.split('\\').join('/'));
+        continue;
+      }
+      throw new Error(`CLIENT_TITLE_RUNTIME_PACKAGE_MISSING ${name}: ${error.message}`);
+    }
     assert.ok(resolved === boundary || resolved.startsWith(`${boundary}/`), 'CLIENT_TITLE_RUNTIME_PACKAGE_OUTSIDE');
     return resolved;
-  } catch (error) {
-    if (error.code === 'ERR_ASSERTION') throw error;
-    throw new Error(`CLIENT_TITLE_RUNTIME_PACKAGE_MISSING ${name}: ${error.message}`);
   }
+  throw new Error(`CLIENT_TITLE_RUNTIME_PACKAGE_MISSING ${name}: not found under ${attempted.join(', ')}`);
 }
 
 function titleSurface(bytes, expected, code) {
