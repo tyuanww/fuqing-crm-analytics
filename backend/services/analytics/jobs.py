@@ -1761,7 +1761,7 @@ class RunStore:
 
     def settle_acp_binding(self, run_id: str, attempt_id: str, state: str) -> bool:
         """CAS one binding BOUND -> SETTLED | LOST; never the other direction."""
-        if state not in {"SETTLED", "LOST"}:
+        if state not in ACP_BINDING_STATES or state == "BOUND":
             raise ValueError("unsupported ACP binding settlement")
         self._binding_text(run_id, "run_id")
         self._binding_text(attempt_id, "attempt_id")
