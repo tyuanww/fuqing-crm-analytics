@@ -122,3 +122,53 @@ test('composition preparation rejects unready or mismatched source bindings befo
     await rm(root, { recursive: true, force: true });
   }
 });
+
+test('a READY gate requires the production-only closure receipt', async t => {
+  const {
+    PRODUCTION_ONLY_CLOSURE_SCHEMA, RECEIPT_BEGIN, RECEIPT_END, REQUIRED_CHECKS,
+    RETAINED_PLUGIN_DIRECTORIES, SIMULATED_ABSENT_DIRECTORIES,
+  } = await import('./production-only-closure-receipt.mjs');
+  const root = await mkdtemp(join(tmpdir(), 'plugin-source-manifest-ready-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const source = { ...manifest().sources[0], status: 'PASS', manifest_sha256: sha256, pack_sha256: sha256 };
+  const bundle = {
+    repository: 'tyuanww/fuqing-crm-analytics', workflow: 'dsh-release-preflight', branch: 'main', run_id: 1,
+    artifact_id: 2, artifact_sha256: sha256, artifact_head_sha: sha1, expires_at: '2026-12-01T00:00:00Z',
+    status: 'PASS', remote_main: 'PASS',
+  };
+  const ready = manifest({ sources: [source], bundle, deletion_gate: { status: 'READY', blocking_reasons: [] } });
+  const plugin = { id: source.id, source_sha: source.sha, version: '0.0.0-b0', manifest_sha256: sha256, pack_sha256: sha256 };
+  const receipt = {
+    schema_version: PRODUCTION_ONLY_CLOSURE_SCHEMA, verdict: 'PASS', ref: 'origin/main', commit: sha1, tree: sha1,
+    absence: { simulated_absent: [...SIMULATED_ABSENT_DIRECTORIES], retained: [...RETAINED_PLUGIN_DIRECTORIES],
+      boundary: 'ten source trees absent; contracts, plugin-kit and query-agent retained' },
+    inputs: {
+      lock: { path: 'config/shinemage-composition-packs.lock.json', sha256 },
+      manifest: { path: 'config/shinemage-composition-pack-manifest.v1.json', sha256 },
+      artifact_lock: { path: 'config/shinemage-composition-artifact.lock.json', sha256, id: 2, run_id: 1, head_sha: sha1,
+        artifact_sha256: sha256, composition_lock_sha256: sha256 },
+      artifact_zip_sha256: sha256,
+      profiles: [{ name: 'crm', path: 'config/dsh-profile.crm-knowledge.rc3.json', sha256 },
+        { name: 'page', path: 'config/dsh-profile.rc3.json', sha256 }],
+      sources: [{ id: source.id, directory: source.directory, sha: source.sha, manifest_sha256: sha256, pack_sha256: sha256 }],
+      domains: [],
+    },
+    environment: { node: 'v24.19.0', pnpm: '11.28.2', python: '3.14.8', platform: 'linux', arch: 'x64',
+      install_mode: 'PRODUCTION_ONLY', commit_date: '2026-11-05T00:00:00+08:00' },
+    checks: REQUIRED_CHECKS.map(id => ({ id, status: 'PASS' })),
+    composition: { lock_sha256: sha256, source_manifest_sha256: sha256,
+      profiles: [{ name: 'crm', path: 'config/dsh-profile.crm-knowledge.rc3.json', sha256 },
+        { name: 'page', path: 'config/dsh-profile.rc3.json', sha256 }],
+      plugins: [plugin], domains: [], business_profile: { path: 'config/dsh-profile.business.rc3.json', sha256 } },
+    release_payload: { files: 1, bytes: 1, profile_pack_snapshot: { path: 'shinemage-release-pack-inputs.json', sha256 },
+      plugins: [plugin], activation: 'NOT_RUN' },
+    consumer: { packages: 1, install: 'PASS', imports: [{ specifier: source.id, status: 'PASS' }],
+      dev_dependencies: 'excluded', peer_dependencies: 'installed', client_bundles: 'NOT_RUN_BROWSER_TARGET' },
+    unproven: ['real production host'],
+  };
+  const receiptPath = join(root, 'receipt.md');
+  await writeFile(receiptPath, `${RECEIPT_BEGIN}\n\`\`\`json\n${JSON.stringify(receipt, null, 2)}\n\`\`\`\n${RECEIPT_END}\n`);
+  validateSourceManifest(ready, { lockSha256: sha256, productionOnlyClosurePath: receiptPath });
+  assert.throws(() => validateSourceManifest(ready, { lockSha256: sha256,
+    productionOnlyClosurePath: join(root, 'missing.md') }), /PRODUCTION_ONLY_CLOSURE_RECEIPT_MISSING/);
+});
