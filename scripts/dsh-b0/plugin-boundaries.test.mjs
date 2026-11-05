@@ -38,6 +38,27 @@ test('the checked inventory equals current sources and includes every plugin', a
   assert.ok(result.unresolved_dynamic_imports.every(item => item.phase === 'test'));
 });
 
+test('owner target repositories name the live tyuanww repositories', async () => {
+  const policy = JSON.parse(await readFile(new URL('../../config/shinemage-plugin-boundaries.v1.json', import.meta.url), 'utf8'));
+  const live = new Set([
+    'tyuanww/fuqing-crm-analytics',
+    'tyuanww/dsh-analytics-workbench',
+    'tyuanww/dsh-crm-knowledge',
+    'tyuanww/dsh-knowledge',
+    'tyuanww/dsh-shine-board',
+    'tyuanww/dsh-shine-brand',
+    'tyuanww/dsh-shine-crowd-action',
+    'tyuanww/dsh-shine-funnel',
+    'tyuanww/dsh-shine-query',
+    'tyuanww/dsh-shine-waterfall',
+    'tyuanww/shinemage-board-components',
+  ]);
+  for (const [name, owner] of Object.entries(policy.owners)) {
+    assert.ok(live.has(owner.target_repository), `BOUNDARY_TARGET_REPOSITORY ${name}: ${owner.target_repository}`);
+  }
+});
+
+
 test('parser distinguishes type imports and literal routes without executing source', async t => {
   const f = await fixture(t);
   await f.source('first', "type Thing = import('../../second/src/index.ts').Thing;\nconst route = `/api/v1/items/${id}`;\nthrow new Error('must never execute');\n// import 'comment-only-fake'\n");
