@@ -1,0 +1,27 @@
+{
+  "schema_version": "dsh-acp-profile-lock/v1",
+  "profile": "analytics-acp",
+  "template": "acp",
+  "bundles": [
+    "@deepseek-ai/dsh-base",
+    "@deepseek-ai/dsh-acp-app"
+  ],
+  "tools_row": {
+    "id": "analytics-workbench-tools",
+    "name": "@shine-mage/dsh-analytics-workbench-b0/tools"
+  },
+  "plugin": "@shine-mage/dsh-analytics-workbench-b0",
+  "plugin_version": "0.0.0-b0",
+  "tools_export": "./lib/entry-tools.js",
+  "files_listed": true,
+  "patch_export": "./cordis.acp.patch.yml",
+  "build_entry": true,
+  "typecheck_entry": true,
+  "dsh": {
+    "sdk_version": "0.2.1-rc.5",
+    "upstream_sha": "b830ec950faba0a46dda564be3e2d854afed94f1",
+    "cordis": "4.0.5"
+  },
+  "entry_sha256": "0c0a7a9ec8998fd92ee62c632c5c97c28b3823867590d5af012fa9d4a14e8fb0",
+  "patch_sha256": "97c7e0eddaf3d047d4afe38ec66cf0110aaa722bd6a36901569204ecff778462"
+}

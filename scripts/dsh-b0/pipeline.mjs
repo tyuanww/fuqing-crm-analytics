@@ -199,6 +199,9 @@ if (mode === '--prepare') {
   run(process.execPath, ['--test', '--test-concurrency=1', 'scripts/ci/pregate-runner.test.mjs']);
   run(process.execPath, ['--test', 'scripts/ops/open-hangzhou-dsh.test.mjs']);
   run(process.execPath, ['--test', 'scripts/dsh-b0/leaf-pack-inputs.test.mjs', 'scripts/dsh-b0/workbench-client-pack-inputs.test.mjs']);
+  // P3-3d preparation: the generated analytics-acp profile is tools-only and
+  // byte-locked; a real --dump-config run still needs the pinned host.
+  run(process.execPath, ['--test', 'scripts/dsh-b0/acp-profile.test.mjs']);
   run(process.execPath, ['scripts/dsh-b0/plugin-boundaries.mjs', '--check']);
   run(process.execPath, ['--test', 'scripts/dsh-b0/plugin-boundaries.test.mjs']);
   // Generated contract outputs live in one package and must stay byte-identical

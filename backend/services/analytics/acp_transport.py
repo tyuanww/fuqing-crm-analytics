@@ -60,12 +60,15 @@ transport keeps its ACP session id in memory, keyed by the kernel
 back to ``session/new`` on a definitive JSON-RPC rejection (a timeout is
 ambiguous and is never retried).
 
-Profile wiring is deliberately NOT part of this module: ``analytics-acp`` is a
-generated composition (entry split + bundle patch + profile locks), larger
-than this slice. ``from_config`` therefore accepts the command/args, workspace
-and private ``DSH_HOME`` as deployment configuration; until that profile is
-generated, selecting ``transport=acp`` fails closed at health (admission
-closed) rather than silently using the bridge.
+Profile wiring is a separate, generated artifact: ``scripts/dsh-b0/acp-profile.mjs``
+writes ``<DSH_HOME>/profiles/analytics-acp`` (the shipped ``acp`` template plus
+the workbench ``./tools`` row), locks its patch/entry bytes and can assert the
+composed tree through ``dsh --profile analytics-acp --dump-config``. The
+deployment installs the workbench package into that profile; ``from_config``
+therefore accepts the command/args, workspace and private ``DSH_HOME`` as
+deployment configuration. Until that profile is installed, selecting
+``transport=acp`` fails closed at health (admission closed) rather than
+silently using the bridge.
 """
 
 from __future__ import annotations
