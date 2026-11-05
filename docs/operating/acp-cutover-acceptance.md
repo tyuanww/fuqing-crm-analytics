@@ -90,7 +90,7 @@ NODE
 sha256sum "$PACK_ROOT/lib/entry-tools.js" | tee "$EVID/00-preconditions/entry-tools.built.sha256"
 ```
 
-预期结果是包名 `@shine-mage/dsh-analytics-workbench-b0`、版本 `0.0.0-b0`、`./tools` 指向 `./lib/entry-tools.js`、`./cordis.acp.patch.yml` 存在且 sha256 等于锁里的 `patch_sha256`。通过判据是上面的 `node` 断言全部通过，并且 `lib/entry-tools.js` 非空。作者仓 repack 仍在进行，pack 必须来自新的 workbench head；如果 pack 与当前主仓锁不一致，先完成 repack 与锁回填，不要用旧 pack 通过本步。
+预期结果是包名 `@shine-mage/dsh-analytics-workbench-b0`、版本 `0.0.0-b0`、`./tools` 指向 `./lib/entry-tools.js`、`./cordis.acp.patch.yml` 存在且 sha256 等于锁里的 `patch_sha256`。通过判据是上面的 `node` 断言全部通过，并且 `lib/entry-tools.js` 非空。作者仓 repack 已随主仓 #235 回填，作者 PR #16 仍未合；pack 必须与当前主仓锁一致，不一致时先完成作者 PR 与锁回填，不要用旧 pack 通过本步。
 
 ### 1.4 目录、权限和 pnpm
 
