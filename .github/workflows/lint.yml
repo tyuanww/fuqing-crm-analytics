@@ -143,12 +143,13 @@ jobs:
     needs: changes
     if: needs.changes.outputs.checks == 'true'
     runs-on: ubuntu-latest
-    # P3-0/P3-1 evidence only: the repository still pins rc.3, so rc.5 surface
-    # drift and the disposer ownership tests are reported without blocking
-    # unrelated work. This job is deliberately outside the 4-shard `test`
-    # matrix (they are not Python-plan shards, so sharding would run each one
-    # four times) and outside merge-gate.needs. Delete `continue-on-error` once
-    # the P0 rc.5 pin and the P3-1 follow-up have landed.
+    # P3-0/P3-1/P3-3c evidence only: the repository still pins rc.3, so rc.5
+    # surface drift, the disposer ownership tests and the offline legacy↔ACP
+    # projection compare are reported without blocking unrelated work. This job
+    # is deliberately outside the 4-shard `test` matrix (they are not
+    # Python-plan shards, so sharding would run each one four times) and outside
+    # merge-gate.needs. Delete `continue-on-error` once the P0 rc.5 pin and the
+    # P3-1/P3-3c follow-ups have landed.
     continue-on-error: true
     timeout-minutes: 10
     steps:
@@ -170,6 +171,14 @@ jobs:
           dsh-plugins/analytics-workbench/test/native-tools.test.mjs
           dsh-plugins/analytics-workbench/test/first-purchase-commands.test.mjs
           scripts/ci/rc5-surface-gate.test.mjs
+      - name: rc.5 legacy↔ACP offline shadow compare (non-blocking)
+        continue-on-error: true
+        run: |
+          node --test scripts/ci/rc5-shadow-classifier.test.mjs scripts/ci/rc5-shadow-compare.test.mjs
+          node scripts/ci/rc5-shadow-compare.mjs \
+            --fixtures scripts/ci/fixtures/rc5-shadow \
+            --out .context/rc5-shadow/shadow-diff.json \
+            --summary "$GITHUB_STEP_SUMMARY"
 
   frontend:
     needs: changes

@@ -1,0 +1,53 @@
+{
+  "schema_version": "dsh-rc5-shadow-fixture/v1",
+  "name": "forked",
+  "description": "Fork-seed closer: turn/end forked is never a live ACP prompt turn (codec.ts:30-33), so the rc.5 projection has no settlement and every legacy evidence fact is MISSING_IN_ACP.",
+  "sessionId": "sess-shadow-forked",
+  "intent": {
+    "run_id": "run-shadow-forked",
+    "attempt_id": "att-shadow-forked-1"
+  },
+  "observations": [
+    {
+      "request_id": "req-shadow-forked",
+      "execution_exited": true
+    }
+  ],
+  "events": [
+    {
+      "seq": 0,
+      "type": "turn/start",
+      "data": {
+        "turn": 5
+      }
+    },
+    {
+      "seq": 1,
+      "type": "user/message",
+      "data": {
+        "id": "msg-shadow-forked",
+        "role": "user",
+        "source": {
+          "kind": "user",
+          "rpcId": "req-shadow-forked"
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "从这一轮分叉。"
+          }
+        ]
+      }
+    },
+    {
+      "seq": 2,
+      "type": "turn/end",
+      "data": {
+        "turn": 5,
+        "reason": {
+          "kind": "forked"
+        }
+      }
+    }
+  ]
+}

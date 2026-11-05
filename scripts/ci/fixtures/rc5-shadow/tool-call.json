@@ -1,0 +1,127 @@
+{
+  "schema_version": "dsh-rc5-shadow-fixture/v1",
+  "name": "tool-call",
+  "description": "One completed and one failed tool lifecycle: the native fold counts only the explicit isError:false block and rc.5 projects completed/failed tool_call_update statuses.",
+  "sessionId": "sess-shadow-tools",
+  "intent": {
+    "run_id": "run-shadow-tools",
+    "attempt_id": "att-shadow-tools-1"
+  },
+  "observations": [
+    {
+      "request_id": "req-shadow-tools",
+      "execution_exited": true
+    }
+  ],
+  "events": [
+    {
+      "seq": 0,
+      "type": "turn/start",
+      "data": {
+        "turn": 2
+      }
+    },
+    {
+      "seq": 1,
+      "type": "user/message",
+      "data": {
+        "id": "msg-shadow-tools",
+        "role": "user",
+        "source": {
+          "kind": "user",
+          "rpcId": "req-shadow-tools"
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "查订单并导出。"
+          }
+        ]
+      }
+    },
+    {
+      "seq": 2,
+      "type": "tool/call",
+      "data": {
+        "turn": 2,
+        "step": 1,
+        "callId": "call-shadow-query",
+        "name": "analytics_b0_query",
+        "arguments": "{\"question\":\"上周订单\"}"
+      }
+    },
+    {
+      "seq": 3,
+      "type": "tool/result",
+      "data": {
+        "turn": 2,
+        "step": 1,
+        "message": {
+          "id": "res-shadow-query",
+          "role": "tool",
+          "source": {
+            "kind": "tool",
+            "callId": "call-shadow-query"
+          },
+          "toolCallId": "call-shadow-query",
+          "isError": false,
+          "content": [
+            {
+              "type": "tool-result",
+              "toolCallId": "call-shadow-query",
+              "isError": false,
+              "content": []
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 4,
+      "type": "tool/call",
+      "data": {
+        "turn": 2,
+        "step": 1,
+        "callId": "call-shadow-export",
+        "name": "analytics_export",
+        "arguments": "{}"
+      }
+    },
+    {
+      "seq": 5,
+      "type": "tool/result",
+      "data": {
+        "turn": 2,
+        "step": 1,
+        "message": {
+          "id": "res-shadow-export",
+          "role": "tool",
+          "source": {
+            "kind": "tool",
+            "callId": "call-shadow-export"
+          },
+          "toolCallId": "call-shadow-export",
+          "isError": true,
+          "content": [
+            {
+              "type": "tool-result",
+              "toolCallId": "call-shadow-export",
+              "isError": true,
+              "content": []
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 6,
+      "type": "turn/end",
+      "data": {
+        "turn": 2,
+        "reason": {
+          "kind": "completed"
+        }
+      }
+    }
+  ]
+}
