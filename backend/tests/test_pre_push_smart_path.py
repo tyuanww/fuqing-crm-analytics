@@ -9,6 +9,7 @@ Covers:
 from __future__ import annotations
 
 import importlib.util
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -365,6 +366,49 @@ class TestPrePushScript:
         assert "delete" in r.stdout.lower() or "skip" in r.stdout.lower()
         # must not start full suite
         assert "Running full pytest" not in r.stdout
+
+
+def _b0_scope(paths):
+    """Run the exact CI classifier CLI that emits b0_required."""
+    r = subprocess.run(
+        [sys.executable, str(REPO_ROOT / "scripts" / "ci" / "run_checks.py"),
+         "--files-from", "-", "--b0-scope"],
+        cwd=str(REPO_ROOT), input="\n".join(paths) + "\n", capture_output=True,
+        text=True, timeout=60,
+    )
+    assert r.returncode == 0, r.stderr
+    return json.loads(r.stdout)
+
+
+class TestB0ReleaseScope:
+    """#228 moved starlette 1.10.0 in the kernel recipe while b0 was skipped."""
+
+    def test_kernel_service_manifest_requires_b0(self):
+        plan = _b0_scope(["services/analytics-first-purchase-kernel/package.json"])
+        assert plan["b0"] is True
+        assert plan["b0_required"] is True
+
+    @pytest.mark.parametrize("path", [
+        "services/analytics-first-purchase/package.json",
+        "services/analytics-first-purchase/compatibility-baseline.json",
+        "services/crm-knowledge/package.json",
+        "services/crm-metrics/package.json",
+    ])
+    def test_every_service_recipe_requires_b0(self, path):
+        plan = _b0_scope([path])
+        assert plan["b0"] is True
+        assert plan["b0_required"] is True
+
+    def test_backend_service_code_stays_out_of_sealed_b0_scope(self):
+        plan = _b0_scope(["backend/services/analytics/analytics_service.py"])
+        assert plan["b0"] is True
+        assert plan["b0_required"] is False
+
+    def test_root_requirements_lock_stays_out_of_sealed_b0_scope(self):
+        # The kernel recipe is derived from the service manifests, not the root lock.
+        plan = _b0_scope(["requirements-lock.txt"])
+        assert plan["b0"] is True
+        assert plan["b0_required"] is False
 
 
 def test_dsh_dev_changes_select_b0_pipeline(path_class):

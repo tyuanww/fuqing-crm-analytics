@@ -17,7 +17,10 @@ import { recordEvent } from './state.mjs';
 import { DSH_UPSTREAM_SHA, DSH_SDK_VERSION, NODE_MAJOR } from './toolchain.mjs';
 
 export const RUNTIME_HOST_SCHEMA = 'dsh-runtime-host-evidence/v1';
-export const RUNTIME_HOST_SOURCE = '4d792eebc577686e452757d1986051aaf03d47ba';
+// Fixed Git source for the archived host-verifier inputs. Keep it on a commit
+// whose requirements-lock.txt matches the current service recipes; a sealed
+// composition refill records that commit in the composition artifact lock.
+export const RUNTIME_HOST_SOURCE = '47840d231c1db63ec6500ec8974a68096de6bdc7';
 export const RUNTIME_HOST_TEST_ROOT = 'host-r2/tests/test_official_host_crm_query_scurrent';
 export const RUNTIME_HOST_REQUIRED_CODE = Object.freeze([
   'backend/tests/test_analytics_first_purchase_official_host.py',
