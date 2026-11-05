@@ -47,6 +47,14 @@ jobs:
         run: |
           set -euo pipefail
           node --test scripts/release/production-only-closure.test.mjs scripts/release/plugin-source-manifest.test.mjs
+      - name: Install the locked production Python closure
+        # requirements-lock.txt is the documented CI/production venv. Drop the
+        # test/lint tools so the import closure runs against production-only
+        # packages, mirroring the pnpm --prod assertion.
+        run: |
+          set -euo pipefail
+          grep -vE '^(pytest|pytest-xdist|black|ruff|iniconfig|pluggy|pygments|execnet)==' requirements-lock.txt > "$RUNNER_TEMP/runtime-requirements.txt"
+          python -m pip install --quiet --disable-pip-version-check -r "$RUNNER_TEMP/runtime-requirements.txt"
       - name: Download the locked sealed composition artifact
         env:
           GH_TOKEN: ${{ github.token }}
