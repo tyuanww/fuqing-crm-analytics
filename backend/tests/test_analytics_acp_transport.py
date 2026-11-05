@@ -1395,11 +1395,10 @@ def test_from_config_passes_only_the_scoped_child_environment(tmp_path, monkeypa
     finally:
         receiver.close()
 
-    query = build_host_transport({**config, "family": "channel_followup"})
-    try:
-        assert query.env["B0_RUNTIME_FAMILY"] == "channel_followup"
-    finally:
-        query.close()
+    # H5: ACP serves kernel-owned automation only. A query-family runtime must
+    # refuse the ACP switch instead of spawning a child for user-chat traffic.
+    with pytest.raises(ValueError):
+        build_host_transport({**config, "family": "channel_followup"})
 
 
 def test_from_config_rejects_an_unscoped_token_shape(tmp_path):

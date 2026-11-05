@@ -4,67 +4,67 @@
   "owners": {
     "plugin-kit": {
       "domain": "build-tooling",
-      "target_repository": "shinemage-dsh-plugin-kit",
+      "target_repository": "tyuanww/fuqing-crm-analytics",
       "kind": "dev-tool"
     },
     "analytics-workbench": {
       "domain": "analysis/pages/cockpit",
-      "target_repository": "shinemage-dsh-analytics-workbench",
+      "target_repository": "tyuanww/dsh-analytics-workbench",
       "kind": "plugin"
     },
     "crm-knowledge": {
       "domain": "crm-adapter",
-      "target_repository": "shinemage-dsh-crm",
+      "target_repository": "tyuanww/dsh-crm-knowledge",
       "kind": "plugin"
     },
     "shine-brand": {
       "domain": "plugin-theme",
-      "target_repository": "shinemage-dsh-brand",
+      "target_repository": "tyuanww/dsh-shine-brand",
       "kind": "plugin"
     },
     "shine-funnel": {
       "domain": "board-components",
-      "target_repository": "shinemage-dsh-board-components",
+      "target_repository": "tyuanww/dsh-shine-funnel",
       "kind": "plugin"
     },
     "shine-waterfall": {
       "domain": "board-components",
-      "target_repository": "shinemage-dsh-board-components",
+      "target_repository": "tyuanww/dsh-shine-waterfall",
       "kind": "plugin"
     },
     "shine-query": {
       "domain": "query",
-      "target_repository": "shinemage-dsh-query",
+      "target_repository": "tyuanww/dsh-shine-query",
       "kind": "plugin"
     },
     "shine-board": {
       "domain": "board",
-      "target_repository": "shinemage-dsh-board",
+      "target_repository": "tyuanww/dsh-shine-board",
       "kind": "plugin"
     },
     "shine-crowd-action": {
       "domain": "board-marker",
-      "target_repository": "shinemage-dsh-board",
+      "target_repository": "tyuanww/dsh-shine-crowd-action",
       "kind": "plugin"
     },
     "board-components": {
       "domain": "board-components",
-      "target_repository": "shinemage-dsh-board-components",
+      "target_repository": "tyuanww/shinemage-board-components",
       "kind": "domain-library"
     },
     "knowledge": {
       "domain": "knowledge",
-      "target_repository": "shinemage-dsh-knowledge",
+      "target_repository": "tyuanww/dsh-knowledge",
       "kind": "plugin"
     },
     "query-agent": {
       "domain": "agent-preset",
-      "target_repository": "shinemage-dsh-query-agent",
+      "target_repository": "tyuanww/fuqing-crm-analytics",
       "kind": "configuration-bundle"
     },
     "contracts": {
       "domain": "generated-contracts",
-      "target_repository": "shinemage-dsh-contracts",
+      "target_repository": "tyuanww/fuqing-crm-analytics",
       "kind": "contract-package"
     }
   },

@@ -17,6 +17,6 @@ def test_catalog_loads_from_the_main_owned_projection():
 
 def test_board_spec_import_has_no_plugin_source_dependency():
     source = Path(board_spec.__file__).read_text(encoding="utf-8")
-    assert "dsh-plugins/analytics-workbench" not in source
+    assert "dsh-plugins/" not in source
     assert 'with_name("component-catalog.json")' in source
     assert (CONTRACTS / "component-catalog.json").is_file()

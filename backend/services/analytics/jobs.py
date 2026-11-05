@@ -68,10 +68,14 @@ TERMINAL = frozenset({"SUCCEEDED", "FAILED", "CANCELLED", "NEEDS_INPUT"})
 TRANSPORT_BRIDGE = "bridge"
 TRANSPORT_ACP = "acp"
 TRANSPORTS = frozenset({TRANSPORT_BRIDGE, TRANSPORT_ACP})
+# H5 keeps the query family on the bridge: it is user-chat traffic, while ACP
+# serves kernel-owned automation only. The exclusion is named and applied before
+# every eligible family or percentage check, so configuration cannot widen it.
+QUERY_FAMILIES = frozenset({QUERY_RUN_FAMILY})
 # Only these fixture-scoped (synthetic) families may ever move to ACP by canary.
 # A future non-synthetic family is deliberately absent: the selection checks this
 # set before any percentage, so it can never be selected by configuration alone.
-SYNTHETIC_FAMILIES = frozenset({"b0", "channel_followup", "first_purchase"})
+SYNTHETIC_FAMILIES = frozenset({"b0", "first_purchase"})
 CANARY_BUCKETS = 100
 _LOGGER = logging.getLogger(__name__)
 ACP_BINDING_STATES = frozenset({"BOUND", "SETTLED", "LOST"})
@@ -184,9 +188,11 @@ class TransportPolicy:
 
     ``transport=bridge`` and ``transport=acp`` keep their old whole-runtime
     meaning. Only ``canary`` may mix paths, and only for an explicit list of
-    synthetic families and a stable hash of the request id. Every decision is
-    returned with a reason so the accept path can log it, and the chosen value
-    is persisted before any transport sees the intent.
+    synthetic families and a stable hash of the request id. The query family is
+    never ACP-eligible: a policy or configuration that names it refuses instead
+    of silently filtering it. Every decision is returned with a reason so the
+    accept path can log it, and the chosen value is persisted before any
+    transport sees the intent.
     """
 
     mode: str = TRANSPORT_BRIDGE
@@ -199,9 +205,10 @@ class TransportPolicy:
             raise ValueError("unsupported transport policy mode")
         if type(self.canary_percent) is not int or not 0 <= self.canary_percent <= CANARY_BUCKETS:
             raise ValueError("canary_percent must be an integer between 0 and 100")
-        if not isinstance(self.canary_families, frozenset) or any(
-                not isinstance(family, str) or family not in SYNTHETIC_FAMILIES
-                for family in self.canary_families):
+        if not isinstance(self.canary_families, frozenset) or QUERY_FAMILIES.intersection(self.canary_families):
+            raise ValueError("canary_families must never include the query family")
+        if any(not isinstance(family, str) or family not in SYNTHETIC_FAMILIES
+               for family in self.canary_families):
             raise ValueError("canary_families must be a subset of the synthetic families")
 
     @classmethod
@@ -210,6 +217,7 @@ class TransportPolicy:
         raw = config.get("transport", TRANSPORT_BRIDGE)
         if not isinstance(raw, str) or not raw:
             raise ValueError("transport must be bridge, acp or canary[:percent]")
+        family = config.get("family", "b0")
         percent = config.get("canary_percent", 0)
         if raw in {TRANSPORT_BRIDGE, TRANSPORT_ACP} or raw == "canary":
             mode = raw
@@ -223,11 +231,17 @@ class TransportPolicy:
             percent = int(value)
         else:
             raise ValueError("unsupported host transport")
+        if mode == TRANSPORT_ACP and family in QUERY_FAMILIES:
+            raise ValueError("transport=acp must not serve the query family; it stays on bridge")
         if mode != "canary":
             return cls(mode=mode)
+        if family in QUERY_FAMILIES:
+            raise ValueError("transport=canary must not serve the query family; it stays on bridge")
         families = config.get("canary_families", sorted(SYNTHETIC_FAMILIES))
         if not isinstance(families, (list, tuple)) or any(not isinstance(item, str) for item in families):
             raise ValueError("canary_families must be a list of family names")
+        if QUERY_FAMILIES.intersection(families):
+            raise ValueError("canary_families must never include the query family")
         return cls(mode=mode, canary_percent=percent, canary_families=frozenset(families),
                    acp_available=bool(acp_available))
 
@@ -245,6 +259,8 @@ class TransportPolicy:
         """Choose the executing transport and return the inspectable reason."""
         if self.mode == TRANSPORT_BRIDGE:
             return TRANSPORT_BRIDGE, "mode=bridge"
+        if family in QUERY_FAMILIES:
+            return TRANSPORT_BRIDGE, "query_family_bridge_only"
         if self.mode == TRANSPORT_ACP:
             return TRANSPORT_ACP, "mode=acp"
         if not self.acp_available:

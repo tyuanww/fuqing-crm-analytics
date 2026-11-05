@@ -22,7 +22,7 @@ node --test scripts/dsh-b0/plugin-boundaries.test.mjs
 
 ## 实际包与维护归属
 
-下表列出当前插件作者仓。policy 中的 `target_repository` 保留 T1 开始盘点时的目标名称，用于历史职责记录，不是远程仓地址；本次未修改 policy 或增加源码豁免。
+下表列出当前插件作者仓。policy 中的 `target_repository` 记录该包当前的维护仓库（`tyuanww/<repo>`）；仍由主仓维护的 kit、合同包和 query-agent 指向 `tyuanww/fuqing-crm-analytics`，不再是 T1 的历史目标名称。
 
 | 主仓历史包目录 | 领域 | 当前独立作者仓／维护归属 | 能力边界 |
 |---|---|---|---|

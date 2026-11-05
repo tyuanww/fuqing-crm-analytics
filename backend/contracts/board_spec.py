@@ -1,8 +1,8 @@
 """Library BoardSpec HTTP contract. Catalogue is main-owned, offline.
 
-The runtime projection lives next to this module; the plugin keeps a byte-identical
-copy for its UI build, and scripts/ci/board-catalog-sync.mjs guards the parity. This
-module must never read dsh-plugins/ at import time.
+The runtime projection lives next to this module; the workbench author repo keeps a
+byte-identical copy for its UI build, and scripts/ci/board-catalog-sync.mjs guards the
+parity. This module must never read plugin source at import time.
 
 This is the new canvas contract, not the frozen C0 board or legacy CRM schema.
 No submitted document carries facts, executable code, an owner or a saved version.
