@@ -46,7 +46,7 @@ from backend.services.analytics.acp_transport import (
 from backend.services.analytics.first_purchase.native_identity import NativeSessionIdentityResolver
 from backend.services.analytics.runtime import HostBridge, RunDispatcher
 from backend.services.analytics.transport import HostTransport
-from backend.tests.analytics_run_support import actor, make_store
+from backend.tests.analytics_run_support import actor, make_store, profile, successful_step
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 NATIVE_EVIDENCE = REPO_ROOT / "dsh-plugins" / "analytics-workbench" / "src" / "native-evidence.mjs"
@@ -74,12 +74,13 @@ def native_request(key="native-1", text="合成渠道", session=SESSION):
             "content": [{"type": "text", "text": text}], "clientTimeZone": "Asia/Shanghai"}
 
 
-def dispatch_payload(key="native-1", *, attempt="attempt-1", text="合成渠道", with_native=True):
+def dispatch_payload(key="native-1", *, attempt="attempt-1", text="合成渠道", with_native=True,
+                     deadline_ms=0):
     inner = {"question": text}
     if with_native:
         inner["native_request"] = native_request(key, text)
     return {"run_id": "run-1", "attempt_id": attempt, "session_id": SESSION, "request_id": key,
-            "payload": inner, "payload_hash": "h" * 64, "deadline_ms": 0}
+            "payload": inner, "payload_hash": "h" * 64, "deadline_ms": deadline_ms}
 
 
 def identity_payload():
@@ -107,6 +108,8 @@ class FakeAcpServer:
         self.contaminate_stdout = False
         self.contaminate_on_list = False
         self.cancel_delay = 0.05
+        self.close_calls = 0
+        self.close_mode = "error"
         self.prompt_started = threading.Event()
         self._inflight = None
         self._lock = threading.Lock()
@@ -129,6 +132,16 @@ class FakeAcpServer:
             self._inflight = None
         if inflight is not None:
             inflight["respond"](stop_reason)
+
+    def tool_update(self, call_id="call-1", status="completed"):
+        """Emit one tool update on the in-flight prompt's stream, then return."""
+        with self._lock:
+            inflight = self._inflight
+        if inflight is None:
+            raise AssertionError("no in-flight prompt to attach a tool update to")
+        update = {"sessionUpdate": "tool_call" if status == "in_progress" else "tool_call_update",
+                  "toolCallId": call_id, "title": "native_query", "kind": "other", "status": status}
+        self.child._notify("session/update", {"sessionId": inflight["session_id"], "update": update})
 
     def server_request_id(self):
         with self._lock:
@@ -281,6 +294,19 @@ class FakeAcpChild:
             self._respond(message["id"], {"configOptions": []})
         elif method == "session/prompt":
             self._prompt(message, params)
+        elif method == "session/close":
+            self.server.close_calls += 1
+            if self.server.close_mode == "settle":
+                with self.server._lock:
+                    inflight = self.server._inflight
+                    self.server._inflight = None
+                if inflight is not None:
+                    inflight["respond"]("cancelled")
+                self._respond(message["id"], {})
+            elif self.server.close_mode == "hang":
+                return
+            else:
+                self._respond_error(message["id"], -32603, "close failed")
         else:
             self._respond_error(message["id"], -32601, f"method not found: {method}")
 
@@ -298,7 +324,7 @@ class FakeAcpChild:
             self._respond(message["id"], {"stopReason": stop_reason})
 
         with self.server._lock:
-            self.server._inflight = {"respond": respond}
+            self.server._inflight = {"respond": respond, "session_id": params["sessionId"]}
         mode = self.server.prompt_mode
         if mode in {"hang", "hang_ignore_cancel", "cancel_then_settle"}:
             return
@@ -390,7 +416,11 @@ def test_all_five_operations_route_through_the_acp_transport(acp):
     assert server.methods[:2] == ["initialize", "session/list"]
 
     dispatch = dispatch_payload()
-    assert receiver.call("dispatch", dispatch) == {"accepted": True}
+    receipt = receiver.call("dispatch", dispatch)
+    assert receipt["accepted"] is True
+    assert receipt["transport"] == "acp"
+    assert receipt["acp_session_id"] in server.sessions
+    assert str(receipt["prompt_rpc_id"]).isdigit()
     assert server.prompt_started.wait(5.0)
     assert server.prompts == ["合成渠道"]
     settled = observe_until(receiver, dispatch, "SUCCEEDED")
@@ -404,7 +434,7 @@ def test_all_five_operations_route_through_the_acp_transport(acp):
     # One prompt per session; a second one is refused before it reaches the child.
     server.prompt_mode = "hang_ignore_cancel"
     second = dispatch_payload("native-2", attempt="attempt-2")
-    assert receiver.call("dispatch", second) == {"accepted": True}
+    assert receiver.call("dispatch", second)["accepted"] is True
     assert wait_until(lambda: len(server.prompts) == 2)
     with pytest.raises(AcpTransportError):
         receiver.call("dispatch", dispatch_payload("native-3", attempt="attempt-3"))
@@ -550,6 +580,204 @@ def test_cancel_is_fire_and_forget_and_only_settlement_proves_exit(tmp_path):
         assert server.methods.count("session/cancel") == 0
         assert wait_until(lambda: server.cancels == 1)
     finally:
+        receiver.close()
+
+
+def test_aborted_after_cancel_maps_to_cancelled(tmp_path):
+    """rc.5 reports an aborted turn as end_turn; the cancel record decides."""
+    server = FakeAcpServer()
+    server.prompt_mode = "hang_ignore_cancel"
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0)
+    try:
+        receiver.call("health", {})
+        payload = dispatch_payload()
+        receiver.call("dispatch", payload)
+        assert server.prompt_started.wait(5.0)
+        assert receiver.call("cancel", payload)["accepted"] is True
+        server.release("end_turn")
+        evidence = observe_until(receiver, payload, "CANCELLED")
+        assert evidence["execution_exited"] is True
+        assert evidence["successful_call_ids"] == []
+    finally:
+        receiver.close()
+
+
+def test_cancel_then_tool_call_then_end_turn_is_cancelled_never_succeeded(tmp_path):
+    # The dangerous race: the cancel is in flight, a tool completes, then the
+    # turn settles as a plain end_turn. Without the cancel record this would
+    # read as SUCCEEDED; it must read as CANCELLED.
+    server = FakeAcpServer()
+    server.prompt_mode = "hang_ignore_cancel"
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0)
+    try:
+        receiver.call("health", {})
+        payload = dispatch_payload()
+        receiver.call("dispatch", payload)
+        assert server.prompt_started.wait(5.0)
+        assert receiver.call("cancel", payload)["accepted"] is True
+        server.tool_update("call-1", "in_progress")
+        server.tool_update("call-1", "completed")
+        server.release("end_turn")
+        evidence = observe_until(receiver, payload, "CANCELLED")
+        assert evidence["execution_exited"] is True
+        assert evidence["successful_call_ids"] == ["call-1"]  # evidence kept, outcome truthful
+    finally:
+        receiver.close()
+
+
+def test_aborted_without_a_cancel_remains_the_documented_codec_loss(tmp_path):
+    # No cancel record exists, so an aborted turn is indistinguishable from a
+    # completed one over ACP (design §2/R3 accepted loss). This is not a success
+    # classification bug: it is the codec collapse the design lists.
+    server = FakeAcpServer()
+    server.prompt_mode = "end_turn"
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0)
+    try:
+        receiver.call("health", {})
+        payload = dispatch_payload()
+        receiver.call("dispatch", payload)
+        evidence = observe_until(receiver, payload, "SUCCEEDED")
+        assert evidence["execution_exited"] is True
+        assert evidence["successful_call_ids"] == ["call-1"]
+        assert server.cancels == 0
+    finally:
+        receiver.close()
+
+
+def test_a_normal_success_is_not_misclassified_by_a_previous_cancel(tmp_path):
+    server = FakeAcpServer()
+    server.prompt_mode = "hang_ignore_cancel"
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0)
+    try:
+        receiver.call("health", {})
+        first = dispatch_payload("native-1", attempt="attempt-1")
+        receiver.call("dispatch", first)
+        assert server.prompt_started.wait(5.0)
+        assert receiver.call("cancel", first)["accepted"] is True
+        server.release("cancelled")
+        assert observe_until(receiver, first, "CANCELLED")["execution_exited"] is True
+
+        server.prompt_mode = "end_turn"
+        second = dispatch_payload("native-2", attempt="attempt-2")
+        receiver.call("dispatch", second)
+        evidence = observe_until(receiver, second, "SUCCEEDED")
+        assert evidence["execution_exited"] is True
+        assert evidence["successful_call_ids"] == ["call-1"]
+        assert server.cancels == 1
+    finally:
+        receiver.close()
+
+
+# ---------------------------------------------------------------------------
+# Deadline passed with a prompt in flight: bounded close, then restart
+# ---------------------------------------------------------------------------
+
+
+def expired_deadline():
+    return int(time.time() * 1000) - 1000
+
+
+def test_expired_prompt_closes_the_session_and_accepts_a_real_settlement(tmp_path):
+    server = FakeAcpServer()
+    server.prompt_mode = "hang_ignore_cancel"
+    server.close_mode = "settle"
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0,
+                            cancel_grace=0.0, close_timeout=1.0)
+    try:
+        receiver.call("health", {})
+        payload = dispatch_payload(deadline_ms=expired_deadline())
+        receiver.call("dispatch", payload)
+        assert server.prompt_started.wait(5.0)
+        assert receiver.call("cancel", payload)["accepted"] is True
+        evidence = observe_until(receiver, payload, "CANCELLED")
+        # The close caused a real prompt response; CANCELLED is settlement-backed.
+        assert evidence["execution_exited"] is True
+        assert server.close_calls == 1
+    finally:
+        receiver.close()
+
+
+def test_expired_prompt_without_settlement_restarts_the_child_and_stays_unknown(tmp_path):
+    server = FakeAcpServer()
+    server.prompt_mode = "hang_ignore_cancel"
+    server.close_mode = "hang"
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0,
+                            cancel_grace=0.0, close_timeout=0.2)
+    try:
+        receiver.call("health", {})
+        payload = dispatch_payload(deadline_ms=expired_deadline())
+        receiver.call("dispatch", payload)
+        assert server.prompt_started.wait(5.0)
+        assert receiver.call("cancel", payload)["accepted"] is True
+        child = server.child
+        with pytest.raises(AcpTransportError) as error:
+            receiver.call("observe", payload)
+        assert "deadline expired without settlement" in str(error.value)
+        assert server.close_calls == 1
+        assert wait_until(lambda: child.poll() is not None)
+        # The lost settlement is never rewritten as CANCELLED; the attempt
+        # stays unresolved and a later call starts a fresh child.
+        with pytest.raises(AcpTransportError):
+            receiver.call("observe", payload)
+        assert receiver.call("health", {}) == {"ready": True}
+        assert len(server.children) == 2
+    finally:
+        receiver.close()
+
+
+def test_deadline_expiry_does_not_fire_before_a_cancel_request(tmp_path):
+    # A past deadline alone is not a stop request: the kernel owns deadlines
+    # and only an in-flight cancel makes the transport escalate.
+    server = FakeAcpServer()
+    server.prompt_mode = "hang_ignore_cancel"
+    server.close_mode = "settle"
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0,
+                            cancel_grace=0.0, close_timeout=1.0)
+    try:
+        receiver.call("health", {})
+        payload = dispatch_payload(deadline_ms=expired_deadline())
+        receiver.call("dispatch", payload)
+        assert server.prompt_started.wait(5.0)
+        assert receiver.call("observe", payload)["outcome"] == "RUNNING"
+        assert server.close_calls == 0
+    finally:
+        receiver.close()
+
+
+def test_dispatcher_deadline_expiry_keeps_cancelling_and_never_writes_cancelled(tmp_path):
+    server = FakeAcpServer()
+    server.prompt_mode = "hang_ignore_cancel"
+    server.close_mode = "hang"
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0,
+                            cancel_grace=0.0, close_timeout=0.2)
+    store = make_store(tmp_path / "state", resource_profile=profile(run_timeout_ms=500, query_timeout_ms=100))
+    conversation = store.create_conversation(
+        actor(), "native", AnalyticsConversationRequest(), runtime_session_id=SESSION)
+    run = store.accept(actor(), conversation.conversation_id, "native-1",
+                       AnalyticsRunRequest(question="合成渠道"), native_request=native_request())
+    dispatcher = RunDispatcher(store, lambda _: actor(), receiver)
+    dispatcher.start()
+    try:
+        dispatcher.tick()  # claim + dispatch before the 500ms deadline
+        intent = store.runtime_work()[0]["intent"]
+        assert store.acp_binding(intent.run_id, intent.attempt_id).state == "BOUND"
+        time.sleep(0.7)
+        for _ in range(200):
+            dispatcher.tick()
+            snapshot = store.get(actor(), run.run_id)
+            if server.close_calls:
+                break
+            time.sleep(0.01)
+        assert server.close_calls == 1
+        assert wait_until(lambda: server.child.poll() is not None)
+        snapshot = store.get(actor(), run.run_id)
+        # The deadline expired and the settlement is lost: the run must stay
+        # CANCELLING with the slot held, never become CANCELLED or SUCCEEDED.
+        assert snapshot.status == "CANCELLING"
+        assert snapshot.diagnostics.execution_active is True
+        assert store.acp_binding(intent.run_id, intent.attempt_id).state == "BOUND"
+    finally:
+        dispatcher.close()
         receiver.close()
 
 
@@ -760,6 +988,78 @@ def test_acp_lost_settlement_is_unknown_and_a_requested_cancel_stays_held(tmp_pa
         assert snapshot.status == "CANCELLING"  # exit unproven; never CANCELLED
         assert snapshot.diagnostics.execution_active
         assert not dispatcher.ready
+    finally:
+        dispatcher.close()
+        receiver.close()
+
+
+# ---------------------------------------------------------------------------
+# Persisted ACP binding: written before the prompt, settled only by exit proof
+# ---------------------------------------------------------------------------
+
+
+def test_binding_sink_runs_after_session_new_and_before_the_prompt(tmp_path):
+    server = FakeAcpServer()
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0)
+    seen = []
+    receiver.attach_binding_sink(lambda binding: seen.append(dict(binding)) or True)
+    try:
+        receiver.call("health", {})
+        payload = dispatch_payload()
+        assert receiver.call("dispatch", payload)["accepted"] is True
+        assert len(seen) == 1
+        binding = seen[0]
+        assert (binding["run_id"], binding["attempt_id"], binding["session_id"]) == (
+            payload["run_id"], payload["attempt_id"], payload["session_id"])
+        assert binding["acp_session_id"] in server.sessions
+        assert binding["prompt_rpc_id"].isdigit()
+        assert wait_until(lambda: server.prompts == ["合成渠道"])
+        # session/new precedes the sink; the prompt is written only after it.
+        assert server.methods.index("session/new") < server.methods.index("session/prompt")
+        assert observe_until(receiver, payload, "SUCCEEDED")["execution_exited"] is True
+    finally:
+        receiver.close()
+
+
+def test_binding_sink_refusal_blocks_the_prompt(tmp_path):
+    server = FakeAcpServer()
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0)
+    receiver.attach_binding_sink(lambda _binding: False)
+    try:
+        receiver.call("health", {})
+        with pytest.raises(AcpTransportError) as error:
+            receiver.call("dispatch", dispatch_payload())
+        assert "already bound" in str(error.value)
+        assert server.prompts == []
+    finally:
+        receiver.close()
+
+
+def test_dispatcher_persists_the_binding_and_settles_it_with_exit_evidence(tmp_path):
+    server = FakeAcpServer()
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0)
+    store, run = bound_run(tmp_path)
+    dispatcher = RunDispatcher(store, lambda _: actor(), receiver)
+    dispatcher.start()
+    try:
+        dispatcher.tick()
+        intent = store.runtime_work()[0]["intent"]
+        binding = store.acp_binding(intent.run_id, intent.attempt_id)
+        assert binding is not None and binding.state == "BOUND"
+        assert binding.acp_session_id in server.sessions
+        assert binding.prompt_rpc_id.isdigit()
+
+        # The fake child reports call-1 completed; give the dispatcher the same
+        # successful step the bridge path would have written, then let the
+        # settled prompt refresh the binding.
+        successful_step(store, intent, call_id="call-1")
+        for _ in range(200):
+            dispatcher.tick()
+            if store.get(actor(), run.run_id).status == "SUCCEEDED":
+                break
+            time.sleep(0.01)
+        assert store.get(actor(), run.run_id).status == "SUCCEEDED"
+        assert store.acp_binding(intent.run_id, intent.attempt_id).state == "SETTLED"
     finally:
         dispatcher.close()
         receiver.close()

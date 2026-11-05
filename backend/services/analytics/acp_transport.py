@@ -35,18 +35,34 @@ Termination mapping (rc.5 ``turnEndToStopReason``, ``acp/src/codec.ts:14-35``)
 ------------------------------------------------------------------------------
 ``end_turn`` with at least one observed tool call -> ``SUCCEEDED``; the
 dispatcher still decides whether a *successful* step backs it. ``end_turn``
-with no tool call -> ``UNKNOWN``: rc.5 collapses ``blocked`` (which the bridge
-maps to ``NEEDS_INPUT``) and ``aborted`` into the same ``end_turn``, so the
-only fail-closed reading for a no-tool turn is "cannot prove success". Every
-automation family in scope calls a server-side tool, so a text-only turn is not
-a valid completion. ``cancelled`` -> ``CANCELLED`` (rc.5 also collapses
-``interrupted`` and explicit cancellation here). ``max_tokens``,
-``max_turn_requests``, ``refusal`` and a JSON-RPC prompt error -> ``FAILED``.
-Any other reason -> ``UNKNOWN``. Only a settled prompt response proves exit:
-a cancel receipt, a write success or a process signal never does. If the child
-dies, the prompt's settlement is lost and ``observe`` raises, so the
-dispatcher records one ``UNKNOWN`` and keeps the slot; it never fabricates an
-outcome from process exit.
+after this transport wrote a ``session/cancel`` notification for the same
+prompt -> ``CANCELLED``, never ``SUCCEEDED``: rc.5 reports an aborted turn as
+``end_turn`` and the request record is the only evidence that distinguishes it
+from a completed one, including the cancel-then-tool-call-then-end_turn case.
+``end_turn`` with no tool call and no cancel request -> ``UNKNOWN``: rc.5
+collapses ``blocked`` (which the bridge maps to ``NEEDS_INPUT``) and ``aborted``
+into the same ``end_turn``, so the only fail-closed reading for a no-tool turn
+is "cannot prove success". Every automation family in scope calls a server-side
+tool, so a text-only turn is not a valid completion. ``cancelled`` ->
+``CANCELLED`` (rc.5 also collapses ``interrupted`` and explicit cancellation
+here). ``max_tokens``, ``max_turn_requests``, ``refusal`` and a JSON-RPC prompt
+error -> ``FAILED``; a cancel request never rewrites a real failure. Any other
+reason -> ``UNKNOWN``. Only a settled prompt response proves exit: a cancel
+receipt, a write success or a process signal never does. If the child dies, the
+prompt's settlement is lost and ``observe`` raises, so the dispatcher records
+one ``UNKNOWN`` and keeps the slot; it never fabricates an outcome from process
+exit.
+
+Deadline with a prompt in flight
+--------------------------------
+The dispatch envelope carries the kernel deadline. After this transport wrote
+``session/cancel`` for an attempt and the deadline passed for ``cancel_grace``,
+``observe`` escalates once: a bounded ``session/close`` (the child may settle
+the prompt, and then the settlement is classified normally), otherwise the
+child is retired so the old prompt cannot keep executing and the settlement is
+recorded LOST. The observation then fails and the dispatcher records UNKNOWN
+while the run stays CANCELLING with its slot held. Neither a cancel receipt nor
+a deadline writes CANCELLED; only a prompt settlement can.
 
 Correlation
 -----------
@@ -60,12 +76,15 @@ transport keeps its ACP session id in memory, keyed by the kernel
 back to ``session/new`` on a definitive JSON-RPC rejection (a timeout is
 ambiguous and is never retried).
 
-Profile wiring is deliberately NOT part of this module: ``analytics-acp`` is a
-generated composition (entry split + bundle patch + profile locks), larger
-than this slice. ``from_config`` therefore accepts the command/args, workspace
-and private ``DSH_HOME`` as deployment configuration; until that profile is
-generated, selecting ``transport=acp`` fails closed at health (admission
-closed) rather than silently using the bridge.
+Profile wiring is a separate, generated artifact: ``scripts/dsh-b0/acp-profile.mjs``
+writes ``<DSH_HOME>/profiles/analytics-acp`` (the shipped ``acp`` template plus
+the workbench ``./tools`` row), locks its patch/entry bytes and can assert the
+composed tree through ``dsh --profile analytics-acp --dump-config``. The
+deployment installs the workbench package into that profile; ``from_config``
+therefore accepts the command/args, workspace and private ``DSH_HOME`` as
+deployment configuration. Until that profile is installed, selecting
+``transport=acp`` fails closed at health (admission closed) rather than
+silently using the bridge.
 """
 
 from __future__ import annotations
@@ -88,6 +107,12 @@ DEFAULT_ARGS: Final[tuple[str, ...]] = ("--profile", "analytics-acp")
 CONNECT_ATTEMPTS: Final[int] = 2
 EOF_GRACE_SECONDS: Final[float] = 1.0
 MAX_PROMPT_CHARS: Final[int] = 8000
+# A prompt whose run deadline passed after a cancel request gets this long to
+# settle before the transport closes the session and, if needed, restarts the
+# child. Both are bounded deployment knobs, not forced-exit claims.
+DEFAULT_CANCEL_GRACE_SECONDS: Final[float] = 5.0
+DEFAULT_CLOSE_TIMEOUT_SECONDS: Final[float] = 2.0
+CLOSE_SETTLEMENT_WAIT_SECONDS: Final[float] = 0.25
 
 # The seam's five names minus the one this transport cannot serve.
 CAPABILITIES: Final[frozenset[str]] = frozenset({"health", "dispatch", "observe", "cancel"})
@@ -160,6 +185,15 @@ class _Prompt:
     error: str | None = None
     settled: bool = False
     settlement_lost: bool = False
+    # A cancel notification was written for this prompt. rc.5 collapses an
+    # aborted turn into ``end_turn``, so this is the only evidence that lets the
+    # settlement be read as CANCELLED instead of SUCCEEDED.
+    cancel_requested: bool = False
+    cancel_requested_at: float | None = None
+    # Kernel deadline carried by the dispatch envelope (epoch ms); None means
+    # the caller supplied no positive deadline.
+    deadline_ms: int | None = None
+    expiring: bool = False
 
     def successful_call_ids(self) -> list[str]:
         return [call_id for call_id, status in self.tool_calls.items() if status == "completed"]
@@ -211,6 +245,8 @@ class AcpTransport:
         args: tuple[str, ...] | list[str] = DEFAULT_ARGS,
         spawn: Callable[..., AcpChild] = spawn_acp_child,
         timeout: float = 30.0,
+        cancel_grace: float = DEFAULT_CANCEL_GRACE_SECONDS,
+        close_timeout: float = DEFAULT_CLOSE_TIMEOUT_SECONDS,
         logger: logging.Logger | None = None,
     ):
         if not isinstance(cwd, str) or not os.path.isabs(cwd):
@@ -224,10 +260,18 @@ class AcpTransport:
             raise ValueError("ACP child spawn factory must be callable")
         if not isinstance(timeout, (int, float)) or timeout <= 0:
             raise ValueError("ACP timeout must be positive")
+        if (not isinstance(cancel_grace, (int, float)) or isinstance(cancel_grace, bool)
+                or cancel_grace < 0):
+            raise ValueError("ACP cancel grace must be non-negative")
+        if (not isinstance(close_timeout, (int, float)) or isinstance(close_timeout, bool)
+                or close_timeout <= 0):
+            raise ValueError("ACP close timeout must be positive")
         self.cwd = cwd
         self.argv = tuple(argv)
         self.env = dict(env or {})
         self.timeout = float(timeout)
+        self.cancel_grace = float(cancel_grace)
+        self.close_timeout = float(close_timeout)
         self.logger = logger or logging.getLogger(__name__)
         self._spawn = spawn
         self._state_lock = threading.RLock()
@@ -242,6 +286,9 @@ class AcpTransport:
         self._sessions: dict[str, _Session] = {}
         self._kernel_by_acp: dict[str, str] = {}
         self._reader: threading.Thread | None = None
+        # The kernel's persistent binding sink; None means "no persistence
+        # configured" and the transport keeps its in-memory binding only.
+        self._binding_sink: Callable[[Mapping[str, Any]], bool] | None = None
 
     # -- construction -----------------------------------------------------
 
@@ -275,17 +322,36 @@ class AcpTransport:
         timeout_ms = config.get("acp_timeout_ms", 30_000)
         if type(timeout_ms) is not int or timeout_ms <= 0:
             raise ValueError("acp_timeout_ms must be a positive integer")
+        grace_ms = config.get("acp_cancel_grace_ms", int(DEFAULT_CANCEL_GRACE_SECONDS * 1000))
+        if type(grace_ms) is not int or grace_ms < 0:
+            raise ValueError("acp_cancel_grace_ms must be a non-negative integer")
+        close_ms = config.get("acp_close_timeout_ms", int(DEFAULT_CLOSE_TIMEOUT_SECONDS * 1000))
+        if type(close_ms) is not int or close_ms <= 0:
+            raise ValueError("acp_close_timeout_ms must be a positive integer")
         env = dict(os.environ)
         env.update(extra)
         # The ACP harness gets its own home; it must never resume a session
         # that belongs to the web host's store (design R7).
         env["DSH_HOME"] = str(home_path)
-        return cls(cwd=cwd, env=env, command=command, args=args, timeout=timeout_ms / 1000)
+        return cls(cwd=cwd, env=env, command=command, args=args, timeout=timeout_ms / 1000,
+                   cancel_grace=grace_ms / 1000, close_timeout=close_ms / 1000)
 
     # -- seam -------------------------------------------------------------
 
     def supports(self, operation: str) -> bool:
         return operation in self.capabilities
+
+    def attach_binding_sink(self, sink: Callable[[Mapping[str, Any]], bool] | None) -> None:
+        """Attach the kernel's ACP binding store (design §3 invariant 2).
+
+        The sink is called after ``session/new``/``session/resume`` and before
+        the prompt is written. Returning anything but True aborts the dispatch
+        before any model work starts; raising is treated the same way.
+        """
+        if sink is not None and not callable(sink):
+            raise ValueError("ACP binding sink must be callable")
+        with self._state_lock:
+            self._binding_sink = sink
 
     def call(self, operation: str, payload: Mapping[str, Any]) -> dict[str, Any]:
         """Run one seam operation; every failure is a transport failure."""
@@ -324,6 +390,9 @@ class AcpTransport:
     def _dispatch(self, payload: Mapping[str, Any]) -> dict[str, Any]:
         run_id, attempt_id, session_id, request_id = _correlation(payload)
         text = _prompt_text(payload, session_id, request_id)
+        deadline = payload.get("deadline_ms")
+        if type(deadline) is not int or deadline <= 0:
+            deadline = None
         generation = self._ensure_child()
         session = self._activate_session(session_id, generation)
         with session.lock:
@@ -332,10 +401,21 @@ class AcpTransport:
             if (session.prompt is not None and not session.prompt.settled
                     and not session.prompt.settlement_lost):
                 raise AcpTransportError("an ACP prompt is already in flight for this session")
-            prompt = _Prompt(run_id, attempt_id, request_id)
+            prompt = _Prompt(run_id, attempt_id, request_id, deadline_ms=deadline)
             session.prompt = prompt
             try:
                 rpc_id = self._allocate_id()
+                sink = self._binding_sink
+                if sink is not None:
+                    bound = sink({
+                        "run_id": run_id, "attempt_id": attempt_id, "session_id": session_id,
+                        "acp_session_id": session.acp_session_id, "prompt_rpc_id": str(rpc_id),
+                        "generation": generation, "transport": "acp",
+                    })
+                    if bound is not True:
+                        # The attempt is already bound: never write a second
+                        # prompt for it, even if the caller retried.
+                        raise AcpTransportError("ACP attempt is already bound to another transport")
                 pending = _Pending("session/prompt", prompt=prompt)
                 self._write_request(rpc_id, "session/prompt", {
                     "sessionId": session.acp_session_id,
@@ -345,7 +425,8 @@ class AcpTransport:
                 session.prompt = None
                 raise AcpTransportError(f"ACP dispatch failed: {error}") from error
         self.logger.debug("acp: dispatched run %s attempt %s (rpc %s)", run_id, attempt_id, rpc_id)
-        return {"accepted": True}
+        return {"accepted": True, "transport": "acp", "acp_session_id": session.acp_session_id,
+                "prompt_rpc_id": str(rpc_id), "generation": generation}
 
     def _observe(self, payload: Mapping[str, Any]) -> dict[str, Any]:
         _run_id, attempt_id, session_id, request_id = _correlation(payload)
@@ -364,7 +445,12 @@ class AcpTransport:
             # EOF: a dead child can never settle this prompt.
             if not self._child_alive() or session_generation != self._generation:
                 raise AcpChildExited("ACP child holding the prompt is gone")
-            return _observation(payload, False, "RUNNING", [])
+            if self._deadline_passed(prompt):
+                self._expire_prompt(session, prompt)
+                if not prompt.settled:
+                    raise AcpChildExited("ACP prompt deadline expired without settlement")
+            else:
+                return _observation(payload, False, "RUNNING", [])
         outcome, error_code, exited = _classify_prompt(prompt)
         return _observation(payload, exited, outcome, prompt.successful_call_ids(), error_code)
 
@@ -375,15 +461,72 @@ class AcpTransport:
             if session is None or session.acp_session_id is None:
                 raise AcpTransportError("no ACP session to cancel")
             prompt = session.prompt
-        if (prompt is not None and not prompt.settled
+        if (prompt is not None
                 and (prompt.attempt_id != attempt_id or prompt.request_id != request_id)):
+            # A stale cancel must never reach a later attempt's prompt: the
+            # session carries one in-flight prompt at a time.
             raise AcpTransportError("cancel does not belong to the in-flight prompt")
         if not self._child_alive() or session.generation != self._generation:
             raise AcpChildExited("ACP child is not the one that holds this session")
+        with self._state_lock:
+            if prompt is not None and not prompt.settled and not prompt.settlement_lost:
+                # Record intent BEFORE the notification can race a settlement;
+                # an end_turn arriving after this point is read as CANCELLED.
+                prompt.cancel_requested = True
+                prompt.cancel_requested_at = time.monotonic()
         self._write_notification("session/cancel", {"sessionId": session.acp_session_id})
         # Fire-and-forget by contract: no ack exists and none is invented. Only
         # the prompt response settles the run; observe remains the exit proof.
         return {"accepted": True}
+
+    def _deadline_passed(self, prompt: _Prompt) -> bool:
+        if (not prompt.cancel_requested or prompt.deadline_ms is None
+                or prompt.cancel_requested_at is None):
+            return False
+        if prompt.deadline_ms > time.time() * 1000:
+            return False
+        return time.monotonic() - prompt.cancel_requested_at >= self.cancel_grace
+
+    def _expire_prompt(self, session: _Session, prompt: _Prompt) -> None:
+        """Bound a deadline-expired, cancel-requested prompt to close/restart.
+
+        The kernel already holds the run in CANCELLING; the only question is
+        whether the ACP child can still produce a settlement. A bounded
+        ``session/close`` may settle it, and then the normal classification
+        applies (including CANCELLED, because it is a real settlement). If no
+        settlement arrives, the child is restarted so the old prompt cannot keep
+        executing, and the settlement is recorded as LOST. This method never
+        returns an exit claim: the caller must map the missing settlement to
+        UNKNOWN, never to CANCELLED.
+        """
+        with self._state_lock:
+            if prompt.settled or prompt.settlement_lost or prompt.expiring:
+                return
+            prompt.expiring = True
+            generation = session.generation
+            acp_session_id = session.acp_session_id
+        self.logger.warning(
+            "acp: prompt for attempt %s passed its deadline after cancel; closing session %s",
+            prompt.attempt_id, acp_session_id)
+        try:
+            self._request("session/close", {"sessionId": acp_session_id}, generation,
+                          timeout=self.close_timeout)
+        except Exception as error:  # noqa: BLE001 - a failed close falls back to a restart
+            self.logger.warning("acp: session/close did not answer for attempt %s: %s",
+                                prompt.attempt_id, error)
+        # The close response can precede the prompt settlement it caused.
+        deadline = time.monotonic() + CLOSE_SETTLEMENT_WAIT_SECONDS
+        while time.monotonic() < deadline and not prompt.settled:
+            time.sleep(0.01)
+        if prompt.settled:
+            return
+        with self._spawn_lock:
+            if generation == self._generation and not self._dead:
+                self._retire_child_locked(kill=True)
+        with self._state_lock:
+            prompt.settlement_lost = True
+            prompt.error = "ACP prompt deadline expired without settlement"
+        raise AcpChildExited("ACP prompt deadline expired without settlement")
 
     # -- child lifecycle --------------------------------------------------
 
@@ -788,6 +931,12 @@ def _classify_prompt(prompt: _Prompt) -> tuple[str, str | None, bool]:
         return "FAILED", "MODEL_FAILED", True
     stop_reason = prompt.stop_reason
     if stop_reason == "end_turn":
+        if prompt.cancel_requested:
+            # rc.5 reports an aborted turn as ``end_turn``. A cancel notification
+            # was written for this prompt before settlement, so the only
+            # faithful reading is CANCELLED, even when tool calls completed
+            # while the cancel was in flight.
+            return "CANCELLED", None, True
         if not prompt.tool_calls:
             # rc.5 collapses blocked/aborted into end_turn; without tool-call
             # evidence this is UNKNOWN, never a manufactured success.

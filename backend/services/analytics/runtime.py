@@ -78,6 +78,18 @@ class RunDispatcher:
         self._lock = None
         self.ready = False
         self.last_error = None
+        # Duck-typed optional ACP seam: the pinned standalone kernel ships this
+        # module without acp_transport.py, so the store is injected without an
+        # import. A bridge transport has no sink and is unaffected.
+        attach = getattr(bridge, "attach_binding_sink", None)
+        if callable(attach):
+            attach(self._bind_acp_attempt)
+
+    def _bind_acp_attempt(self, binding):
+        """Persist the ACP attempt binding before the prompt is written."""
+        return self.store.bind_acp_attempt(
+            binding["run_id"], binding["attempt_id"], binding["session_id"],
+            binding["acp_session_id"], binding.get("prompt_rpc_id"), binding["generation"])
 
     def start(self):
         """One owner across API restarts; never adopt or unlink foreign locks."""

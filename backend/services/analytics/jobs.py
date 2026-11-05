@@ -63,6 +63,7 @@ FAMILY_SCOPE = {"b0": "b0-fixture", QUERY_RUN_FAMILY: QUERY_DATA_SCOPE, "first_p
 APPLICATION_ID = 1397572144  # SMB0, not a general-purpose SQLite database.
 STATE_SCHEMA_VERSION = 2  # Existing v1 evidence is retained, never auto-migrated.
 TERMINAL = frozenset({"SUCCEEDED", "FAILED", "CANCELLED", "NEEDS_INPUT"})
+ACP_BINDING_STATES = frozenset({"BOUND", "SETTLED", "LOST"})
 SAFE_ERRORS = frozenset({
     "MODEL_FAILED", "TOOL_FAILED", "TIMEOUT", "EXECUTION_UNKNOWN",
     "RESOURCE_EXCEEDED", "PERMISSION_REVOKED", "RUNTIME_REJECTED",
@@ -128,6 +129,27 @@ CREATE TABLE events (
 );
 """
 
+# P3-3d preparation: the ACP session/attempt binding. Additive on purpose so an
+# existing v2 state file stays readable (no existing table or row changes);
+# making ACP the default is the cutover that may bump STATE_SCHEMA_VERSION.
+# UNIQUE(run_id, attempt_id) is the second no-double-dispatch fence from the
+# design and `state` is the CAS cell (BOUND -> SETTLED | LOST, never back).
+_ACP_BINDING_SCHEMA = """
+CREATE TABLE IF NOT EXISTS acp_bindings (
+    run_id TEXT NOT NULL REFERENCES runs(run_id),
+    attempt_id TEXT NOT NULL,
+    session_id TEXT NOT NULL,
+    acp_session_id TEXT NOT NULL,
+    prompt_rpc_id TEXT,
+    generation INTEGER NOT NULL DEFAULT 0 CHECK(generation >= 0),
+    state TEXT NOT NULL CHECK(state IN ('BOUND','SETTLED','LOST')),
+    bound_ms INTEGER NOT NULL,
+    updated_ms INTEGER NOT NULL,
+    UNIQUE(run_id, attempt_id)
+);
+CREATE INDEX IF NOT EXISTS acp_bindings_state ON acp_bindings(state);
+"""
+
 
 def _now_ms() -> int:
     return time.time_ns() // 1_000_000
@@ -173,6 +195,21 @@ class StepReservation:
     step_id: str
     disposition: str  # EXECUTE / REUSE_RESULT / PENDING; PENDING must not execute again.
     deadline_ms: int
+
+
+@dataclass(frozen=True)
+class AcpBinding:
+    """One persisted ACP session/attempt binding (design §3 invariant 2)."""
+
+    run_id: str
+    attempt_id: str
+    session_id: str
+    acp_session_id: str
+    prompt_rpc_id: str | None
+    generation: int
+    state: str  # BOUND -> SETTLED | LOST
+    bound_ms: int
+    updated_ms: int
 
 
 @dataclass(frozen=True)
@@ -262,12 +299,15 @@ class RunStore:
                     if row is None or row[0] != self.profile.digest:
                         raise ValueError("persisted B0 profile differs; implicit migration is forbidden")
                     self._assert_existing_family(con)
+                # Additive only: CREATE TABLE IF NOT EXISTS keeps an existing v2
+                # state file readable; no evidence is rewritten or migrated.
+                self._ensure_acp_binding_schema()
                 return
             created = os.open(self.path, os.O_CREAT | os.O_EXCL | os.O_WRONLY | os.O_NOFOLLOW, 0o600)
             os.close(created)
             with self._connection() as con:
                 con.execute("PRAGMA journal_mode=WAL")
-                con.executescript("BEGIN IMMEDIATE;\n" + _SCHEMA)
+                con.executescript("BEGIN IMMEDIATE;\n" + _SCHEMA + _ACP_BINDING_SCHEMA)
                 try:
                     con.execute("PRAGMA application_id=1397572144")
                     con.execute("PRAGMA user_version=2")
@@ -282,6 +322,13 @@ class RunStore:
                     raise
         finally:
             os.close(fd)
+
+    def _ensure_acp_binding_schema(self) -> None:
+        """Create the additive ACP binding table on new and pre-existing stores."""
+        with self._transaction() as con:
+            for statement in _ACP_BINDING_SCHEMA.split(";"):
+                if statement.strip():
+                    con.execute(statement)
 
     @contextmanager
     def _connection(self, *, readonly: bool = False):
@@ -1297,6 +1344,16 @@ class RunStore:
                 row = con.execute("SELECT * FROM runs WHERE run_id=? AND status='QUEUED'", (candidate["run_id"],)).fetchone()
                 if row is None:
                     continue
+                if con.execute("SELECT 1 FROM acp_bindings WHERE run_id=? AND attempt_id=?",
+                               (row["run_id"], row["attempt_id"])).fetchone():
+                    # A persisted ACP binding proves this attempt already left
+                    # the kernel. Never re-prompt it; fence it without a slot so
+                    # the evidence stays inspectable and no second side effect
+                    # can start.
+                    row = self._update(con, row, status="FAILED", error_code="EXECUTION_UNKNOWN")
+                    con.execute("UPDATE dispatch_intents SET state='EXITED' WHERE run_id=?", (row["run_id"],))
+                    self._emit(con, row, "run.failed")
+                    continue
                 if allowed and self.is_query:
                     try:
                         binding = self._inspect_query_run(con, row)
@@ -1591,6 +1648,9 @@ class RunStore:
                 row = self._update(con, row, status=status, phase="FINALIZING", active_slot=None,
                                    error_code=error_code, result=result, primary_result_ref=primary)
                 con.execute("UPDATE dispatch_intents SET state='EXITED' WHERE run_id=?", (row["run_id"],))
+                # A terminal observation is settlement-backed exit evidence:
+                # CAS the binding forward so a restart cannot mark it LOST.
+                self._cas_acp_binding(con, row["run_id"], observation.attempt_id, "SETTLED", self.clock())
                 event_type = {"SUCCEEDED": "run.completed", "FAILED": "run.failed",
                               "CANCELLED": "run.cancelled", "NEEDS_INPUT": "run.needs_input"}[status]
             else:
@@ -1618,6 +1678,10 @@ class RunStore:
         """
         pending = []
         with self._transaction() as con:
+            # A kernel restart is a new process with no live ACP child. Every
+            # unsettled binding is fenced as LOST; it can never be resumed or
+            # prompted again as the same attempt (design §3 invariant 2).
+            con.execute("UPDATE acp_bindings SET state='LOST', updated_ms=? WHERE state='BOUND'", (self.clock(),))
             rows = con.execute("SELECT * FROM runs WHERE active_slot=1").fetchall()
             for row in rows:
                 if self.is_query:
@@ -1636,6 +1700,81 @@ class RunStore:
                                               dispatch["request_id"], json.loads(dispatch["payload_json"]),
                                               dispatch["payload_hash"], row["deadline_ms"]))
         return pending
+
+    @staticmethod
+    def _binding_text(value, name: str, *, optional: bool = False) -> str | None:
+        if value is None and optional:
+            return None
+        if not isinstance(value, str) or not value or len(value) > 200:
+            raise ValueError(f"invalid ACP binding {name}")
+        return value
+
+    def bind_acp_attempt(self, run_id: str, attempt_id: str, session_id: str, acp_session_id: str,
+                         prompt_rpc_id: str | None, generation: int) -> bool:
+        """Persist one ACP session/attempt binding before the prompt is written.
+
+        UNIQUE(run_id, attempt_id) is the second no-double-dispatch fence: the
+        first transport wins and any later bind returns False, so a restarted
+        kernel (or a second path) cannot prompt the same attempt again.
+        """
+        self._binding_text(run_id, "run_id")
+        self._binding_text(attempt_id, "attempt_id")
+        self._binding_text(session_id, "session_id")
+        self._binding_text(acp_session_id, "acp_session_id")
+        self._binding_text(prompt_rpc_id, "prompt_rpc_id", optional=True)
+        if type(generation) is not int or generation < 0:
+            raise ValueError("invalid ACP binding generation")
+        with self._transaction() as con:
+            row = con.execute("SELECT status, active_slot FROM runs WHERE run_id=? AND attempt_id=?",
+                              (run_id, attempt_id)).fetchone()
+            if row is None:
+                raise ValueError("ACP binding has no matching run attempt")
+            if row["status"] in TERMINAL or row["active_slot"] is None:
+                raise ValueError("ACP binding requires a live attempt")
+            if con.execute("SELECT 1 FROM acp_bindings WHERE run_id=? AND attempt_id=?",
+                           (run_id, attempt_id)).fetchone():
+                return False
+            now = self.clock()
+            con.execute("INSERT INTO acp_bindings VALUES (?, ?, ?, ?, ?, ?, 'BOUND', ?, ?)",
+                        (run_id, attempt_id, session_id, acp_session_id, prompt_rpc_id, generation, now, now))
+        return True
+
+    def acp_binding(self, run_id: str, attempt_id: str) -> AcpBinding | None:
+        """Read the persisted binding; no writer lock, no implicit repair."""
+        self._binding_text(run_id, "run_id")
+        self._binding_text(attempt_id, "attempt_id")
+        with self._connection(readonly=True) as con:
+            row = con.execute("SELECT * FROM acp_bindings WHERE run_id=? AND attempt_id=?",
+                              (run_id, attempt_id)).fetchone()
+        if row is None:
+            return None
+        return AcpBinding(row["run_id"], row["attempt_id"], row["session_id"], row["acp_session_id"],
+                          row["prompt_rpc_id"], row["generation"], row["state"],
+                          row["bound_ms"], row["updated_ms"])
+
+    @staticmethod
+    def _cas_acp_binding(con, run_id: str, attempt_id: str, state: str, now: int) -> bool:
+        cursor = con.execute(
+            "UPDATE acp_bindings SET state=?, updated_ms=? WHERE run_id=? AND attempt_id=? AND state='BOUND'",
+            (state, now, run_id, attempt_id))
+        return cursor.rowcount == 1
+
+    def settle_acp_binding(self, run_id: str, attempt_id: str, state: str) -> bool:
+        """CAS one binding BOUND -> SETTLED | LOST; never the other direction."""
+        if state not in ACP_BINDING_STATES or state == "BOUND":
+            raise ValueError("unsupported ACP binding settlement")
+        self._binding_text(run_id, "run_id")
+        self._binding_text(attempt_id, "attempt_id")
+        with self._transaction() as con:
+            row = con.execute("SELECT state FROM acp_bindings WHERE run_id=? AND attempt_id=?",
+                              (run_id, attempt_id)).fetchone()
+            if row is None:
+                return False
+            if row["state"] == state:
+                return True
+            if row["state"] != "BOUND":
+                return False
+            return self._cas_acp_binding(con, run_id, attempt_id, state, self.clock())
 
     def enforce_deadlines(self) -> list[str]:
         """Request stop for active timeouts, never release an unconfirmed slot."""
