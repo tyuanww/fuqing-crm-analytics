@@ -18,18 +18,22 @@
       "exports": {
         ".": "./lib/index.js",
         "./tool": "./lib/tool.js",
+        "./tools": "./lib/entry-tools.js",
         "./client": "./lib/client.js",
         "./cordis.patch.yml": "./cordis.patch.yml",
+        "./cordis.acp.patch.yml": "./cordis.acp.patch.yml",
         "./package.json": "./package.json",
         "./page-tools": "./lib/page-tools.js"
       },
       "files": [
         "lib/index.js",
         "lib/tool.js",
+        "lib/entry-tools.js",
         "lib/skills.js",
         "lib/page-tools.js",
         "lib/client.js",
         "cordis.patch.yml",
+        "cordis.acp.patch.yml",
         "bundled-dependencies.json"
       ],
       "peers": {
@@ -78,7 +82,7 @@
         "test:host-facts": "node --test src/client/host-facts.test.mjs src/client/library-workspace.test.mjs",
         "test:host-facts:browser": "node src/client/host-facts-browser.test.mjs"
       },
-      "manifest_sha256": "d935257288f67df3821779262bb91464c305ec27574f9f2841a3b8dcc9186262"
+      "manifest_sha256": "4240613a1d225c807de260c2422938c206a802e82ecb85b8d876e9ce8e466133"
     },
     {
       "path": "dsh-plugins/board-components",
@@ -647,7 +651,7 @@
       "manifest_sha256": "e6ade327d5fa086dd9fd07c46b1a6ec29e9349b8a4dc6086baa1280e44661377"
     }
   ],
-  "source_files_scanned": 679,
+  "source_files_scanned": 680,
   "cross_package_edges": [
     {
       "consumer": "analytics-workbench",
