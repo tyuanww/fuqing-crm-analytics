@@ -76,6 +76,8 @@ const PACKAGE_NAME = /^@(shine-mage|deepseek-ai)\/[a-z0-9][a-z0-9-]+$/;
 const TARBALL_NAME = /^[a-z0-9][a-z0-9.-]*\.tgz$/;
 
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
+/** Byte-wise path order: locale-independent, so derivation is deterministic. */
+const comparePaths = (left, right) => (left.path < right.path ? -1 : left.path > right.path ? 1 : 0);
 
 function fail(code, detail = '') {
   const error = new Error(detail);
@@ -277,7 +279,7 @@ export async function deriveSealMembers({ compositionLock, manifest, source }) {
     members.set(path, { path, bytes, sha256: expected, origin, label });
   };
 
-  for (const plugin of [...compositionLock.plugins].sort((left, right) => left.directory.localeCompare(right.directory))) {
+  for (const plugin of [...compositionLock.plugins].sort((left, right) => (left.directory < right.directory ? -1 : left.directory > right.directory ? 1 : 0))) {
     const pinned = sourceByDirectory.get(plugin.directory);
     const manifestPath = `packs/${plugin.directory}/plugin-pack.json`;
     const manifestEntry = requireEntry(await source.read(manifestPath), source.missingOrigin(), manifestPath, 'plugin manifest');
@@ -300,7 +302,7 @@ export async function deriveSealMembers({ compositionLock, manifest, source }) {
     collect(tarballPath, tarballEntry.bytes, pinned.pack_sha256, origin, plugin.id);
   }
 
-  for (const domain of [...manifest.domains].sort((left, right) => left.manifest.localeCompare(right.manifest))) {
+  for (const domain of [...manifest.domains].sort((left, right) => (left.manifest < right.manifest ? -1 : left.manifest > right.manifest ? 1 : 0))) {
     const manifestPath = domain.manifest;
     const manifestEntry = requireEntry(await source.read(manifestPath), source.missingOrigin(), manifestPath, 'domain manifest');
     const { origin } = manifestEntry;
@@ -321,7 +323,7 @@ export async function deriveSealMembers({ compositionLock, manifest, source }) {
 
   assertCode(members.size === SEALED_MEMBER_COUNT, 'MEMBER_COUNT',
     `${members.size} != ${SEALED_MEMBER_COUNT}`);
-  const sorted = [...members.values()].sort((left, right) => left.path.localeCompare(right.path));
+  const sorted = [...members.values()].sort(comparePaths);
   return { members: sorted, sums: buildSumsBytes(sorted), memberCount: sorted.length };
 }
 
@@ -329,7 +331,7 @@ export async function deriveSealMembers({ compositionLock, manifest, source }) {
 export function buildSumsBytes(members) {
   const lines = [...members]
     .map(member => ({ path: member.path, digest: member.sha256 ?? sha256(member.bytes) }))
-    .sort((left, right) => left.path.localeCompare(right.path))
+    .sort(comparePaths)
     .map(member => `${member.digest}  ${SEALED_DIR}/${member.path}`);
   return Buffer.from(lines.join('\n') + '\n');
 }
@@ -370,7 +372,7 @@ export async function readSealTree({ root = ROOT, ref }) {
   }
   const sums = await gitBlob(root, ref, SEALED_SUMS);
   assertCode(sums, 'TREE_SUMS_MISSING', `${ref}:${SEALED_SUMS}`);
-  return { members: [...members.values()].sort((left, right) => left.path.localeCompare(right.path)), sums };
+  return { members: [...members.values()].sort(comparePaths), sums };
 }
 
 /** Byte-for-byte comparison of a fresh derivation against a committed tree. */
@@ -387,7 +389,7 @@ export function compareSealTrees({ derived, committed }) {
     if (!derivedMembers.has(path)) drift.push({ path, reason: 'unbound member in the sealing tree' });
   }
   if (!derived.sums.equals(committed.sums)) drift.push({ path: SEALED_SUMS, reason: 'checksum file differs' });
-  drift.sort((left, right) => left.path.localeCompare(right.path));
+  drift.sort(comparePaths);
   return { ok: drift.length === 0, drift };
 }
 
