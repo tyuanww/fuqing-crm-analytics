@@ -8,6 +8,7 @@ from backend.services.analytics.runtime_ports import bridge_origin, runtime_port
 
 import asyncio
 import json
+import logging
 import secrets
 import sys
 from contextlib import asynccontextmanager
@@ -354,16 +355,32 @@ def build_host_transport(config):
 
     ACP is a deployment switch, never a fallback: selecting it without its
     generated profile wiring fails closed at health instead of reaching the
-    loopback bridge. The import is local so this module (and the standalone
-    first-purchase kernel that pins ``runtime.py``) keeps no ACP dependency.
+    loopback bridge. ``canary`` owns both paths and records one per intent; if
+    the ACP wiring is absent it degrades to a bridge-only canary (every intent
+    is recorded bridge) rather than guessing an ACP path. The import is local so
+    this module (and the standalone first-purchase kernel that pins
+    ``runtime.py``) keeps no ACP dependency.
     """
-    kind = TransportPolicy.from_config(config, acp_available=True).mode
-    if kind == "bridge":
+    policy = TransportPolicy.from_config(config, acp_available=True)
+    if policy.mode == "bridge":
         return HostBridge(bridge_origin(config), config["runtime_token"])
-    if kind == "acp":
+    if policy.mode == "acp":
         from backend.services.analytics.acp_transport import AcpTransport
         return AcpTransport.from_config(config)
-    raise ValueError("unsupported host transport")
+    from backend.services.analytics.acp_transport import AcpTransport
+    from backend.services.analytics.transport import RoutedTransport
+    bridge = HostBridge(bridge_origin(config), config["runtime_token"])
+    try:
+        acp = AcpTransport.from_config({**config, "transport": "acp"})
+        reason = None
+    except (ValueError, OSError) as error:
+        # Fail closed to the known-good default path. The reason is logged and
+        # the store is told ACP is unavailable, so no intent can be recorded
+        # for a path this runtime cannot execute.
+        reason = f"acp_prerequisites_missing: {error}"
+        logging.getLogger(__name__).warning("canary ACP path unavailable; every intent stays bridge: %s", error)
+        acp = None
+    return RoutedTransport(bridge, acp, canary_reason=reason)
 
 
 def transport_policy(config, host=None) -> TransportPolicy:
