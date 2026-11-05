@@ -483,6 +483,13 @@ jobs:
             dsh-plugins/plugin-kit/build-tools/node_modules
             ${{ steps.b0-pnpm-store.outputs.path }}
           key: ${{ steps.b0-cache-key.outputs.key }}
+      # `--prepare` also downloads the two pinned pnpm distributions into
+      # Corepack's cache; the warm path must provide them for the offline
+      # manager trials in `--check`.  This never touches prepared bytes and is
+      # intentionally outside the cache key.
+      - name: Prime the pinned package managers
+        if: steps.b0-cache-guard.outputs.verified == 'true'
+        run: node scripts/dsh-b0/prepare-managers.mjs
       - name: Main contracts and sealed plugin consumers with fixed author evidence
         run: node scripts/dsh-b0/pipeline.mjs --check --python "$GITHUB_WORKSPACE/.context/dsh-b0/python-env/bin/python"
 
