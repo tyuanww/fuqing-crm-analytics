@@ -39,6 +39,8 @@ node scripts/release/rebuild-seal-members.mjs --write-branch --packs /tmp/author
 
 正式 pack 从作者仓在该 lock `sha` 上的 CI formal-pack artifact 取得（`gh api repos/<owner>/<repo>/actions/artifacts/<id>/zip`，解包后即上述 `packs/`、`domain/` 布局）。helper 不联网下载作者 pack：作者仓、artifact id 不在当前 lock 里，仍由操作者提供。
 
+**作者证据（2026-11-05 作者仓规范化之后）**：每个插件的 reviewed tree 位于作者 `main`，因此作者证据改为从该作者 `main` 上的 `push` run 重新生成，并在 lock 的 `archive` 里写 `event: push`、`head_branch: main`（`config/workbench-author-evidence.lock.json`、`config/domain-author-evidence.lock.json` 与 `config/public-contract-inputs.lock.json` 的 `owners.<name>.archive` 同此）。receiver 仍要求 run 的 `head_sha` 精确等于 lock 的 `source_sha`，不会接受更晚的 main。
+
 成功后提交 helper 写出的文件，再走正常 PR：
 
 ```bash

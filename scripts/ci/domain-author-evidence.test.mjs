@@ -6,7 +6,7 @@ import { access, mkdtemp, readFile, realpath, rm, symlink, writeFile } from 'nod
 import { tmpdir } from 'node:os';
 import { join, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { readDomainAuthorEvidence, bindDomainPackageInput } from './domain-author-evidence.mjs';
+import { assertRunBinding, readDomainAuthorEvidence, bindDomainPackageInput } from './domain-author-evidence.mjs';
 
 const root = fileURLToPath(new URL('../..', import.meta.url));
 const python = process.env.FQ_B0_PYTHON;
@@ -97,6 +97,51 @@ for (const [name, mutate, code] of [
   ['release overclaim', { release_ready: true }, /DOMAIN_AUTHOR_RELEASE_BOUNDARY/],
 ]) test(`freshly resealed receipt with ${name} is rejected`, options, async t => {
   await assert.rejects(readDomainAuthorEvidence(await fixture(t, mutate)), code);
+});
+
+test('the lock admits push evidence only with the default branch recorded', async t => {
+  const directory = await temporary(t), lockPath = join(directory, 'lock.json'), absent = join(directory, 'absent.zip');
+  const original = JSON.parse(await readFile(lockFile));
+  for (const [edit, code] of [
+    [row => { row.archive.event = 'merge'; }, /DOMAIN_AUTHOR_EVENT/],
+    [row => { row.archive.event = 'push'; }, /DOMAIN_AUTHOR_PUSH_BRANCH/],
+    [row => { row.archive.event = 'push'; row.archive.head_branch = 'release'; }, /DOMAIN_AUTHOR_PUSH_BRANCH/],
+  ]) {
+    const row = structuredClone(original); edit(row); await writeFile(lockPath, json(row));
+    await assert.rejects(readDomainAuthorEvidence({ archivePath: absent, python, lockPath }), code);
+  }
+  const pushed = structuredClone(original); pushed.archive.event = 'push'; pushed.archive.head_branch = 'main';
+  await writeFile(lockPath, json(pushed));
+  await assert.rejects(readDomainAuthorEvidence({ archivePath: absent, python, lockPath }), { code: 'ENOENT' });
+});
+
+const pushSource = '1'.repeat(40);
+const archive = event => event === 'push' ? { event, head_branch: 'main' } : { event };
+const fetched = overrides => ({ event: 'push', head_branch: 'main', head_sha: pushSource, ...overrides });
+
+test('a push run on the default branch at the locked source is accepted; pull_request keeps working', () => {
+  assert.doesNotThrow(() => assertRunBinding({ source_sha: pushSource, archive: archive('push') }, fetched()));
+  assert.doesNotThrow(() => assertRunBinding({ source_sha: pushSource, archive: archive('pull_request') },
+    fetched({ event: 'pull_request', head_branch: 'codex/author' })));
+});
+
+test('a push run describing a later main is rejected', () => {
+  assert.throws(() => assertRunBinding({ source_sha: pushSource, archive: archive('push') },
+    fetched({ head_sha: '2'.repeat(40) })), /DOMAIN_AUTHOR_RUN_SOURCE/);
+});
+
+test('a push run from a non-default branch or repository is rejected', () => {
+  assert.throws(() => assertRunBinding({ source_sha: pushSource, archive: archive('push') },
+    fetched({ head_branch: 'codex/author' })), /DOMAIN_AUTHOR_RUN_BRANCH/);
+  assert.throws(() => assertRunBinding({ source_sha: pushSource, archive: archive('push') }, fetched(), 'release'),
+    /DOMAIN_AUTHOR_REPOSITORY_BRANCH/);
+});
+
+test('an event mismatch keeps the existing run event code', () => {
+  assert.throws(() => assertRunBinding({ source_sha: pushSource, archive: archive('push') },
+    fetched({ event: 'pull_request' })), /DOMAIN_AUTHOR_RUN_EVENT/);
+  assert.throws(() => assertRunBinding({ source_sha: pushSource, archive: archive('pull_request') }, fetched()),
+    /DOMAIN_AUTHOR_RUN_EVENT/);
 });
 
 test('ZIP path/link/duplicate/expansion controls remain active under Python -O, without extraction', async t => {

@@ -6,7 +6,7 @@ import { mkdtemp, readFile, rm, writeFile, symlink, link, copyFile } from 'node:
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { appendContractEnvironment, CONTRACT_PACKAGE, projectContractMaterial, readPublicContractInputs, validatePublicContractLock } from './public-contract-inputs.mjs';
+import { appendContractEnvironment, assertOwnerRunBinding, CONTRACT_PACKAGE, projectContractMaterial, readPublicContractInputs, validatePublicContractLock } from './public-contract-inputs.mjs';
 
 const root = fileURLToPath(new URL('../..', import.meta.url));
 const lockPath = join(root, 'config/public-contract-inputs.lock.json');
@@ -140,3 +140,41 @@ with zipfile.ZipFile(source) as original, zipfile.ZipFile(target, 'w', compressi
     await writeFile(localLock, JSON.stringify(candidateLock)); await writeFile(localInputs, JSON.stringify(candidateInputs));
     await assert.rejects(() => readPublicContractInputs({ inputsPath: localInputs, python, lockPath: localLock }), error);
   });
+
+test('push evidence is admitted with the default branch, pull_request unchanged', () => {
+  assert.equal(validatePublicContractLock(lock), lock);
+  const pushed = structuredClone(lock);
+  for (const owner of Object.values(pushed.owners)) { owner.archive.event = 'push'; owner.archive.head_branch = 'main'; }
+  assert.equal(validatePublicContractLock(pushed), pushed);
+  for (const [edit, error] of [
+    [x => { x.owners.workbench.archive.event = 'merge'; }, /PUBLIC_CONTRACT_EVENT/],
+    [x => { x.owners.workbench.archive.event = 'push'; delete x.owners.workbench.archive.head_branch; }, /PUBLIC_CONTRACT_PUSH_BRANCH/],
+    [x => { x.owners.workbench.archive.event = 'push'; x.owners.workbench.archive.head_branch = 'release'; }, /PUBLIC_CONTRACT_PUSH_BRANCH/],
+  ]) {
+    const candidate = structuredClone(pushed); edit(candidate);
+    assert.throws(() => validatePublicContractLock(candidate), error);
+  }
+});
+
+const pushSource = '1'.repeat(40);
+const fetched = overrides => ({ event: 'push', head_branch: 'main', head_sha: pushSource, ...overrides });
+const owner = event => ({ source_sha: pushSource, archive: event === 'push' ? { event, head_branch: 'main' } : { event } });
+
+test('a push run on the default branch at the locked source is accepted; pull_request keeps working', () => {
+  assert.doesNotThrow(() => assertOwnerRunBinding(owner('push'), fetched()));
+  assert.doesNotThrow(() => assertOwnerRunBinding(owner('pull_request'), fetched({ event: 'pull_request', head_branch: 'codex/author' })));
+});
+
+test('a push run describing a later main is rejected', () => {
+  assert.throws(() => assertOwnerRunBinding(owner('push'), fetched({ head_sha: '2'.repeat(40) })), /PUBLIC_CONTRACT_RUN_SOURCE/);
+});
+
+test('a push run from a non-default branch or repository is rejected', () => {
+  assert.throws(() => assertOwnerRunBinding(owner('push'), fetched({ head_branch: 'codex/author' })), /PUBLIC_CONTRACT_RUN_BRANCH/);
+  assert.throws(() => assertOwnerRunBinding(owner('push'), fetched(), 'release'), /PUBLIC_CONTRACT_REPOSITORY_BRANCH/);
+});
+
+test('an event mismatch keeps the existing run event code', () => {
+  assert.throws(() => assertOwnerRunBinding(owner('push'), fetched({ event: 'pull_request' })), /PUBLIC_CONTRACT_RUN_EVENT/);
+  assert.throws(() => assertOwnerRunBinding(owner('pull_request'), fetched()), /PUBLIC_CONTRACT_RUN_EVENT/);
+});
