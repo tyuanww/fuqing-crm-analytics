@@ -116,7 +116,10 @@ def scoped_pytest_targets(paths: list[str]) -> list[str]:
 # is covered by the same prefix; its generated outputs are checked by the B0
 # contracts guard, which is why the package needs no separate entry here.
 B0_PREFIXES = ('dsh-plugins/', 'scripts/dsh-b0/', 'scripts/dsh-dev/',
-               'backend/services/analytics/', 'backend/tests/analytics_')
+               'backend/services/analytics/', 'backend/tests/analytics_',
+               # Service recipes pin the sealed kernel/source-target inputs.
+               # #228 moved starlette 1.10.0 here and no B0 run refreshed the seal.
+               'services/')
 B0_EXACT = {'backend/contracts/analytics.py', 'backend/semantic/analytics_b0.py',
             'config/shinemage-composition-packs.lock.json', 'config/workbench-author-evidence.lock.json', 'config/domain-author-evidence.lock.json',
             'config/shinemage-composition-artifact.lock.json', 'config/shinemage-composition-pack-manifest.v1.json',

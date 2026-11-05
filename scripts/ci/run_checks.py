@@ -16,11 +16,12 @@ from scripts.ci.pre_push_path_class import TOOL_TESTS, verification_plan  # noqa
 # --- B0 job scope -----------------------------------------------------------
 # The B0 job pays for a pinned toolchain, fixed author evidence and sealed
 # composition packs. It therefore only runs when one of its own inputs moved:
-# plugin boundaries, composition packs and lock files, the published contract
-# surface, release/gate workflow definitions, dependency locks and the frontend
-# seams the Workbench core consumes. Ordinary backend product code belongs to
-# the backend jobs selected by pre_push_path_class.py, so backend-only changes
-# no longer pay for a B0 build.
+# plugin boundaries, composition packs and lock files, the service recipes that
+# pin the sealed kernel/source-target evidence, the published contract surface,
+# release/gate workflow definitions, dependency locks and the frontend seams the
+# Workbench core consumes. Ordinary backend product code belongs to the backend
+# jobs selected by pre_push_path_class.py, so backend-only changes no longer pay
+# for a B0 build.
 B0_SCOPE_PREFIXES = (
     'dsh-plugins/',                 # isolated plugins and sealed pack sources
     'config/',                      # composition packs, plugin boundaries, locks, release lanes
@@ -28,6 +29,8 @@ B0_SCOPE_PREFIXES = (
     'scripts/dsh-dev/',             # dev supervisor consumed by the B0 pipeline
     'scripts/ci/',                  # fixed author evidence receivers and input sealing
     '.github/workflows/',           # gate and release definitions, including this job
+    'services/',                    # kernel/service recipes feed the sealed source-target evidence;
+                                    # #228 moved starlette 1.10.0 here and b0 skipped, leaving the seal stale
     'backend/contracts/',           # contract surface consumed by the sealed packs
     'frontend-vue3/src/assets/brand/',
 )

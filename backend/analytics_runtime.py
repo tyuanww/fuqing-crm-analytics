@@ -255,15 +255,33 @@ def _query_runtime_app(config, *, bridge=None):
     return app
 
 
+def build_host_transport(config):
+    """Select the documented Host transport; ``bridge`` stays the default.
+
+    ACP is a deployment switch, never a fallback: selecting it without its
+    generated profile wiring fails closed at health instead of reaching the
+    loopback bridge. The import is local so this module (and the standalone
+    first-purchase kernel that pins ``runtime.py``) keeps no ACP dependency.
+    """
+    kind = config.get("transport", "bridge")
+    if kind == "bridge":
+        return HostBridge(bridge_origin(config), config["runtime_token"])
+    if kind == "acp":
+        from backend.services.analytics.acp_transport import AcpTransport
+        return AcpTransport.from_config(config)
+    raise ValueError("unsupported host transport")
+
+
 def runtime_app(config, *, bridge=None):
+    host = bridge if bridge is not None else build_host_transport(config)
     family = config.get("family", "b0")
     if family == QUERY_RUN_FAMILY:
-        app = _query_runtime_app(config, bridge=bridge)
+        app = _query_runtime_app(config, bridge=host)
         assert_native_routes(app, family)
         return app
     if family == "first_purchase":
         from backend.analytics_first_purchase_native import create_first_purchase_native_app
-        app = create_first_purchase_native_app(config, bridge=bridge)
+        app = create_first_purchase_native_app(config, bridge=host)
         assert_native_routes(app, family)
         return app
     if family != "b0":
@@ -286,7 +304,7 @@ def runtime_app(config, *, bridge=None):
     store = RunStore(Path(config["state_dir"]), B0ResourceProfile(**B0_SMALL_FIXTURE_PROFILE))
     conv = store.create_conversation(actor, "native-primary", AnalyticsConversationRequest(), runtime_session_id=session_id)
     workers = WorkerManager(store, resolve_actor, SyntheticFixture(**config["fixture"]))
-    dispatcher = RunDispatcher(store, resolve_actor, bridge or HostBridge(bridge_origin(config), runtime_token), workers=workers)
+    dispatcher = RunDispatcher(store, resolve_actor, host, workers=workers)
     app = create_app(store, registry, runtime_ready=lambda: dispatcher.ready, runtime_conversation_id=conv.conversation_id)
 
     @asynccontextmanager
