@@ -207,6 +207,10 @@ if (mode === '--prepare') {
   // Generated contract outputs live in one package and must stay byte-identical
   // to a fresh generator render; plugins may only consume its exports.
   run(process.execPath, ['--test', 'scripts/dsh-b0/contracts-package.test.mjs']);
+  // S0 kit cut: the pinned pnpm must reproduce the kit bytes from a commit and
+  // the tarball must still export ./provenance, ./client-banner and
+  // CONTRACT_PACKAGE_NAME before any author repo vendors it.
+  run(process.execPath, ['--test', 'scripts/dsh-b0/cut-kit-artifact.test.mjs']);
   // Guard tests fail before process startup. The real-host drill remains opt-in.
   run(process.execPath, ['--test', 'scripts/dsh-b0/pinned-host-acceptance.test.mjs']);
   run(process.execPath, ['--test', 'scripts/dsh-b0/first-purchase-crm-host-protocol.test.mjs']);
