@@ -31,7 +31,7 @@ openai>=3.42.0           # OpenAI API（ad-hoc / 可选脚本；非核心 reques
 # 工具
 python-dotenv>=1.2.3    # 环境变量管理
 pydantic>=2.13.5         # 数据验证
-python-dateutil>=2.8.0  # 日期处理
+python-dateutil>=4.0.0  # 日期处理
 pyarrow>=26.0.0         # Arrow 格式支持
 bcrypt>=4.0.0           # 密码哈希（routers/auth.py token 认证）
 xxhash>=4.0.1           # 文件指纹（scripts/etl/config.py lazy import, parquet cache）
