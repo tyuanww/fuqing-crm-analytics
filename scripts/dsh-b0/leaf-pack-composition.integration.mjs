@@ -80,10 +80,18 @@ function documentFixture({ icon = false, nested = false, preview = false } = {})
   return { document, heading, leaf, badge, icons };
 }
 
-test('brand bundle applies its opted-in title, greeting and icon from published bytes', () => {
+test('brand bundle applies its opted-in greeting and icon without writing the runtime title', () => {
   const f = documentFixture();
+  // The verified author pack (dsh-shine-brand 6aa335d2, commit ff866cfc) stopped
+  // overriding document.title; the opt-in surface must preserve the host title.
+  let title = f.document.title, titleWrites = 0;
+  Object.defineProperty(f.document, 'title', {
+    get: () => title,
+    set: value => { titleWrites += 1; title = value; },
+  });
   const mounted = mountBrand(client('shine-brand', { override: true, document: f.document }).value);
-  assert.equal(f.document.title, '伸美 AI 增长董事会');
+  assert.equal(titleWrites, 0);
+  assert.equal(f.document.title, 'DeepSeek Harness');
   assert.equal(f.heading.textContent, 'Shine mage Work');
   assert.equal(f.icons[0].href, '/b0/brand/mark.svg'); mounted.dispose();
 });

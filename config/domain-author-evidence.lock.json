@@ -2,52 +2,53 @@
   "schema": "shinemage-domain-author-evidence/v1",
   "package": "@shine-mage/board-components",
   "version": "0.1.0",
-  "source_sha": "26de61fc783ecf0c2fb38a89ad2901e92e15f1c8",
+  "source_sha": "4245aa811771f45d847bc7644234fabe5a6eee45",
   "source_files": 30,
-  "source_inventory_sha256": "0b65cdeaa36a7a99a8a62fa368b50ae0196343f7534b50cf016aee1ca54e9d84",
+  "source_inventory_sha256": "662d22720ef9b95f6426576e256b6528fedff97deb3d91ed4572f6fd709a3501",
   "archive": {
     "repository": "tyuanww/shinemage-board-components",
-    "run_id": 41871488443,
+    "run_id": 42030897866,
     "attempt": 1,
-    "event": "pull_request",
+    "event": "push",
+    "head_branch": "main",
     "conclusion": "success",
-    "artifact_id": 13344482291,
-    "sha256": "862050b382150215b2ab4cde28399df21e7fdb25934449292c7fd5e1a3e540ef",
-    "bytes": 11366
+    "artifact_id": 13416002428,
+    "sha256": "533649d98390b97d15629d24e449ad85b0b7fc47b0f1de8b348ff3cc65133e73",
+    "bytes": 11357
   },
   "files": {
     "receipt": {
-      "path": "board-author-41871488443-1/author-tests.json",
-      "sha256": "635be481a2e0b0f1bfdf4a7c191f3019cde8ddb48b82310d16e2395e01e67043",
+      "path": "board-author-42030897866-1/author-tests.json",
+      "sha256": "90f0195dd00db8c4e2ed2bf1d72bb329a26c332db913b264b69c06e5bd8d52de",
       "bytes": 8419
     },
     "geometry_stdout": {
-      "path": "board-author-41871488443-1/geometry.stdout.log",
-      "sha256": "b95e1242e89fc3c0516ac492396ded8babd9605d849c970994f10fd4e73b3b17",
-      "bytes": 3806
+      "path": "board-author-42030897866-1/geometry.stdout.log",
+      "sha256": "048e99dfbb3a31ad450e31e63883d49358f5b59b62a503658379a3111b8e48dd",
+      "bytes": 3801
     },
     "geometry_stderr": {
-      "path": "board-author-41871488443-1/geometry.stderr.log",
+      "path": "board-author-42030897866-1/geometry.stderr.log",
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "bytes": 0
     },
     "producer_stdout": {
-      "path": "board-author-41871488443-1/producer-inputs.stdout.log",
-      "sha256": "b0937abe2ff7318b130e9bb392c22d5474842011cf40230bb8728cc17b9752eb",
-      "bytes": 1698
+      "path": "board-author-42030897866-1/producer-inputs.stdout.log",
+      "sha256": "d428ffaa5504510b4092fa4325b934a1ddb40482ab41047613f7deed65bbe29d",
+      "bytes": 1699
     },
     "producer_stderr": {
-      "path": "board-author-41871488443-1/producer-inputs.stderr.log",
+      "path": "board-author-42030897866-1/producer-inputs.stderr.log",
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "bytes": 0
     },
     "reference": {
-      "path": "board-author-41871488443-1/reference/shine-mage-board-components-0.1.0.tgz",
+      "path": "board-author-42030897866-1/reference/shine-mage-board-components-0.1.0.tgz",
       "sha256": "22245ab95511b13bf38ae8b2a5e761f6d5a3aaa413ba55b48ce1a8fcf7390182",
       "bytes": 1955
     },
     "content_pack": {
-      "path": "board-output-41871488443-1/shine-mage-board-components-0.1.0.tgz",
+      "path": "board-output-42030897866-1/shine-mage-board-components-0.1.0.tgz",
       "sha256": "66d53381095e93f38dbaa7385780f20b677f68ca2692702cb270849f3392853e",
       "bytes": 1951
     }
@@ -80,8 +81,8 @@
       "logs": {
         "stdout": {
           "path": "geometry.stdout.log",
-          "bytes": 3806,
-          "sha256": "b95e1242e89fc3c0516ac492396ded8babd9605d849c970994f10fd4e73b3b17"
+          "bytes": 3801,
+          "sha256": "048e99dfbb3a31ad450e31e63883d49358f5b59b62a503658379a3111b8e48dd"
         },
         "stderr": {
           "path": "geometry.stderr.log",
@@ -123,8 +124,8 @@
       "logs": {
         "stdout": {
           "path": "producer-inputs.stdout.log",
-          "bytes": 1698,
-          "sha256": "b0937abe2ff7318b130e9bb392c22d5474842011cf40230bb8728cc17b9752eb"
+          "bytes": 1699,
+          "sha256": "d428ffaa5504510b4092fa4325b934a1ddb40482ab41047613f7deed65bbe29d"
         },
         "stderr": {
           "path": "producer-inputs.stderr.log",
