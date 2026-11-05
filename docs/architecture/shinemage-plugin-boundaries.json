@@ -2051,6 +2051,20 @@
       "consumer": "analytics-workbench",
       "phase": "runtime",
       "source": "dsh-plugins/analytics-workbench/src/native-tools.mjs",
+      "route": "/internal/acp/run-context",
+      "contract": "INTERNAL_NOT_PUBLIC"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/native-tools.mjs",
+      "route": "/internal/acp/tool-call",
+      "contract": "INTERNAL_NOT_PUBLIC"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/native-tools.mjs",
       "route": "/internal/native/channel-followup",
       "contract": "INTERNAL_NOT_PUBLIC"
     },
