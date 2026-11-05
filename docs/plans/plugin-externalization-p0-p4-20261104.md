@@ -465,7 +465,7 @@ node --test scripts/ci/composition-pack-inputs.test.mjs
 
 **核验（2026-11-05，rc.5 `b830ec95`）** `DSH_CLIENT_TITLE` 是构建期值：`apps/web/vite.config.ts` 的 `clientDocumentTitle()` 把它写进初始 `<title>`，`packages/client/ui-layout/src/client/AppFrame.tsx` 把它作为 `productTitle` 传给 `DocumentTitle`（导航时重写 `document.title`）。官方构建经 `scripts/build.ts` 的 `official` profile 调 `scripts/client-build-environment.ts`，其中 `OFFICIAL_CLIENT_BUILD_ENVIRONMENT` 把 `DSH_CLIENT_TITLE` 固定为 `DeepSeek Harness`，且 `resolveClientBuildEnvironment` 对 `official` 之外的 profile 直接抛错。本仓 `scripts/dsh-b0/pipeline.mjs` 在固定 SHA 的干净 checkout 上跑 `pnpm run build:official`，`verifySource()` 拒绝本地改动。因此需要受控的 bundle-time 重写，而不是在 build env 里加变量。
 
-**代码侧（2026-11-05，本 PR）** `scripts/release/client-runtime-title.mjs` 接入 `scripts/release/runtime-bundle.mjs`，配置面只有 `DSH_CLIENT_TITLE`；未设置或空值时不重写，bundle 字节与 provenance 字段与今天一致。显式设置后：
+**代码侧（2026-11-05，#253）** `scripts/release/client-runtime-title.mjs` 接入 `scripts/release/runtime-bundle.mjs`，配置面只有 `DSH_CLIENT_TITLE`；未设置或空值时不重写，bundle 字节与 provenance 字段与今天一致。显式设置后：
 
 - 精确校验 `apps/web/dist/index.html` 的 `<title>DeepSeek Harness</title>` 与 `packages/client/ui-layout/lib/client.js` 的 `const productTitle = "DeepSeek Harness";` 各出现一次，其余 client artifact 的 `DeepSeek Harness` 字节替换为新标题。任一 literal 缺失、重复或变形都会在写盘前以 `CLIENT_TITLE_*` 失败关闭，不会静默发出默认标题。
 - 重写发生在 `pnpm deploy` 之前，deployed 的 web/client 副本都由已重写 bytes 派生；`.dsh-build/client-build-environment.json` 同步 `DSH_CLIENT_TITLE` 并按新产物重算 `artifacts` 摘要。
@@ -473,16 +473,16 @@ node --test scripts/ci/composition-pack-inputs.test.mjs
 - runtime provenance 的 `source_tree` 改为 post-rewrite/shipped tree；`client_title_build` 同时命名 `prepared_source_tree` 与 `shipped_source_tree`、build record 和 deployed paths。
 - `scripts/release/client-runtime-title.test.mjs` 已注册进 `scripts/dsh-b0/pipeline.mjs` 的 node test 列表，覆盖默认无变化、配置重写、literal 缺失/重复失败关闭、shipped tree 命名和 deployed build record。
 
-**剩余 rollout（本 PR 之外）**
+**剩余 rollout（#253 之外）**
 
 1. `tyuanww/dsh-shine-brand` 作者包重建：删除 `brand-surface.mjs` 的运行期 `document.title = PRODUCT_NAME` 赋值，重新发布 pack 与 provenance。
 2. 在固定 rc.5 checkout 上用 `DSH_CLIENT_TITLE="伸美 AI 增长董事会"` 重建 runtime bundle，确认 deployed `<title>`、`productTitle`、`.dsh-build` record 与 provenance。
 3. 重新 seal 并回填 sealed artifact 与 config lock（由后续授权流程执行）。
 4. 真机/真实 host 视觉验收：导航到会话后标题仍为业务品牌，且 `shine-brand` 不再抢回。
 
-**验收** rollout 完成后：构建产物 `index.html` 的 `<title>` 为业务品牌；`.dsh-build` 记录与产物摘要一致；导航后标题不再被抢回；删除 `shine-brand` 的 `document.title` 赋值不导致回归。本 PR 只证明代码路径与默认不启用。
+**验收** rollout 完成后：构建产物 `index.html` 的 `<title>` 为业务品牌；`.dsh-build` 记录与产物摘要一致；导航后标题不再被抢回；删除 `shine-brand` 的 `document.title` 赋值不导致回归。#253 只证明代码路径与默认不启用。
 
-**阻塞** 本 PR 不做 repack/reseal；品牌作者包、带配置的 runtime 重建与 sealed artifact 重新 pin 需后续授权。**授权** 品牌作者仓、runtime 重建、sealed artifact 由后续流程批准；本 PR 只改主仓 release 脚本、测试与计划文档。
+**阻塞** #253 不做 repack/reseal；品牌作者包、带配置的 runtime 重建与 sealed artifact 重新 pin 需后续授权。**授权** 品牌作者仓、runtime 重建、sealed artifact 由后续流程批准；#253 只改主仓 release 脚本、测试与计划文档。
 
 ## 5 决策与授权记录
 
