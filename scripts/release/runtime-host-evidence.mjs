@@ -20,7 +20,7 @@ export const RUNTIME_HOST_SCHEMA = 'dsh-runtime-host-evidence/v1';
 // Fixed Git source for the archived host-verifier inputs. Keep it on a commit
 // whose requirements-lock.txt matches the current service recipes; a sealed
 // composition refill records that commit in the composition artifact lock.
-export const RUNTIME_HOST_SOURCE = '47840d231c1db63ec6500ec8974a68096de6bdc7';
+export const RUNTIME_HOST_SOURCE = '5e4510b3683beda1fa42c142d361bd30e06e0c54';
 export const RUNTIME_HOST_TEST_ROOT = 'host-r2/tests/test_official_host_crm_query_scurrent';
 export const RUNTIME_HOST_REQUIRED_CODE = Object.freeze([
   'backend/tests/test_analytics_first_purchase_official_host.py',
