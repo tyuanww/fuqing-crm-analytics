@@ -13,7 +13,7 @@
       "name": "@shine-mage/dsh-analytics-workbench-b0",
       "version": "0.0.0-b0",
       "domain": "analysis/pages/cockpit",
-      "target_repository": "shinemage-dsh-analytics-workbench",
+      "target_repository": "tyuanww/dsh-analytics-workbench",
       "kind": "plugin",
       "exports": {
         ".": "./lib/index.js",
@@ -89,7 +89,7 @@
       "name": "@shine-mage/board-components",
       "version": "0.1.0",
       "domain": "board-components",
-      "target_repository": "shinemage-dsh-board-components",
+      "target_repository": "tyuanww/shinemage-board-components",
       "kind": "domain-library",
       "exports": {
         "./funnel": {
@@ -125,7 +125,7 @@
       "name": "@shine-mage/dsh-contracts",
       "version": "0.1.0",
       "domain": "generated-contracts",
-      "target_repository": "shinemage-dsh-contracts",
+      "target_repository": "tyuanww/fuqing-crm-analytics",
       "kind": "contract-package",
       "exports": {
         "./analytics-workbench/analysis-contract.generated.js": "./analytics-workbench/analysis-contract.generated.d.ts",
@@ -216,7 +216,7 @@
       "name": "@shine-mage/dsh-crm-knowledge",
       "version": "0.0.0-crm.5",
       "domain": "crm-adapter",
-      "target_repository": "shinemage-dsh-crm",
+      "target_repository": "tyuanww/dsh-crm-knowledge",
       "kind": "plugin",
       "exports": {
         ".": "./lib/index.js",
@@ -268,7 +268,7 @@
       "name": "@shine-mage/dsh-knowledge",
       "version": "0.0.0-candidate.1",
       "domain": "knowledge",
-      "target_repository": "shinemage-dsh-knowledge",
+      "target_repository": "tyuanww/dsh-knowledge",
       "kind": "plugin",
       "exports": {
         ".": "./lib/index.js",
@@ -307,7 +307,7 @@
       "name": "@shine-mage/dsh-plugin-kit",
       "version": "0.1.1",
       "domain": "build-tooling",
-      "target_repository": "shinemage-dsh-plugin-kit",
+      "target_repository": "tyuanww/fuqing-crm-analytics",
       "kind": "dev-tool",
       "exports": {
         "./toolchain": "./toolchain.mjs",
@@ -349,7 +349,7 @@
       "name": "@shine-mage/dsh-query-agent",
       "version": "0.0.0-query.14",
       "domain": "agent-preset",
-      "target_repository": "shinemage-dsh-query-agent",
+      "target_repository": "tyuanww/fuqing-crm-analytics",
       "kind": "configuration-bundle",
       "exports": {
         "./tool-policy": "./lib/tool-policy.js",
@@ -379,7 +379,7 @@
       "name": "@shine-mage/dsh-shine-board",
       "version": "0.0.0-b0",
       "domain": "board",
-      "target_repository": "shinemage-dsh-board",
+      "target_repository": "tyuanww/dsh-shine-board",
       "kind": "plugin",
       "exports": {
         ".": "./lib/index.js",
@@ -419,7 +419,7 @@
       "name": "@shine-mage/dsh-shine-brand",
       "version": "0.0.0-b0",
       "domain": "plugin-theme",
-      "target_repository": "shinemage-dsh-brand",
+      "target_repository": "tyuanww/dsh-shine-brand",
       "kind": "plugin",
       "exports": {
         ".": "./lib/index.js",
@@ -463,7 +463,7 @@
       "name": "@shine-mage/dsh-shine-crowd-action",
       "version": "0.0.0-b0",
       "domain": "board-marker",
-      "target_repository": "shinemage-dsh-board",
+      "target_repository": "tyuanww/dsh-shine-crowd-action",
       "kind": "plugin",
       "exports": {
         ".": "./lib/index.js",
@@ -503,7 +503,7 @@
       "name": "@shine-mage/dsh-shine-funnel",
       "version": "0.0.0-b0",
       "domain": "board-components",
-      "target_repository": "shinemage-dsh-board-components",
+      "target_repository": "tyuanww/dsh-shine-funnel",
       "kind": "plugin",
       "exports": {
         ".": "./lib/index.js",
@@ -559,7 +559,7 @@
       "name": "@shine-mage/dsh-shine-query",
       "version": "0.0.0-b0",
       "domain": "query",
-      "target_repository": "shinemage-dsh-query",
+      "target_repository": "tyuanww/dsh-shine-query",
       "kind": "plugin",
       "exports": {
         ".": "./lib/index.js",
@@ -599,7 +599,7 @@
       "name": "@shine-mage/dsh-shine-waterfall",
       "version": "0.0.0-b0",
       "domain": "board-components",
-      "target_repository": "shinemage-dsh-board-components",
+      "target_repository": "tyuanww/dsh-shine-waterfall",
       "kind": "plugin",
       "exports": {
         ".": "./lib/index.js",

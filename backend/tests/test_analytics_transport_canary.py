@@ -3,9 +3,11 @@
 The canary is a deployment switch, never a fallback: ``bridge`` and ``acp``
 keep their whole-runtime meaning, while ``canary[:percent]`` may move only an
 explicitly eligible synthetic family and only by a stable hash of the request
-id. Missing ACP wiring degrades the canary to bridge-only with a logged reason;
-a malformed canary configuration refuses startup. The dispatcher test asserts
-the persisted value, not a fresh decision, chooses the executing transport.
+id. H5 keeps the query family (``channel_followup``) on the bridge, so it is
+never ACP-eligible and a configuration that names it refuses startup. Missing
+ACP wiring degrades the canary to bridge-only with a logged reason; a malformed
+canary configuration refuses startup. The dispatcher test asserts the persisted
+value, not a fresh decision, chooses the executing transport.
 """
 
 from __future__ import annotations
@@ -86,9 +88,44 @@ def test_canary_is_off_by_default_and_bridge_keeps_its_meaning():
     assert policy.mode == "bridge"
     assert policy.select("b0", "native-1") == ("bridge", "mode=bridge")
     assert TransportPolicy.from_config({"transport": "bridge"}).select("b0", "x")[0] == "bridge"
-    # ``acp`` keeps its whole-runtime meaning: every family is ACP.
+    # ``acp`` keeps its whole-runtime meaning for the eligible synthetic
+    # families; the query family is never selected for ACP (H5).
     acp = TransportPolicy.from_config({"transport": "acp"})
-    assert acp.select("channel_followup", "x")[0] == "acp"
+    assert acp.select("b0", "x")[0] == "acp"
+    assert acp.select("first_purchase", "x")[0] == "acp"
+    assert acp.select("channel_followup", "x") == ("bridge", "query_family_bridge_only")
+
+
+def test_query_family_is_never_acp_eligible_in_any_mode():
+    # H5: the query family stays on the bridge, including a canary that would
+    # otherwise move every eligible family.
+    for config in ({"transport": "acp"}, {"transport": "canary:100"},
+                   {"transport": "canary:100", "canary_families": ["b0", "first_purchase"]}):
+        policy = TransportPolicy.from_config(config)
+        assert policy.select("channel_followup", "native-1") == ("bridge", "query_family_bridge_only")
+    direct = TransportPolicy(mode="acp")
+    assert direct.select("channel_followup", "native-1") == ("bridge", "query_family_bridge_only")
+
+
+def test_query_family_configuration_refuses_startup_instead_of_filtering():
+    for config in (
+        {"transport": "acp", "family": "channel_followup"},
+        {"transport": "canary:100", "family": "channel_followup"},
+        {"transport": "canary:100", "canary_families": ["channel_followup"]},
+        {"transport": "canary:100", "canary_families": ["b0", "channel_followup"]},
+    ):
+        with pytest.raises(ValueError):
+            TransportPolicy.from_config(config)
+    with pytest.raises(ValueError):
+        TransportPolicy(mode="canary", canary_families=frozenset({"channel_followup"}))
+
+
+def test_the_other_eligible_synthetic_families_are_unchanged():
+    policy = TransportPolicy.from_config({"transport": "canary:100"})
+    assert policy.canary_families == frozenset({"b0", "first_purchase"})
+    assert policy.select("b0", "native-1")[0] == "acp"
+    assert policy.select("first_purchase", "native-1")[0] == "acp"
+    assert policy.select("crm-live", "native-1") == ("bridge", "non_synthetic_family")
 
 
 def test_canary_assignment_is_deterministic_and_spread_across_request_ids():
@@ -148,6 +185,18 @@ def test_the_accept_decision_and_reason_are_logged(tmp_path, caplog):
     assert recorded_transport(store, run.run_id) == "acp"
     assert "dispatch transport acp" in caplog.text
     assert "canary_bucket=" in caplog.text
+
+
+def test_the_query_family_decision_and_reason_are_logged(tmp_path, caplog):
+    from backend.tests.test_analytics_query_jobs import make_query_store, query_accept
+
+    store = make_query_store(
+        tmp_path / "state", transport_policy=TransportPolicy.from_config({"transport": "canary:100"}))
+    with caplog.at_level("INFO", logger="backend.services.analytics.jobs"):
+        run = query_accept(store)
+    assert recorded_transport(store, run.run_id) == "bridge"
+    assert "family=channel_followup" in caplog.text
+    assert "query_family_bridge_only" in caplog.text
 
 
 # ---------------------------------------------------------------------------

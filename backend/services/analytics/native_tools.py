@@ -1,9 +1,9 @@
 """Single main-owned binding table for the private native kernel surfaces.
 
 P3-2 removes the scattered `/internal/native/*` literals and fixed port blocks.
-The workbench plugin keeps the reviewed table
-(`dsh-plugins/analytics-workbench/src/native-tools.mjs`); the FastAPI kernel
-reads its generated projection `config/analytics-native-tools.v1.json`, and
+The workbench author repo (`tyuanww/dsh-analytics-workbench`) keeps the reviewed
+table; the FastAPI kernel reads its generated projection
+`config/analytics-native-tools.v1.json`, and
 `scripts/ci/analytics-native-tools-sync.mjs --check` keeps the two identical.
 This module is the only backend reader: route mounting and the regression test
 assert the mounted kernel routes against this table instead of hand-kept lists.
