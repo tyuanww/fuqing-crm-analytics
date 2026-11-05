@@ -114,7 +114,7 @@ NODE
 sha256sum "$PACK_ROOT/lib/entry-tools.js" | tee "$EVID/00-preconditions/entry-tools.built.sha256"
 ```
 
-预期结果是包名 `@shine-mage/dsh-analytics-workbench-b0`、版本 `0.0.0-b0`、`./tools` 指向 `./lib/entry-tools.js`、`./cordis.acp.patch.yml` 存在且 sha256 等于锁里的 `patch_sha256`。通过判据是上面的 `node` 断言全部通过，并且 `lib/entry-tools.js` 非空。作者仓 repack 已随主仓 #235 回填，作者 PR #16 仍未合；pack 必须与当前主仓锁一致，不一致时先完成作者 PR 与锁回填，不要用旧 pack 通过本步。
+预期结果是包名 `@shine-mage/dsh-analytics-workbench-b0`、版本 `0.0.0-b0`、`./tools` 指向 `./lib/entry-tools.js`、`./cordis.acp.patch.yml` 存在且 sha256 等于锁里的 `patch_sha256`。通过判据是上面的 `node` 断言全部通过，并且 `lib/entry-tools.js` 非空。作者仓 repack 已随主仓 #235 回填，并在 2026-11-05 按 rc.5 于 workbench `main` `ae922fa3` 重建（run `42031523764`）；#16 的内容已由 #17 一次性 land（`eef9e9e0`），PR 仍开着但不再是前置。pack 必须与当前主仓锁一致，不一致时先完成作者 archive 重建与锁回填，不要用旧 pack 通过本步。
 
 ### 1.4 目录、权限和 pnpm
 
@@ -171,7 +171,7 @@ PY
 | identity 归属已定：ACP 不支持 identity，first_purchase/CRM identity 仍有 Host owner | 构建评审，本清单不演练 | 自动化 run 报 `IDENTITY_UNAVAILABLE`，或删 bridge 后 identity 无 owner |
 | rc.5 surface gate 与 ACP 相关 CI 步转 blocking | 构建门禁，本清单不演练 | 影子门禁继续 `continue-on-error`，回归不阻断合并 |
 | 默认 transport 翻到 `acp`（或部署显式选择且回退可切） | 1.7 | 部署仍默认 `bridge`，cutover 未真正发生 |
-| 作者 PR #16 合入、作者 archive 重建、C0 例外可移除 | 1.3 | pack/锁/作者 archive 不一致，1.3 失败 |
+| 作者 archive 按 rc.5 重建、C0 例外移除或重新说明 | 1.3 | pack/锁/作者 archive 不一致，1.3 失败 |
 
 ### 1.7 内核 ACP 块
 
@@ -1124,7 +1124,7 @@ PY
 | identity 归属 | [acp_transport.py](../../backend/services/analytics/acp_transport.py) 的 `CAPABILITIES` 不含 `identity`；[native_identity.py](../../backend/services/analytics/first_purchase/native_identity.py) 仍 `bridge.call("identity")`，ACP 路径会映射为 retryable `IDENTITY_UNAVAILABLE` | 1.7 的 `family` 选择与 8 的删除范围 | 明确 owner：b0 自动化用内核 registry actor；first_purchase/CRM identity 继续由 Host bridge 或其他已评审 owner 提供；删 bridge 不得让 identity 无 owner |
 | 门禁转 blocking | [lint.yml](../../.github/workflows/lint.yml) 的 rc.5 surface gate job 与三个步骤仍是 `continue-on-error: true` | 不适用于单次演练，但决定 cutover 后能否长期守护 | 去掉 rc.5 gate 的 `continue-on-error`，把 ACP 相关测试纳入 merge-gate；回归能阻断合并 |
 | 默认 transport 翻到 `acp` | [analytics_runtime.py](../../backend/analytics_runtime.py) 的 `build_host_transport` 默认 `bridge`；只有部署配置显式选择才走 ACP | 1.7 | 部署默认或唯一可选 ACP；保留 `transport=bridge` 回退开关与第 8 节证据 |
-| 作者 pack 与 C0 前置 | #235 回填了作者 repack、锁链和 sealed artifact；作者 PR #16 仍未合；`competition-c0-contract.generated.d.ts` 仍是已评审例外 | 1.3 的 pack/锁断言 | #16 合入并按 rc.5 重建作者 archive；重新回填 [dsh-acp-profile.lock.json](../../config/dsh-acp-profile.lock.json) 的 `entry_sha256`/`patch_sha256`；C0 例外在 author archive 重建后移除或重新说明 |
+| 作者 pack 与 C0 前置 | #235 回填了作者 repack、锁链和 sealed artifact；2026-11-05 按 rc.5 在 workbench `main` `ae922fa3` 重建作者 archive（run `42031523764`，证据见 [workbench-author-evidence.lock.json](../../config/workbench-author-evidence.lock.json)）；#16 内容已由 #17 一次性 land（`eef9e9e0`），PR 仍开着但不再是前置；[dsh-acp-profile.lock.json](../../config/dsh-acp-profile.lock.json) 的 `entry_sha256`/`patch_sha256` 与 main `a097deb5` 的 `src/entry-tools.ts` 和 `cordis.acp.patch.yml` 一致；`competition-c0-contract.generated.d.ts` 仍是已评审例外 | 1.3 的 pack/锁断言 | 只剩 C0 例外在作者 archive 重建后移除或重新说明；其余两项已完成，不再作为 cutover 前置 |
 
 `dispatch_intents.transport` 的 canary 与 S-B 双路径流量属于 3c 的在线部分，本清单的 5.x 只证明单路径 ACP 结算，不证明分流比例。identity 与门禁两项也不在本清单的演练范围内，必须在 cutover 构建评审中单独签字。
 
