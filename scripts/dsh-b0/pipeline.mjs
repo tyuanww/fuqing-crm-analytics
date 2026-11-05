@@ -21,6 +21,7 @@ import { runWorkbenchMainContracts } from './workbench-main-contracts.mjs';
 import { readPublicContractInputs } from '../ci/public-contract-inputs.mjs';
 import { runFixedContractChecks } from './fixed-contract-checks.mjs';
 import { managerVersions } from '../../dsh-plugins/plugin-kit/package-manager.mjs';
+import { verifyPinnedSource } from './pinned-source.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const b0 = join(root, '.context/dsh-b0');
@@ -83,10 +84,9 @@ const git = args => output('git', ['--no-optional-locks', '-c', 'core.fsmonitor=
   GIT_NO_REPLACE_OBJECTS: '1', GIT_TERMINAL_PROMPT: '0',
 });
 async function verifySource() {
-  assert.equal(git(['rev-parse', 'HEAD']), pin.upstream_sha, 'Pinned upstream SHA mismatch');
-  assert.equal(git(['status', '--porcelain', '--untracked-files=no']), '', 'Refusing locally modified upstream');
-  assert.equal(createHash('sha256').update(await readFile(join(upstream, 'pnpm-lock.yaml'))).digest('hex'), pin.upstream_lock_sha256);
-  assert.equal(JSON.parse(await readFile(join(upstream, 'package.json'), 'utf8')).packageManager, `pnpm@${managers.upstream}`);
+  // The cache guard imports the same assertions, so a restored preparation is
+  // accepted exactly when a fresh one would be.
+  await verifyPinnedSource({ upstream, pin, git });
 }
 async function preparePackageManager() {
   env = await packageManagerEnv(join(b0, 'tool-bin'), env, upstream);
@@ -277,7 +277,7 @@ print('B0 exact Python closure verified')
     'scripts/dsh-b0/html-host-browser-ui-args.test.mjs',
     'scripts/dsh-b0/html-host-browser-cleanup.test.mjs',
     'scripts/dsh-b0/lifecycle-observer.test.mjs', 'scripts/dsh-b0/host-feasibility.test.mjs', 'scripts/dsh-b0/compatibility-matrix.test.mjs', 'scripts/dsh-b0/permission-fence.test.mjs', 'scripts/dsh-b0/ui-seams.test.mjs',
-    'scripts/dsh-b0/package-manager-env.test.mjs', 'scripts/dsh-b0/diagnostic-sink.test.mjs',
+    'scripts/dsh-b0/package-manager-env.test.mjs', 'scripts/dsh-b0/prepare-cache.test.mjs', 'scripts/dsh-b0/diagnostic-sink.test.mjs',
     'dsh-plugins/query-agent/test/package.test.mjs', 'dsh-plugins/query-agent/test/tool-policy.test.mjs',
     'dsh-plugins/query-agent/test/tool-policy-registry.test.mjs', 'scripts/ops/weknora-production-scope.test.mjs',
     'scripts/release/plugin-pack.test.mjs', 'scripts/release/plugin-candidate.test.mjs', 'scripts/release/plugin-host-evidence.test.mjs', 'scripts/release/profile.test.mjs', 'scripts/release/plugin-boundary.test.mjs', 'scripts/release/supply-chain.test.mjs',

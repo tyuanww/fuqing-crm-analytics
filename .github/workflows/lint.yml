@@ -432,8 +432,64 @@ jobs:
             --output "$RUNNER_TEMP/shinemage-composition-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" \
             --python "$GITHUB_WORKSPACE/.context/dsh-b0/python-env/bin/python" \
             --github-env "$GITHUB_ENV"
+      # The prepared closure is a pure function of the pinned upstream SHA,
+      # both pnpm locks, the managers, the runner platform and this
+      # repository's prepare-script closure. Cache exactly those bytes; a hit
+      # skips only the preparation, never `--check` or the fixed evidence.
+      - name: Resolve the B0 pnpm store
+        id: b0-pnpm-store
+        run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+      - name: Compute the B0 preparation cache key
+        id: b0-cache-key
+        run: echo "key=$(node scripts/dsh-b0/prepare-cache.mjs --key)" >> "$GITHUB_OUTPUT"
+      - name: Restore the prepared B0 closure
+        id: b0-cache-restore
+        # A cache outage must degrade to the cold path, never fail the gate.
+        continue-on-error: true
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            .context/dsh-b0/upstream-*
+            .context/dsh-b0/runtime-inputs
+            .context/dsh-b0/package-inputs
+            dsh-plugins/plugin-kit/build-tools/node_modules
+            ${{ steps.b0-pnpm-store.outputs.path }}
+          key: ${{ steps.b0-cache-key.outputs.key }}
+      - name: Verify the restored preparation or fall back to a full prepare
+        id: b0-cache-guard
+        env:
+          B0_CACHE_HIT: ${{ steps.b0-cache-restore.outputs.cache-hit }}
+        # The guard re-runs verifyPinnedSource(), the runtime preparation
+        # receipt and both installed-lock digests. A mismatch removes the
+        # restored bytes and returns 0 so the cold prepare below rebuilds them;
+        # only an inability to remove them fails the step (fail closed).
+        run: node scripts/dsh-b0/prepare-cache.mjs --guard
       - name: Prepare exact public DSH and private build tools
+        if: steps.b0-cache-guard.outputs.verified != 'true'
         run: node scripts/dsh-b0/pipeline.mjs --prepare --python "$GITHUB_WORKSPACE/.context/dsh-b0/python-env/bin/python"
+      - name: Verify the prepared closure before caching it
+        if: steps.b0-cache-guard.outputs.verified != 'true'
+        run: node scripts/dsh-b0/prepare-cache.mjs --verify
+      - name: Save the verified B0 preparation
+        if: steps.b0-cache-guard.outputs.verified != 'true'
+        # A save failure (quota, transient outage) must not fail the gate.
+        continue-on-error: true
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            .context/dsh-b0/upstream-*
+            .context/dsh-b0/runtime-inputs
+            .context/dsh-b0/package-inputs
+            dsh-plugins/plugin-kit/build-tools/node_modules
+            ${{ steps.b0-pnpm-store.outputs.path }}
+          key: ${{ steps.b0-cache-key.outputs.key }}
+      # `--prepare` also downloads the two pinned pnpm distributions into
+      # Corepack's cache; the warm path must provide them for the offline
+      # manager trials in `--check`.  This never touches prepared bytes and is
+      # intentionally outside the cache key.
+      - name: Prime the pinned package managers
+        if: steps.b0-cache-guard.outputs.verified == 'true'
+        run: node scripts/dsh-b0/prepare-managers.mjs
       - name: Main contracts and sealed plugin consumers with fixed author evidence
         run: node scripts/dsh-b0/pipeline.mjs --check --python "$GITHUB_WORKSPACE/.context/dsh-b0/python-env/bin/python"
 
