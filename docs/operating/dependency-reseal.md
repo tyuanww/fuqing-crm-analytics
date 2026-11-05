@@ -17,10 +17,27 @@ helper 顺序执行：
 
 1. 校验 worktree 是目标 commit 且没有 tracked 改动；
 2. `service-manifest-pins.mjs --write`，再 `--check`，仍有 `SERVICE_DEPENDENCY_*` drift 就失败；
-3. 从目标 commit 重建 `codex/rc3-composition-artifact-20261024`，只对该分支 `--force-with-lease` 推送，触发 push workflow；
+3. 从当前 `config/shinemage-composition-packs.lock.json` 与 `config/shinemage-composition-pack-manifest.v1.json` **推导** 20 个 `.ci` 成员的路径、文件名和期望摘要，字节优先取 `--packs`、未变的 pack 取密封分支，重建 `codex/rc3-composition-artifact-20261024`（固定身份 + 目标 commit 日期，同一输入产生同一 commit/tree），只对该分支 `--force-with-lease` 推送，触发 push workflow；
 4. 等 workflow SUCCESS，用 `composition-pack-inputs.mjs --artifact-lock` 下载并验证 20 个成员、sha256、run/head 绑定，并校验 sealed head 的 `requirements-lock.txt` 能对上当前 service recipes；
 5. 改写 `config/shinemage-composition-artifact.lock.json`，把 `scripts/release/runtime-host-evidence.mjs` 的 `RUNTIME_HOST_SOURCE` 移到新 sealed head；
 6. 打印每个改动文件与 old/new artifact id、run、head。
+
+### 作者 pack 变了（repack）
+
+依赖版本没变、只是某个作者 pack 重打时，step 3 会发现密封分支上的旧字节与当前 lock/source manifest 摘要不一致，报 `RESPIN_SEAL_MEMBERS_STALE`，并给出 `--packs` 的修复指令。把新的**正式 pack** 解包到一个输入目录（布局与 `composition-pack-inputs.mjs --input-dir` 相同：`packs/<directory>/{plugin-pack.json,*.tgz}`、`domain/...`），只放变化的 pack 即可，未变的仍从密封分支逐字节取：
+
+```bash
+# 只读预检：按当前 lock 重新推导，并与密封分支的已提交树逐字节比较
+node scripts/release/rebuild-seal-members.mjs --check --packs /tmp/author-packs
+
+# 重签；只有变化的 pack 被替换，其余成员不变
+node scripts/release/respin-composition-artifact.mjs --packs /tmp/author-packs
+
+# 也可只重建密封分支（之后仍需 respin 触发 workflow、下载并回填 lock）
+node scripts/release/rebuild-seal-members.mjs --write-branch --packs /tmp/author-packs
+```
+
+正式 pack 从作者仓在该 lock `sha` 上的 CI formal-pack artifact 取得（`gh api repos/<owner>/<repo>/actions/artifacts/<id>/zip`，解包后即上述 `packs/`、`domain/` 布局）。helper 不联网下载作者 pack：作者仓、artifact id 不在当前 lock 里，仍由操作者提供。
 
 成功后提交 helper 写出的文件，再走正常 PR：
 
@@ -38,12 +55,14 @@ git push
 ```bash
 node scripts/release/respin-composition-artifact.mjs --check   # 本地一致，不联网、不写文件
 node scripts/release/respin-composition-artifact.mjs --dry-run # 已重签时输出 RESPIN_ALREADY_SEALED
+node scripts/release/rebuild-seal-members.mjs --check          # 离线逐字节核对密封树 vs 按当前锁重新推导
+node scripts/release/rebuild-seal-members.mjs --check --packs /tmp/author-packs  # 核对分支是否已重建
 ```
 
 期望：
 
 - helper 退出码 `0`，最后一行 `RESPIN_SUMMARY ...`；重复执行输出 `RESPIN_ALREADY_SEALED`，不会二次重签；
-- `--check` 输出 `RESPIN_CHECK_OK`；
+- `--check` 输出 `RESPIN_CHECK_OK`；`rebuild-seal-members.mjs --check` 输出 `SEAL_REBUILD_CHECK_OK`；
 - PR 的 `b0-contract-build` SUCCESS，且 `test` / `dependency-audit` 绿；
 - lock 的 `id/runId/headSha` 与 run 页面一致，`RUNTIME_HOST_SOURCE` 等于 `headSha`；
 - 不带 `--dry-run` 的 run 已证明远端 artifact 可下载、digest 与 run/head 绑定。
@@ -79,7 +98,7 @@ gh pr create --base main --head respin/<dep> \
 
 | 阶段 | 典型耗时 |
 |---|---|
-| `--dry-run` / `--check` | 数秒 |
+| `--dry-run` / `--check` / `rebuild --check` | 数秒 |
 | step 3 sealing workflow | 1–2 分钟（warm） |
 | step 4 下载 + 全量验证 | 1–2 分钟（取决于网络） |
 | 整个 helper | 3–6 分钟 |
@@ -93,7 +112,8 @@ B0 未绿前不要合并。
 |---|---|
 | `RESPIN_DIRTY_TREE` / `RESPIN_TARGET_MISMATCH` | 先停在目标 commit 并清理 tracked 改动；不要用 `--force` 绕过 |
 | `RESPIN_SERVICE_PINS_STILL_DRIFTING` | 生成器仍报 drift，检查 `requirements-lock.txt` 与 `services/dependency-closure.json`，修输入而不是手改 manifest |
-| `RESPIN_SEALED_*` / `RESPIN_SOURCE_TARGET_LOCK` | 密封成员字节与目标锁不一致，或 sealed head 的 lock 对不上 recipe；不要手改 `.ci`，先修依赖/recipe，再重跑 |
+| `RESPIN_SEAL_MEMBERS_STALE` | 密封分支上的 pack 字节已落后于当前 lock（作者 pack 重打了）。把新正式 pack 解包到 `--packs <dir>` 后重跑：helper 只替换变化的 pack，其余成员逐字节沿用密封分支；不要手改 `.ci` |
+| `RESPIN_SEALED_*` / `RESPIN_SEALED_INPUT` / `RESPIN_SOURCE_TARGET_LOCK` | 真正不一致：`--packs` 提供的 manifest/tarball 与 lock/manifest 摘要不符、成员数/校验和异常，或 sealed head 的 lock 对不上 recipe；核对 pack 来源与 lock，不要手改 `.ci` |
 | `RESPIN_DEPENDENT_LOCK_UNSUPPORTED` | 有新的 `config/*.json` 嵌了旧 artifact id/head；先扩展 helper 的依赖锁改写，再重签 |
 | `RESPIN_SEALING_RUN_FAILED` | 打开 run 日志；sealing 分支已推到失败 head，修因后重跑 helper（force-with-lease 会覆盖该专用分支） |
 | `RESPIN_ARTIFACT_VERIFY` / `RESPIN_ARTIFACT_MISSING` | workflow 未产出 20 成员 artifact 或下载/校验失败；重跑 sealing workflow，不要把旧 artifact 写回 lock |
@@ -102,7 +122,10 @@ B0 未绿前不要合并。
 
 ## 边界
 
-- helper 不改依赖版本、service pin 数值或 `.ci` 成员字节，只重建专用 sealing 分支并回填 lock/pin。
-- 触发 workflow、下载 artifact 是 live-only，需要仓库 push 权限和 `gh` 认证；单元测试只覆盖确定性部分：
-  `node --test scripts/release/respin-composition-artifact.test.mjs`（lock/pin 改写、20 成员摘要、stale source-target 拒绝、`--dry-run` 不写文件）。
+- helper 现在从当前锁**重建** `.ci` 成员，而不是整树复制旧字节：路径、文件名和摘要来自 `config/*lock*.json` + source manifest；字节来自 `--packs`（变化的作者 pack）或密封分支（未变的 pack）。同一输入产生同一 20 成员 tree/sums。
+- helper 不改依赖版本、pack sha、`config/*lock*.json` 内容或作者 pack 字节，只重建专用 sealing 分支并回填 lock/pin。
+- 触发 workflow、下载 artifact 是 live-only，需要仓库 push 权限和 `gh` 认证；作者 formal-pack 下载也不在 helper 内（lock 里没有 author artifact id）。
+- 单元测试只覆盖确定性部分：
+  `node --test scripts/release/respin-composition-artifact.test.mjs`（lock/pin 改写、20 成员摘要、stale source-target 拒绝、`--dry-run` 不写文件、确定性 sealing commit）；
+  `node --test scripts/release/rebuild-seal-members.test.mjs`（成员路径/字节推导、partial `--packs` 回退、stale 分支检测、drift 检测、dry-run 不写、幂等重跑、真不一致拒绝）。
 - `--check` 是离线检查，不证明远端 artifact 仍存在或未过期；以 live run 和 PR 的 B0 为准。

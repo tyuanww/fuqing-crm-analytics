@@ -30,23 +30,43 @@ async function put(path, bytes) {
   await writeFile(path, bytes);
 }
 
+function pluginFixture(index, directory = `pack-${index}`) {
+  const id = `@shine-mage/dsh-${directory}`;
+  const version = '0.0.0-b0';
+  const tarballName = `shine-mage-dsh-${directory}-${version}.tgz`;
+  const pack = Buffer.from(`tarball-${index}`);
+  const manifest = canonical({
+    schema_version: 'dsh-plugin-pack/v1',
+    package_name: id,
+    package_version: version,
+    source_sha: '1'.repeat(40),
+    tarball: { name: tarballName, bytes: pack.length, sha256: sha256(pack) },
+  });
+  return { directory, id, version, tarballName, manifest, pack };
+}
+
 async function sealedFixture(t) {
   const directory = await root(t);
   const plugins = [];
   const sources = [];
   for (let index = 0; index < 9; index += 1) {
-    const name = `pack-${index}`;
-    const manifest = canonical({ name });
-    const pack = Buffer.from(`tarball-${index}`);
-    await put(join(directory, SEALED_DIR, 'packs', name, 'plugin-pack.json'), manifest);
-    await put(join(directory, SEALED_DIR, 'packs', name, `${name}.tgz`), pack);
-    plugins.push({ directory: name, manifest_sha256: sha256(manifest) });
-    sources.push({ directory: name, pack_sha256: sha256(pack) });
+    const pack = pluginFixture(index);
+    await put(join(directory, SEALED_DIR, 'packs', pack.directory, 'plugin-pack.json'), pack.manifest);
+    await put(join(directory, SEALED_DIR, 'packs', pack.directory, pack.tarballName), pack.pack);
+    plugins.push({ directory: pack.directory, id: pack.id, source_sha: '1'.repeat(40), version: pack.version,
+      manifest_sha256: sha256(pack.manifest) });
+    sources.push({ directory: pack.directory, pack_sha256: sha256(pack.pack) });
   }
-  const domainManifest = canonical({ domain: 'board-components' });
+  const domainName = 'shine-mage-board-components-0.1.0.tgz';
   const domainPack = Buffer.from('domain-tarball');
+  const domainManifest = canonical({
+    schema_version: 'shinemage-domain-pack/v1',
+    package_name: '@shine-mage/board-components',
+    package_version: '0.1.0',
+    tarball: { name: domainName, bytes: domainPack.length, sha256: sha256(domainPack) },
+  });
   await put(join(directory, SEALED_DIR, 'domain', 'board-components-pack.json'), domainManifest);
-  await put(join(directory, SEALED_DIR, 'domain', 'board-components.tgz'), domainPack);
+  await put(join(directory, SEALED_DIR, 'domain', domainName), domainPack);
   const compositionLock = { schema_version: 'shinemage-composition-pack-lock/v1', profiles: [], plugins };
   const manifest = {
     schema_version: 'shinemage-composition-pack-manifest/v1',
@@ -152,7 +172,7 @@ test('sealed members refuse a tampered checksum file and an unbound extra file',
 
 test('sealed members refuse a stale pack digest before any artifact is trusted', async t => {
   const { directory, compositionLock, manifest } = await sealedFixture(t);
-  await unlink(join(directory, SEALED_DIR, 'packs', 'pack-0', 'pack-0.tgz'));
+  await unlink(join(directory, SEALED_DIR, 'packs', 'pack-0', 'shine-mage-dsh-pack-0-0.0.0-b0.tgz'));
   await rejectsCode(() => verifySealedMembers({ root: directory, compositionLock, manifest }),
     'RESPIN_SEALED_MEMBER_COUNT');
 });
