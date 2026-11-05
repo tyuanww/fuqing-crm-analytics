@@ -35,18 +35,24 @@ import { parseArgs } from 'node:util';
 import {
   canonicalPackageName, parseLockPins, readDependencyClosure,
 } from '../crm-calibration/service-manifest-pins.mjs';
+import {
+  createSealSource,
+  rebuildSealMembers,
+  writeSealTree,
+  COMPOSITION_LOCK,
+  COMPOSITION_MANIFEST,
+  SEALED_DIR,
+  SEALED_MEMBER_COUNT,
+  SEALED_SUMS,
+  SEALING_BRANCH,
+} from './rebuild-seal-members.mjs';
 
 const exec = promisify(execFile);
 const ROOT = fileURLToPath(new URL('../..', import.meta.url));
 
-export const SEALING_BRANCH = 'codex/rc3-composition-artifact-20261024';
+export { COMPOSITION_LOCK, COMPOSITION_MANIFEST, SEALED_DIR, SEALED_MEMBER_COUNT, SEALED_SUMS, SEALING_BRANCH };
 export const SEALING_WORKFLOW = '.github/workflows/rc3-composition-artifact.yml';
-export const SEALED_DIR = '.ci/rc3-composition';
-export const SEALED_SUMS = '.ci/rc3-composition.sha256';
-export const SEALED_MEMBER_COUNT = 20;
 export const ARTIFACT_LOCK = 'config/shinemage-composition-artifact.lock.json';
-export const COMPOSITION_LOCK = 'config/shinemage-composition-packs.lock.json';
-export const COMPOSITION_MANIFEST = 'config/shinemage-composition-pack-manifest.v1.json';
 export const RUNTIME_HOST_SOURCE_PATH = 'scripts/release/runtime-host-evidence.mjs';
 export const DEFAULT_REPOSITORY = 'tyuanww/fuqing-crm-analytics';
 export const PIN_GENERATOR = fileURLToPath(new URL('../crm-calibration/service-manifest-pins.mjs', import.meta.url));
@@ -483,12 +489,24 @@ async function copyFromRef(root, ref, path, destination) {
 }
 
 /**
- * Rebuild `codex/rc3-composition-artifact-20261024` from the target commit:
- * target tree + the already-reviewed .ci member bytes + the sealing workflow +
- * the service pins written in step 2. The commit id is deterministic (fixed
- * identity and the target commit date), so re-running cannot fork the branch.
+ * Rebuild the sealing branch from the target commit: target tree + the derived
+ * `.ci` members + the sealing workflow + the service pins written in step 2.
+ *
+ * The members are no longer copied from the branch. `rebuildSealMembers`
+ * derives every path and expected digest from the current composition lock and
+ * source manifest, and takes the pack bytes from:
+ *
+ *   - `packsDirectory` for any pack present there (the rebuilt author pack),
+ *   - the sealing branch for the unchanged packs.
+ *
+ * A branch member that no longer matches the current lock is a stale seal and
+ * fails `RESPIN_SEAL_MEMBERS_STALE` with the `--packs` remedy; bytes supplied
+ * through `--packs` that do not match stay a hard `RESPIN_SEALED_INPUT`.
+ *
+ * The commit id is deterministic (fixed identity and the target commit date),
+ * so re-running the same inputs cannot fork the branch.
  */
-export async function buildSealingCommit({ root = ROOT, target, writtenPaths = [] }) {
+export async function buildSealingCommit({ root = ROOT, target, writtenPaths = [], packsDirectory = null }) {
   const { ref, head: previousHead } = await fetchSealingBranch(root);
   const sealDate = await git(root, ['show', '-s', '--format=%cI', target]);
   const parent = await mkdtemp(join(tmpdir(), 'respin-sealing-'));
@@ -499,18 +517,32 @@ export async function buildSealingCommit({ root = ROOT, target, writtenPaths = [
     assertCode(addedResult.code === 0, 'SEALING_WORKTREE', addedResult.stderr.toString().trim());
     added = true;
 
-    const members = (await git(root, ['ls-tree', '-r', '--name-only', '-z', ref, '--', SEALED_DIR]))
-      .split('\0').filter(Boolean);
-    assertCode(members.length === SEALED_MEMBER_COUNT, 'SEALED_MEMBER_COUNT', `${members.length} != ${SEALED_MEMBER_COUNT}`);
-    for (const path of members) await copyFromRef(root, ref, path, worktree);
-    await copyFromRef(root, ref, SEALED_SUMS, worktree);
     await copyFromRef(root, ref, SEALING_WORKFLOW, worktree);
 
     const compositionLock = await readJson(worktree, COMPOSITION_LOCK, 'COMPOSITION_LOCK_MISSING');
     const manifest = await readJson(worktree, COMPOSITION_MANIFEST, 'COMPOSITION_MANIFEST_MISSING');
+    let derived;
+    try {
+      derived = await rebuildSealMembers({
+        compositionLock,
+        manifest,
+        source: await createSealSource({ root, ref, packsDirectory }),
+      });
+    } catch (error) {
+      if (error.code === 'SEAL_SOURCE_STALE') {
+        throw fail('SEAL_MEMBERS_STALE', `${error.message}\n`
+          + 'Rebuild the changed pack first, then re-run with --packs <dir>; see docs/operating/dependency-reseal.md');
+      }
+      if (typeof error.code === 'string'
+        && (error.code.startsWith('SEAL_INPUT_') || error.code.startsWith('SEAL_PACK_')
+          || error.code.startsWith('SEAL_DOMAIN_'))) {
+        throw fail('SEALED_INPUT', `${error.code}: ${error.message}`);
+      }
+      throw error;
+    }
+    await writeSealTree({ root: worktree, derived });
     await verifySealedMembers({ root: worktree, compositionLock, manifest });
 
-    await writeFile(join(worktree, SEALED_SUMS), await buildSealedSums(worktree), { mode: 0o644 });
     for (const path of writtenPaths) {
       safeRelative(path, 'PIN_WRITE_PATH');
       await mkdir(dirname(join(worktree, path)), { recursive: true, mode: 0o755 });
@@ -536,7 +568,7 @@ export async function buildSealingCommit({ root = ROOT, target, writtenPaths = [
         `--force-with-lease=${lease}`, 'origin', `HEAD:refs/heads/${SEALING_BRANCH}`]);
       assertCode(pushed.code === 0, 'SEALING_PUSH', pushed.stderr.toString().trim());
     }
-    return { head, previousHead, changed, worktree };
+    return { head, previousHead, changed, worktree, members: derived.memberCount, sumsSha256: sha256(derived.sums) };
   } finally {
     if (added) await run('git', ['-C', root, 'worktree', 'remove', '--force', worktree]);
     await rm(parent, { recursive: true, force: true });
@@ -639,6 +671,8 @@ function usage() {
     'Options:',
     '  --dry-run             stop after the read-only pin check; write nothing',
     '  --check               verify the current lock/pin/recipe state; write nothing',
+    '  --packs <dir>         rebuilt author formal packs (packs/, domain/); only the',
+    '                        changed packs are required, others come from the branch',
     '  --target <commit>     commit to seal (default HEAD)',
     '  --root <path>         repository root (defaults to this script\'s checkout)',
     '  --repository <owner/repo>  GitHub repository for the sealing workflow',
@@ -659,6 +693,7 @@ async function main(argv = process.argv.slice(2)) {
     options: {
       'dry-run': { type: 'boolean' },
       check: { type: 'boolean' },
+      packs: { type: 'string' },
       target: { type: 'string' },
       root: { type: 'string' },
       repository: { type: 'string' },
@@ -709,7 +744,9 @@ async function main(argv = process.argv.slice(2)) {
     await printState(state, 'RESPIN_DRY_RUN STATE');
     for (const line of pins.drift) console.log(`RESPIN_DRY_RUN DRIFT ${line}`);
     summarizeChanges([
-      { path: SEALED_SUMS, detail: 'regenerated from the fixed .ci member bytes' },
+      { path: SEALED_SUMS, detail: values.packs
+        ? `regenerated from the rebuilt author packs under ${resolve(values.packs)}`
+        : 'regenerated from the sealing branch member bytes (add --packs if a pack changed)' },
       { path: SEALING_WORKFLOW, detail: `carried onto ${SEALING_BRANCH}` },
       { path: ARTIFACT_LOCK, detail: `id/run/head would move to the new sealed artifact` },
       { path: RUNTIME_HOST_SOURCE_PATH, detail: 'RUNTIME_HOST_SOURCE would move to the new sealed head' },
@@ -721,10 +758,13 @@ async function main(argv = process.argv.slice(2)) {
 
   const pins = await regenerateServicePins({ root, write: true });
   const changes = pins.written.map(path => ({ path, detail: 'service dependency pins regenerated' }));
-  console.log(`RESPIN_SEAL target=${checkout.head} branch=${SEALING_BRANCH}`);
+  console.log(`RESPIN_SEAL target=${checkout.head} branch=${SEALING_BRANCH}`
+    + `${values.packs ? ` packs=${resolve(values.packs)}` : ''}`);
 
-  const sealing = await buildSealingCommit({ root, target: checkout.head, writtenPaths: pins.written });
-  console.log(`RESPIN_SEAL head=${sealing.head} previous=${sealing.previousHead} pushed=${sealing.changed}`);
+  const sealing = await buildSealingCommit({ root, target: checkout.head, writtenPaths: pins.written,
+    packsDirectory: values.packs ? resolve(values.packs) : null });
+  console.log(`RESPIN_SEAL head=${sealing.head} previous=${sealing.previousHead} pushed=${sealing.changed}`
+    + ` members=${sealing.members}`);
 
   const runRow = await waitForSealingRun({ repository, headSha: sealing.head, timeoutMs, pollMs });
   assertCode(runRow.head_sha === sealing.head, 'SEALING_RUN_HEAD', `${runRow.head_sha} != ${sealing.head}`);
