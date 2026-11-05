@@ -18,14 +18,14 @@ CALLBACK = "c" * 32
 SESSION = "native-session"
 
 
-def b0_config(tmp_path):
+def b0_config(tmp_path, *, transport="acp"):
     fixture = synthetic_fixture(tmp_path / "fixture")
     state = tmp_path / "state"
     state.mkdir(mode=0o700)
     os.chmod(state, 0o700)
     return {"state_dir": str(state), "session_id": SESSION, "gateway_token": GATEWAY,
             "runtime_token": RUNTIME, "fixture": asdict(fixture),
-            "method_package_digest": "a" * 64}
+            "transport": transport, "method_package_digest": "a" * 64}
 
 
 def acp_transport(tmp_path):
@@ -54,7 +54,8 @@ def claim_and_bind(app, store, key="native-1", acp_session="acp-live"):
 
 
 def test_acp_callback_route_is_absent_on_the_bridge_default(tmp_path):
-    app = runtime_app(b0_config(tmp_path), bridge=HostBridge("http://127.0.0.1:5999", RUNTIME))
+    app = runtime_app(b0_config(tmp_path, transport="bridge"),
+                      bridge=HostBridge("http://127.0.0.1:5999", RUNTIME))
     client = TestClient(app)
     response = client.post("/internal/acp/tool-call", json={
         "acp_session_id": "acp-live", "call_id": "call-1", "query": "channel_repeat_rate",

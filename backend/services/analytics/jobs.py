@@ -10,7 +10,9 @@ an orphaned execution becomes UNKNOWN. Recovery never invents a new request ID.
 """
 
 import fcntl
+import hashlib
 import json
+import logging
 import os
 import sqlite3
 import stat
@@ -63,6 +65,15 @@ FAMILY_SCOPE = {"b0": "b0-fixture", QUERY_RUN_FAMILY: QUERY_DATA_SCOPE, "first_p
 APPLICATION_ID = 1397572144  # SMB0, not a general-purpose SQLite database.
 STATE_SCHEMA_VERSION = 2  # Existing v1 evidence is retained, never auto-migrated.
 TERMINAL = frozenset({"SUCCEEDED", "FAILED", "CANCELLED", "NEEDS_INPUT"})
+TRANSPORT_BRIDGE = "bridge"
+TRANSPORT_ACP = "acp"
+TRANSPORTS = frozenset({TRANSPORT_BRIDGE, TRANSPORT_ACP})
+# Only these fixture-scoped (synthetic) families may ever move to ACP by canary.
+# A future non-synthetic family is deliberately absent: the selection checks this
+# set before any percentage, so it can never be selected by configuration alone.
+SYNTHETIC_FAMILIES = frozenset({"b0", "channel_followup", "first_purchase"})
+CANARY_BUCKETS = 100
+_LOGGER = logging.getLogger(__name__)
 ACP_BINDING_STATES = frozenset({"BOUND", "SETTLED", "LOST"})
 SAFE_ERRORS = frozenset({
     "MODEL_FAILED", "TOOL_FAILED", "TIMEOUT", "EXECUTION_UNKNOWN",
@@ -100,7 +111,8 @@ CREATE TABLE dispatch_intents (
     request_id TEXT NOT NULL UNIQUE, attempt_id TEXT NOT NULL,
     payload_json TEXT NOT NULL, payload_hash TEXT NOT NULL,
     state TEXT NOT NULL CHECK(state IN ('PENDING','DISPATCHING','ACCEPTED','UNKNOWN','EXITED')),
-    attempts INTEGER NOT NULL DEFAULT 0
+    attempts INTEGER NOT NULL DEFAULT 0,
+    transport TEXT NOT NULL DEFAULT 'bridge' CHECK(transport IN ('bridge','acp'))
 );
 CREATE TABLE idempotency (
     actor TEXT NOT NULL, operation TEXT NOT NULL, target TEXT NOT NULL, key TEXT NOT NULL,
@@ -150,6 +162,114 @@ CREATE TABLE IF NOT EXISTS acp_bindings (
 CREATE INDEX IF NOT EXISTS acp_bindings_state ON acp_bindings(state);
 """
 
+# P3-3d transport selection: which path executes one intent. Additive like the
+# ACP binding table, so a pre-existing v2 file keeps user_version=2 and every
+# old row reads as the bridge default it actually ran on. SQLite has no
+# ``ADD COLUMN IF NOT EXISTS``; ``PRAGMA table_info`` is the guarded equivalent.
+_DISPATCH_TRANSPORT_COLUMN = """
+ALTER TABLE dispatch_intents ADD COLUMN transport TEXT NOT NULL DEFAULT 'bridge'
+CHECK(transport IN ('bridge','acp'))
+"""
+
+
+def canary_bucket(request_id: str) -> int:
+    """Stable 0..99 bucket for one request id; not Python's salted ``hash``."""
+    digest = hashlib.sha256(request_id.encode("utf-8")).digest()
+    return int.from_bytes(digest[:8], "big") % CANARY_BUCKETS
+
+
+@dataclass(frozen=True)
+class TransportPolicy:
+    """Deterministic per-intent transport selection, bridge by default.
+
+    ``transport=bridge`` and ``transport=acp`` keep their old whole-runtime
+    meaning. Only ``canary`` may mix paths, and only for an explicit list of
+    synthetic families and a stable hash of the request id. Every decision is
+    returned with a reason so the accept path can log it, and the chosen value
+    is persisted before any transport sees the intent.
+    """
+
+    mode: str = TRANSPORT_BRIDGE
+    canary_percent: int = 0
+    canary_families: frozenset[str] = SYNTHETIC_FAMILIES
+    acp_available: bool = True
+
+    def __post_init__(self):
+        if self.mode not in {"bridge", "acp", "canary"}:
+            raise ValueError("unsupported transport policy mode")
+        if type(self.canary_percent) is not int or not 0 <= self.canary_percent <= CANARY_BUCKETS:
+            raise ValueError("canary_percent must be an integer between 0 and 100")
+        if not isinstance(self.canary_families, frozenset) or any(
+                not isinstance(family, str) or family not in SYNTHETIC_FAMILIES
+                for family in self.canary_families):
+            raise ValueError("canary_families must be a subset of the synthetic families")
+
+    @classmethod
+    def from_config(cls, config, *, acp_available: bool = True) -> "TransportPolicy":
+        """Parse the runtime ``transport`` switch; invalid wiring refuses startup."""
+        raw = config.get("transport", TRANSPORT_BRIDGE)
+        if not isinstance(raw, str) or not raw:
+            raise ValueError("transport must be bridge, acp or canary[:percent]")
+        percent = config.get("canary_percent", 0)
+        if raw in {TRANSPORT_BRIDGE, TRANSPORT_ACP} or raw == "canary":
+            mode = raw
+        elif raw.startswith("canary:"):
+            mode, value = "canary", raw.split(":", 1)[1]
+            if not value.isdigit():
+                raise ValueError("canary transport requires canary[:percent]")
+            explicit = config.get("canary_percent")
+            if explicit is not None and explicit != int(value):
+                raise ValueError("canary percent was configured twice with different values")
+            percent = int(value)
+        else:
+            raise ValueError("unsupported host transport")
+        if mode != "canary":
+            return cls(mode=mode)
+        families = config.get("canary_families", sorted(SYNTHETIC_FAMILIES))
+        if not isinstance(families, (list, tuple)) or any(not isinstance(item, str) for item in families):
+            raise ValueError("canary_families must be a list of family names")
+        return cls(mode=mode, canary_percent=percent, canary_families=frozenset(families),
+                   acp_available=bool(acp_available))
+
+    def executes(self, transport: str) -> bool:
+        """Whether this runtime owns the path an intent was recorded for."""
+        if transport not in TRANSPORTS:
+            return False
+        if self.mode == TRANSPORT_BRIDGE:
+            return transport == TRANSPORT_BRIDGE
+        if self.mode == TRANSPORT_ACP:
+            return transport == TRANSPORT_ACP
+        return transport == TRANSPORT_BRIDGE or self.acp_available
+
+    def select(self, family: str, request_id: str) -> tuple[str, str]:
+        """Choose the executing transport and return the inspectable reason."""
+        if self.mode == TRANSPORT_BRIDGE:
+            return TRANSPORT_BRIDGE, "mode=bridge"
+        if self.mode == TRANSPORT_ACP:
+            return TRANSPORT_ACP, "mode=acp"
+        if not self.acp_available:
+            return TRANSPORT_BRIDGE, "acp_prerequisites_missing"
+        if family not in SYNTHETIC_FAMILIES:
+            return TRANSPORT_BRIDGE, "non_synthetic_family"
+        if family not in self.canary_families:
+            return TRANSPORT_BRIDGE, "family_not_eligible"
+        if self.canary_percent <= 0:
+            return TRANSPORT_BRIDGE, "canary_disabled"
+        bucket = canary_bucket(request_id)
+        if bucket < self.canary_percent:
+            return TRANSPORT_ACP, f"canary_bucket={bucket}<{self.canary_percent}"
+        return TRANSPORT_BRIDGE, f"canary_bucket={bucket}>={self.canary_percent}"
+
+
+def _intent_transport(dispatch) -> str:
+    """Read the persisted transport, refusing a missing or unknown value."""
+    keys = dispatch.keys() if dispatch is not None else ()
+    value = dispatch["transport"] if "transport" in keys else None
+    if value not in TRANSPORTS:
+        raise AnalyticsError(409, "DISPATCH_TRANSPORT_INVALID",
+                             "调度意图的传输路径缺失或无法识别，已拒绝执行。")
+    return value
+
 
 def _now_ms() -> int:
     return time.time_ns() // 1_000_000
@@ -188,6 +308,7 @@ class DispatchIntent:
     payload: dict
     payload_hash: str
     deadline_ms: int
+    transport: str  # bridge | acp; persisted at accept, read before execution
 
 
 @dataclass(frozen=True)
@@ -250,7 +371,8 @@ class RunStore:
     def __init__(self, state_dir: Path, profile: B0ResourceProfile,
                  *, family: Literal["b0", "channel_followup", "first_purchase"] = "b0",
                  clock: Callable[[], int] = _now_ms,
-                 fault_hook: Callable[[str], None] | None = None):
+                 fault_hook: Callable[[str], None] | None = None,
+                 transport_policy: TransportPolicy | None = None):
         # No default path, dotenv, database fallback, migration or deletion.
         if family not in RUN_FAMILIES:
             raise ValueError("unsupported run family")
@@ -269,6 +391,7 @@ class RunStore:
         self.data_scope = FAMILY_SCOPE[family]
         self.clock = clock
         self.fault_hook = fault_hook
+        self.transport_policy = transport_policy or TransportPolicy()
         self._initialize()
 
     def _hook(self, point: str) -> None:
@@ -299,9 +422,10 @@ class RunStore:
                     if row is None or row[0] != self.profile.digest:
                         raise ValueError("persisted B0 profile differs; implicit migration is forbidden")
                     self._assert_existing_family(con)
-                # Additive only: CREATE TABLE IF NOT EXISTS keeps an existing v2
-                # state file readable; no evidence is rewritten or migrated.
-                self._ensure_acp_binding_schema()
+                # Additive only: CREATE TABLE IF NOT EXISTS and the guarded
+                # transport column keep an existing v2 state file readable; no
+                # evidence is rewritten or migrated and user_version stays 2.
+                self._ensure_additive_schema()
                 return
             created = os.open(self.path, os.O_CREAT | os.O_EXCL | os.O_WRONLY | os.O_NOFOLLOW, 0o600)
             os.close(created)
@@ -323,12 +447,15 @@ class RunStore:
         finally:
             os.close(fd)
 
-    def _ensure_acp_binding_schema(self) -> None:
-        """Create the additive ACP binding table on new and pre-existing stores."""
+    def _ensure_additive_schema(self) -> None:
+        """Create the additive tables/columns on new and pre-existing stores."""
         with self._transaction() as con:
             for statement in _ACP_BINDING_SCHEMA.split(";"):
                 if statement.strip():
                     con.execute(statement)
+            columns = {row["name"] for row in con.execute("PRAGMA table_info(dispatch_intents)")}
+            if "transport" not in columns:
+                con.execute(_DISPATCH_TRANSPORT_COLUMN)
 
     @contextmanager
     def _connection(self, *, readonly: bool = False):
@@ -973,9 +1100,18 @@ class RunStore:
                 dispatch_payload["family"] = self.family
             if frozen_native is not None:
                 dispatch_payload["native_request"] = frozen_native
-            con.execute("INSERT INTO dispatch_intents VALUES (?, ?, ?, ?, ?, ?, 'PENDING', 0)",
-                        (run_id, conversation["runtime_session_id"], key if frozen_native is not None else _id("dispatch"), attempt_id,
-                         canonical_json(dispatch_payload), content_hash(dispatch_payload)))
+            request_id = key if frozen_native is not None else _id("dispatch")
+            transport, reason = self.transport_policy.select(self.family, request_id)
+            # The decision and its reason are inspectable before execution; the
+            # persisted transport is the only input to attempt binding and claim.
+            _LOGGER.info("dispatch transport %s for %s family=%s: %s",
+                         transport, request_id, self.family, reason)
+            con.execute("""INSERT INTO dispatch_intents (
+                    run_id, session_id, request_id, attempt_id, payload_json, payload_hash,
+                    state, attempts, transport
+                ) VALUES (?, ?, ?, ?, ?, ?, 'PENDING', 0, ?)""",
+                        (run_id, conversation["runtime_session_id"], request_id, attempt_id,
+                         canonical_json(dispatch_payload), content_hash(dispatch_payload), transport))
             self._remember(con, principal, "run:create", conversation_id, key, digest, response.model_dump(mode="json"), 202)
             if method_package_digest is not None:
                 self._remember(con, principal, "runtime.binding", run_id, "method", method_package_digest, {}, 200)
@@ -999,7 +1135,8 @@ class RunStore:
         with self._connection(readonly=True) as con:
             predicate, values = ("r.active_slot=1", ()) if session_id is None else (
                 "d.session_id=? AND d.request_id=?", (session_id, request_id))
-            rows = con.execute("""SELECT r.*, d.session_id, d.request_id, d.payload_json, d.payload_hash
+            rows = con.execute("""SELECT r.*, d.session_id, d.request_id, d.payload_json, d.payload_hash,
+                    d.transport
                 FROM runs r JOIN dispatch_intents d USING(run_id) WHERE """ + predicate, values).fetchall()
             work = []
             for row in rows:
@@ -1010,7 +1147,8 @@ class RunStore:
                 elif self._request_schema(row) == QUERY_RUN_SCHEMA:
                     raise AnalyticsError(409, "FAMILY_MISMATCH", "任务合同与当前实例不一致。")
                 work.append({"intent": DispatchIntent(row["run_id"], row["attempt_id"], row["session_id"], row["request_id"],
-                                                      json.loads(row["payload_json"]), row["payload_hash"], row["deadline_ms"]),
+                                                      json.loads(row["payload_json"]), row["payload_hash"], row["deadline_ms"],
+                                                      _intent_transport(row)),
                              "owner": row["owner"], "status": row["status"], "cancel_requested": row["cancel_reason"] is not None,
                              "pending_steps": con.execute("SELECT count(*) FROM steps WHERE run_id=? AND state!='SUCCEEDED'", (row["run_id"],)).fetchone()[0],
                              "steps": {s["call_id"]: s["step_id"] for s in con.execute(
@@ -1356,6 +1494,21 @@ class RunStore:
                     con.execute("UPDATE dispatch_intents SET state='EXITED' WHERE run_id=?", (row["run_id"],))
                     self._emit(con, row, "run.failed")
                     continue
+                # The transport recorded at accept is the only path allowed to
+                # execute this attempt. An unknown value refuses above; a value
+                # this runtime does not own (for example a queued ACP intent
+                # after a bridge rollback) is fenced instead of silently moved
+                # to the other path.
+                dispatch_row = con.execute(
+                    "SELECT transport FROM dispatch_intents WHERE run_id=?", (row["run_id"],)).fetchone()
+                transport = _intent_transport(dispatch_row)
+                if not self.transport_policy.executes(transport):
+                    _LOGGER.warning("dispatch transport %s for run %s is not served by this %s runtime; fencing",
+                                    transport, row["run_id"], self.transport_policy.mode)
+                    row = self._update(con, row, status="FAILED", error_code="RUNTIME_REJECTED")
+                    con.execute("UPDATE dispatch_intents SET state='EXITED' WHERE run_id=?", (row["run_id"],))
+                    self._emit(con, row, "run.failed")
+                    continue
                 if allowed and self.is_query:
                     try:
                         binding = self._inspect_query_run(con, row)
@@ -1374,13 +1527,15 @@ class RunStore:
                 if con.execute("SELECT 1 FROM runs WHERE active_slot=1").fetchone():
                     return None
                 row = self._update(con, row, status="RUNNING", phase="PLANNING", active_slot=1)
-                con.execute("UPDATE dispatch_intents SET state='DISPATCHING', attempts=attempts+1 WHERE run_id=? AND state='PENDING'",
-                            (row["run_id"],))
+                con.execute("""UPDATE dispatch_intents SET state='DISPATCHING', attempts=attempts+1
+                    WHERE run_id=? AND state='PENDING' AND transport=?""",
+                            (row["run_id"], transport))
                 dispatch = con.execute("SELECT * FROM dispatch_intents WHERE run_id=?", (row["run_id"],)).fetchone()
                 self._emit(con, row, "run.started")
                 intent = DispatchIntent(row["run_id"], row["attempt_id"], dispatch["session_id"],
                                         dispatch["request_id"], json.loads(dispatch["payload_json"]),
-                                        dispatch["payload_hash"], row["deadline_ms"])
+                                        dispatch["payload_hash"], row["deadline_ms"],
+                                        _intent_transport(dispatch))
                 self._hook("claim:before_commit")
             self._hook("claim:after_commit")
             return intent
@@ -1708,6 +1863,20 @@ class RunStore:
                     con.execute("UPDATE dispatch_intents SET state='EXITED' WHERE run_id=?", (row["run_id"],))
                     self._emit(con, row, "run.failed")
                     continue
+                if not self.transport_policy.executes(_intent_transport(dispatch)):
+                    # The recorded path is not served by this process (a
+                    # different transport was configured after the attempt
+                    # left the kernel). It can never be observed here, so the
+                    # slot is released with honest uncertainty rather than
+                    # returned for the other path to reconcile.
+                    recorded = _intent_transport(dispatch)
+                    _LOGGER.warning("recover cannot serve recorded transport %s for run %s; fencing",
+                                    recorded, row["run_id"])
+                    row = self._update(con, row, status="FAILED", phase="FINALIZING",
+                                       active_slot=None, error_code="EXECUTION_UNKNOWN")
+                    con.execute("UPDATE dispatch_intents SET state='EXITED' WHERE run_id=?", (row["run_id"],))
+                    self._emit(con, row, "run.failed")
+                    continue
                 target = "CANCELLING" if row["cancel_reason"] else "UNKNOWN"
                 if row["status"] != target or dispatch["state"] != "UNKNOWN":
                     row = self._update(con, row, status=target, error_code="EXECUTION_UNKNOWN")
@@ -1715,7 +1884,8 @@ class RunStore:
                     self._emit(con, row, "run.updated")
                 pending.append(DispatchIntent(row["run_id"], row["attempt_id"], dispatch["session_id"],
                                               dispatch["request_id"], json.loads(dispatch["payload_json"]),
-                                              dispatch["payload_hash"], row["deadline_ms"]))
+                                              dispatch["payload_hash"], row["deadline_ms"],
+                                              _intent_transport(dispatch)))
         return pending
 
     @staticmethod
@@ -1748,6 +1918,16 @@ class RunStore:
                 raise ValueError("ACP binding has no matching run attempt")
             if row["status"] in TERMINAL or row["active_slot"] is None:
                 raise ValueError("ACP binding requires a live attempt")
+            dispatch = con.execute(
+                "SELECT transport FROM dispatch_intents WHERE run_id=? AND attempt_id=?",
+                (run_id, attempt_id)).fetchone()
+            recorded = dispatch["transport"] if dispatch is not None and "transport" in dispatch.keys() else None
+            if recorded != TRANSPORT_ACP:
+                # The intent was recorded for the bridge (or has no readable
+                # transport): ACP must not prompt it, so this is a refusal, not
+                # an implicit rebind.
+                _LOGGER.warning("ACP binding refused for run %s: recorded transport is %r", run_id, recorded)
+                return False
             if con.execute("SELECT 1 FROM acp_bindings WHERE run_id=? AND attempt_id=?",
                            (run_id, attempt_id)).fetchone():
                 return False

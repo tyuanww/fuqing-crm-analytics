@@ -46,6 +46,7 @@ from backend.services.analytics.acp_transport import (
     AcpUnsupportedOperation,
 )
 from backend.services.analytics.first_purchase.native_identity import NativeSessionIdentityResolver
+from backend.services.analytics.jobs import TransportPolicy
 from backend.services.analytics.runtime import HostBridge, RunDispatcher, execute_acp_fixture
 from backend.services.analytics.transport import HostTransport
 from backend.tests.analytics_run_support import (
@@ -767,7 +768,8 @@ def test_dispatcher_deadline_expiry_fences_lost_and_releases_the_slot(tmp_path):
     server.close_mode = "hang"
     receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0,
                             cancel_grace=0.0, close_timeout=0.2)
-    store = make_store(tmp_path / "state", resource_profile=profile(run_timeout_ms=500, query_timeout_ms=100))
+    store = make_store(tmp_path / "state", resource_profile=profile(run_timeout_ms=500, query_timeout_ms=100),
+                       transport_policy=TransportPolicy(mode="acp"))
     conversation = store.create_conversation(
         actor(), "native", AnalyticsConversationRequest(), runtime_session_id=SESSION)
     run = store.accept(actor(), conversation.conversation_id, "native-1",
@@ -946,7 +948,7 @@ def test_transport_config_defaults_to_bridge_and_selects_acp(tmp_path):
 
 
 def bound_run(tmp_path):
-    store = make_store(tmp_path / "state")
+    store = make_store(tmp_path / "state", transport_policy=TransportPolicy(mode="acp"))
     conversation = store.create_conversation(
         actor(), "native", AnalyticsConversationRequest(), runtime_session_id=SESSION)
     run = store.accept(actor(), conversation.conversation_id, "native-1",
