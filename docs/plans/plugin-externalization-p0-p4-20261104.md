@@ -1,6 +1,6 @@
 # 插件外置 P0-P4 作战计划（2026-11-04 基线）
 
-> 本文件是当前计划，不是历史快照。状态事实以 `origin/main` = `d169809`、PR #211/#216/#218/#222/#229/#230/#232/#234/#235 和本文引用的 CI run 为准；2026-11-04 的旧证据保留在 2.1、2.2 与附录 A。执行前先按第 6 节重新核对；状态变化时追加记录，不要改写已经发生的证据。2026-11-05 owner 已批准 D1–D4 与 P3-3 五项，执行依据见 5.1 与 5.1.1，切片状态见 C09。
+> 本文件是当前计划，不是历史快照。状态事实以 `origin/main` = `e09ff4f`、PR #211/#216/#218/#222/#229/#230/#232/#234/#235/#236/#237 和本文引用的 CI run 为准；2026-11-04 的旧证据保留在 2.1、2.2 与附录 A。执行前先按第 6 节重新核对；状态变化时追加记录，不要改写已经发生的证据。2026-11-05 owner 已批准 D1–D4 与 P3-3 五项，执行依据见 5.1 与 5.1.1，切片状态见 C09。
 
 ## 1 目标与执行规则
 
@@ -27,7 +27,7 @@ P0 到 P4 是同一件事的五个阶段，不是五个独立项目。
 
 ## 2 状态总表
 
-2026-11-05 03:40 刷新：`origin/main` = `8da4b78e0bf1db15a1747e2a83903af99599a550`，第一父链为 `8da4b78e` → `9f6c06db` → `a2b9a546` → `36111a90`。下表状态按该快照更新，明细见 2.3；2.1 与 2.2 是 2026-11-04 23:25 的旧快照，保持原样。
+2026-11-05 12:08 刷新：`origin/main` = `e09ff4ffc28a697583c401deb81a068e2f5cfcd3`，第一父链为 `e09ff4f` → `b872288` → `d169809` → `60d7f4e`。下表状态按该快照与 #237 合并更新，明细见 2.3；2.1 与 2.2 是 2026-11-04 23:25 的旧快照，保持原样。
 
 | 层 | 范围 | 状态 | 证据 |
 |---|---|---|---|
@@ -37,8 +37,8 @@ P0 到 P4 是同一件事的五个阶段，不是五个独立项目。
 | P2b | tool policy 单源与官方工具漂移门禁 | 已完成 | #214 merged，head `6849fc4c`，merge `432cc03a`；CI `41828359712` success；`dsh-plugins/query-agent/src/tool-policy.ts` 加 `dsh-plugins/query-agent/config/{query-agent-tool-policy,dsh-official-tools}.v1.json`，68 个官方工具名，25 项行为逐条等价 |
 | P2c | component catalog 移出插件源码 | 已完成 | #212 merged，head `ec83fe52`，merge `dc9b8fba`；CI `41823447654` success；`backend/contracts/component-catalog.json` 7014 bytes、sha256 `8e2161fa…`，`board_spec.py` 导入期不再读 `dsh-plugins/` |
 | P2d | 生成物收进独立 contracts 包 | 已完成 | #216 merged `36111a90`，head `107d2324`；CI `41874816482` success；110 files +1800/−687；b0 / test / merge-gate 绿 |
-| P3 | 换私有协议为 rc.5 公开面 | 部分完成：P3-0/P3-1/P3-2/P3-5 已合并；P3-3 的 3a/3b/3c/3d-prep 已合并，cutover 待真机验收；P3-4 决策已定，按 C10 执行 | #218 merged `a2b9a546`，head `a823b0d9`，CI `41880532530` success（P3-0 影子门禁 + P3-1 disposer）；#222 merged `8da4b78e`，head `2df54efe`，CI `41895117591` success（P3-2 Config / typed tools + P3-5 TurnEndReason）；2026-11-05 owner 批准 D4 与 P3-3 五项，P3-4 按 D1–D3 执行；P3-3 切片见 C09 |
-| P3-3 | 外部半换 ACP，`query` 家族留在 bridge | 3a/3b/3c/3d-prep 已合并（#230/#232/#229/#234）；cutover 待真机验收；作者仓 workbench repack 已随 #235 回填；3e 可选未立项 | #230 merge `72239df2`（transport seam）、#232 merge `0eeb8faa`（ACP stdio transport）、#229 merge `4a926836`（offline shadow compare）、#234 merge `60d7f4e8`（profile generator + `acp_bindings` + cancel-aware settlement + deadline strategy）；#235 merge `d169809`（回填作者 pack、锁链与 sealed artifact）。真机验收清单见 [acp-cutover-acceptance.md](../operating/acp-cutover-acceptance.md)；默认 transport 仍 `bridge` |
+| P3 | 换私有协议为 rc.5 公开面 | 部分完成：P3-0/P3-1/P3-2/P3-5 已合并；P3-3 的 3a/3b/3c/3d-prep 与 #237 回收/回调修复合入，cutover 待真机验收；P3-4 决策已定，按 C10 执行 | #218 merged `a2b9a546`，head `a823b0d9`，CI `41880532530` success（P3-0 影子门禁 + P3-1 disposer）；#222 merged `8da4b78e`，head `2df54efe`，CI `41895117591` success（P3-2 Config / typed tools + P3-5 TurnEndReason）；#237 merged `e09ff4f`，head `c85a988`（ACP C2 回调 + scoped env + lost-turn 回收 + 关停/profile 准入）；2026-11-05 owner 批准 D4 与 P3-3 五项，P3-4 按 D1–D3 执行；P3-3 切片见 C09 |
+| P3-3 | 外部半换 ACP，`query` 家族留在 bridge | 3a/3b/3c/3d-prep 与 #237 已合并（#230/#232/#229/#234/#237）；cutover 仍待真机验收；作者仓 workbench repack 已随 #235 回填；3e 可选未立项 | #230 merge `72239df2`（transport seam）、#232 merge `0eeb8faa`（ACP stdio transport）、#229 merge `4a926836`（offline shadow compare）、#234 merge `60d7f4e8`（profile generator + `acp_bindings` + cancel-aware settlement + deadline strategy）、#235 merge `d169809`（回填作者 pack、锁链与 sealed artifact）、#237 merge `e09ff4f`（binding-based C2 callback、scoped child env、lost/no-tool reclaim + slot release、dispatcher-owned shutdown、profile health）。真机验收清单见 [acp-cutover-acceptance.md](../operating/acp-cutover-acceptance.md)；默认 transport 仍 `bridge`，剩余构建项见该清单第 9 节 |
 | P3-4 | 品牌与账号收口 | 部分完成：D2 hero/徽章与 D3 设置入口按现状接受，不再列为可完成项；D1 构建期标题只留卡片，未实现 | 2026-11-05 决策见 5.1；C10 收口现状，C15 记录标题构建路径与阻塞 |
 | P4 | 最后拆仓并删除主仓插件源码 | 未开工 | 无分支、无 PR；`deletion_gate=BLOCKED`，原因为 `remote_main_not_verified` 与 `production_only_closure_not_recorded`；硬依赖 P3-3/P3-4 完成、10 作者仓迁移和删除门禁 |
 
@@ -77,6 +77,7 @@ P2d #216、P0 #211、P3-0/P3-1 #218、P3-2/P3-5 #222 已依次合并，§3.1 的
 - P3-3 曾等 D4（ACP 主线 vs SDK 主线）；P3-4 曾等 D1/D2/D3（标题、hero 徽章、设置入口）。四项已于 2026-11-05 由 owner 决定，见 5.1 与 5.1.1；代码侧没有新增阻塞。
 - 2026-11-05 决策回填：owner 批准 D1–D4 与 P3-3 五项（5.1/5.1.1）。P3-3 拆为 3a–3e 与 starlette rollout，C09 记录每项 owner-facing 下一步；3a/3c/starlette rollout 记为进行中，3b/3d 未开工，3e 可选。P3-4 的 D2/D3 接受现状，D1 的构建期标题见 C15（未实现）。本轮基于 `e6074d7`（#225/#226 dependabot 合并）的 main 复核，未刷新第 2 节的时间快照。
 - 2026-11-05 P3-3 切片回读，#230 merge `72239df2`（3a transport seam）、#232 merge `0eeb8faa`（3b ACP stdio transport）、#229 merge `4a926836`（3c offline shadow compare）、#234 merge `60d7f4e8`（3d-prep profile generator + `acp_bindings` + cancel-aware settlement + deadline strategy）。cutover 待 pinned rc.5 真机验收，清单见 [acp-cutover-acceptance.md](../operating/acp-cutover-acceptance.md)；作者仓 workbench repack 已随 #235 回填，作者 PR #16 仍未合；默认 transport 仍 `bridge`。
+- 2026-11-05 #237 merge `e09ff4f`（head `c85a988`）修掉 P3-3 cutover 的回收与回调阻塞：settled no-tool、丢失结算和重启中的 ACP attempt 统一 CAS binding `LOST`、run `FAILED`/`EXECUTION_UNKNOWN`、释放 active slot；子进程改 scoped env allowlist + per-boot ACP callback token；C2 改 `/internal/acp/tool-call` 由 `acp_bindings` join；dispatcher 关停回收 child；health 先验证 tools-only profile。cutover 仍待 pinned rc.5 真机验收，剩余构建项（`dispatch_intents.transport` 列与 canary、bridge 删除范围、identity 归属、门禁转 blocking、默认翻 acp、作者 PR #16/C0）见验收清单第 9 节。
 - B0 flake 跟进见 C14：`test_native_success_save_cockpit_roundtrip_and_negatives` 在 run `41871881222` / job `126720993582` attempt 1 记 `1 failed, 1048 passed`，同分支后续 head `107d2324` 的 run `41874816482` 通过。**未修**，精确诊断与剩余风险写在该卡片。
 
 ## 3 依赖图与串行链
@@ -96,7 +97,7 @@ kit 0.1.1 → 10 个作者仓按 rc.5 重建 → 主仓锁链回填 + sealed art
 P3-0/P3-1 (#218) 与 P3-2/P3-5 (#222) 已合并
       |
       v
-P3-3（3a/3b/3c/3d-prep 已合并，cutover 待真机验收；3e 可选）/ P3-4（D2/D3 接受现状，D1 见 C15）→ P4 拆仓
+P3-3（3a/3b/3c/3d-prep 与 #237 已合并，cutover 待真机验收；3e 可选）/ P3-4（D2/D3 接受现状，D1 见 C15）→ P4 拆仓
 ```
 
 ### 3.2 四个拒绝点
@@ -117,7 +118,7 @@ P3-3（3a/3b/3c/3d-prep 已合并，cutover 待真机验收；3e 可选）/ P3-4
 | W5 | 主仓锁链回填与 artifact 密封 | 主仓 `config/` 与 sealing 分支 | 已完成（artifact `13348198215`） | 共享热点，只能单 writer |
 | W6 | 交付层真实演练 T02/T03/T06/T07/T09/E1 | 隔离实例与文档 | 需授权或人工窗口 | 与插件代码无文件冲突 |
 
-结论。W1 到 W5 已随 P0 完成，W6 仍可并行。D1–D4 与 P3-3 五项已由 owner 决定（5.1/5.1.1）；P3-3 按 C09 的 3a–3d 主链推进，3a/3b/3c/3d-prep 已合并，cutover 待真机验收，3e 可选；P3-4 只剩 C15 的标题构建选择。P4 在 P3 与 10 作者仓迁移完成后启动。
+结论。W1 到 W5 已随 P0 完成，W6 仍可并行。D1–D4 与 P3-3 五项已由 owner 决定（5.1/5.1.1）；P3-3 按 C09 的 3a–3d 主链推进，3a/3b/3c/3d-prep 与 #237 已合并，cutover 待真机验收，3e 可选；P3-4 只剩 C15 的标题构建选择。P4 在 P3 与 10 作者仓迁移完成后启动。
 
 ## 4 任务卡
 
@@ -352,13 +353,13 @@ dsh --profile sdk
 | 3a 传输缝 | 在 bridge 与后端之间留出可替换 seam；`query` 家族不走 ACP | 已合并 #230（`72239df2`） | 已收口，seam 合同与测试在 main |
 | 3b ACP server/client | ACP 启动、prompt、cancel、`session/requestPermission`、tool_call id | 已合并 #232（`0eeb8faa`） | 已收口，真实宿主项转到 3d 验收 |
 | 3c 影子对账 | 新旧外部半双写与对账，保留回滚 | 已合并 #229（`4a926836`） | 已收口，离线 S-A 报告随 cutover 证据刷新；S-B 在线金丝雀仍未做 |
-| 3d 切主路径 | 切到 ACP，删除自建 http/token/端口 | 3d-prep #234 已合并；作者 pack/锁链由 #235 回填；cutover 待真机验收 | 先准备 cutover 构建，含 typed-tool `B0_SESSION_ID` 守卫重做、`dispatch_intents.transport` 列与 canary、删 bridge/端口/token、门禁转 blocking；再按 [真机验收清单](../operating/acp-cutover-acceptance.md) 在 pinned rc.5 跑完，最后单独发起 cutover PR |
+| 3d 切主路径 | 切到 ACP，删除自建 http/token/端口 | 3d-prep #234 与 #237 已合并；作者 pack/锁链由 #235 回填；cutover 待真机验收 | 按 [真机验收清单](../operating/acp-cutover-acceptance.md) 在 pinned rc.5 跑完；剩余构建项：`dispatch_intents.transport` 列与 canary、bridge 删除范围（保留 `query` 家族）、identity 归属、门禁转 blocking、默认翻 `acp`、作者 PR #16/C0 前置；最后单独发起 cutover PR |
 | 3e SDK 独立审计会话（可选） | 用独立 SDK 会话做原因保真审计 | 可选，未立项 | owner 决定是否立项；不阻塞 3d |
 | starlette rollout | 后端 FastAPI/Starlette 侧的独立 rollout | 进行中 | 回填 PR/run 与隔离实例回执，并说明与 3b 的接口边界（子进程生命周期、取消、重试归属） |
 
 **验收** H5 下用户聊天无变化；ACP 能启动、prompt、cancel；`session/requestPermission` 只放行机器 allowlist，其余失败关闭；tool_call id 可用于证据链；取消后 inbox 拼接时序正确；3c 影子对账通过后才切主路径；删除自建 http/token/端口后无残留调用；串行 run 不出现并发写入，需要队列时另立切片。
 
-**阻塞** 3a/3b/3c/3d-prep 已合并；3d cutover 等 pinned rc.5 真机按 [验收清单](../operating/acp-cutover-acceptance.md) 通过，作者仓 workbench repack 已随 #235 回填，作者 PR #16 仍未合，typed-tool `B0_SESSION_ID` 守卫重做、`dispatch_intents.transport` 列与 canary、门禁转 blocking 尚未合入；starlette rollout 进行中；3e 可选。部署形态改变（子进程、stdout 协议、生命周期）仍需单独评审。
+**阻塞** 3a/3b/3c/3d-prep 与 #237 已合并；3d cutover 等 pinned rc.5 真机按 [验收清单](../operating/acp-cutover-acceptance.md) 通过。剩余构建项：`dispatch_intents.transport` 列与在线 canary、bridge 删除范围（保留 `query` 家族）、identity 归属、rc.5 gate 转 blocking、默认 transport 翻 `acp`、作者 PR #16 合入与 C0 例外移除。作者仓 workbench repack 已随 #235 回填，作者 PR #16 仍未合；starlette rollout 进行中；3e 可选。部署形态改变（子进程、stdout 协议、生命周期）仍需单独评审。
 
 **授权** 架构级改动、部署形态、子进程管理；不在杭州现役上直接验证。
 
@@ -532,7 +533,7 @@ gh pr checks <n> -R tyuanww/fuqing-crm-analytics
 git log --oneline origin/main -12
 ```
 
-3. 判断入口。P0、P2d、P3-0、P3-1、P3-2、P3-5 已完成；D1–D4 与 P3-3 五项已于 2026-11-05 决定，3a/3b/3c/3d-prep 已合并，下一步按 C09 在 pinned rc.5 真机执行 [ACP 验收清单](../operating/acp-cutover-acceptance.md)，通过后再发起 cutover PR；P3-4 只剩 C15 的标题构建选择，然后 P4。不要重开 #211/#216。
+3. 判断入口。P0、P2d、P3-0、P3-1、P3-2、P3-5 已完成；D1–D4 与 P3-3 五项已于 2026-11-05 决定，3a/3b/3c/3d-prep 与 #237 已合并，下一步按 C09 在 pinned rc.5 真机执行 [ACP 验收清单](../operating/acp-cutover-acceptance.md)，通过后再发起 cutover PR；P3-4 只剩 C15 的标题构建选择，然后 P4。不要重开 #211/#216。
 4. 需要并行时按 3.3 选通道。W1–W5 已完成，3.3 表里只剩 W6；C09 的 3a/3c/starlette rollout 是另外的并行切片，不占 W 通道。P3-3 与 P3-4 会改 `dsh-plugins/*/package.json` 与 profile，同一时刻只让一个 writer 动这些热点。
 5. 只写 `/tmp` 的准备工作已完成；后续写作者仓、主仓 `config/`、sealing 分支或删 `dsh-plugins/` 仍需单独授权。
 6. 每完成一张卡，把 PR 号、run id、artifact、摘要写回本文件的对应卡片或追加“执行记录”，不要覆盖旧证据。
