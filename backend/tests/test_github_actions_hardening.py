@@ -265,8 +265,8 @@ def test_ci_python_uses_deduplicated_runner_and_lint_remains_required():
     assert 'scripts/sync-agents.sh --check' in lint_runs
 
 
-def test_rc5_shadow_evidence_is_a_separate_non_blocking_job():
-    """P3-0/P3-1/P3-3c 证据只跑一次，且不进入分片矩阵或 merge-gate。"""
+def test_rc5_shadow_evidence_is_a_blocking_merge_gate_job():
+    """P3-0/P3-1/P3-3c 证据只跑一次，且 rc.5 漂移必须阻断 merge gate。"""
     workflow = yaml.safe_load((WORKFLOWS_DIR / 'lint.yml').read_text())
     jobs = workflow['jobs']
     test_job = jobs['test']
@@ -278,9 +278,10 @@ def test_rc5_shadow_evidence_is_a_separate_non_blocking_job():
     assert 'rc5-shadow-compare.mjs' not in test_runs
 
     shadow = jobs['rc5-shadow']
-    assert shadow.get('continue-on-error') is True
+    # The shadow job and every one of its steps must fail the run on drift.
+    assert 'continue-on-error' not in shadow
     assert shadow['if'] == test_job['if']
-    assert 'rc5-shadow' not in jobs['merge-gate']['needs']
+    assert all('continue-on-error' not in step for step in shadow['steps'])
     shadow_runs = '\n'.join(step.get('run', '') for step in shadow['steps'])
     for evidence in (
         'scripts/ci/rc5-surface-gate.mjs',
@@ -292,9 +293,16 @@ def test_rc5_shadow_evidence_is_a_separate_non_blocking_job():
         'scripts/ci/fixtures/rc5-shadow',
     ):
         assert evidence in shadow_runs
-    # Every shadow step reports instead of blocking unrelated work.
-    assert all(step.get('continue-on-error') is True
-               for step in shadow['steps'] if step.get('name', '').startswith(('rc.5 ', 'Connection Fetch')))
+    # merge-gate must wait for the shadow job and treat its failure as fatal.
+    assert 'rc5-shadow' in jobs['merge-gate']['needs']
+    gate = next(
+        step
+        for step in jobs['merge-gate']['steps']
+        if step.get('name') == 'Selected checks must not fail or cancel'
+    )
+    assert "needs.rc5-shadow.result == 'failure'" in gate['if']
+    assert "needs.rc5-shadow.result == 'cancelled'" in gate['if']
+    assert "needs.rc5-shadow.result == 'skipped'" not in gate['if']
 
 
 # --- B0 preparation cache producer (main-scoped) ---------------------------
