@@ -2,28 +2,28 @@
   "schema": "shinemage-public-contract-inputs-lock/v1",
   "owners": {
     "workbench": {
-      "source_sha": "62b82b002239148543278be12e8a3ac53f093d03",
+      "source_sha": "bef77947ee70499cfb3e6608782d9ee8e75d13c3",
       "package": "@shine-mage/dsh-analytics-workbench-b0",
       "version": "0.0.0-b0",
       "archive": {
         "repository": "tyuanww/dsh-analytics-workbench",
-        "run_id": 41872857221,
+        "run_id": 41961164549,
         "attempt": 1,
         "event": "pull_request",
         "conclusion": "success",
-        "artifact_id": 13344474041,
-        "name": "public-contracts-41872857221-1",
-        "sha256": "acce733edd97d766c3d42c0340bfbc17f3f446935327b6a4a1f0e25612e4e170",
-        "bytes": 66299
+        "artifact_id": 13385428181,
+        "name": "public-contracts-41961164549-1",
+        "sha256": "033f3567a8bae2982a93e4c2558f717c6479a2e86734dfc3ce4ac7035553e512",
+        "bytes": 66297
       },
       "manifest": {
-        "sha256": "0b8b1f7fe2537ee535e3232888179690e58e2aee9db13dd15a90c48a448a9dd4",
+        "sha256": "4018742d0defafe5d08138f72c2ba67900fc03a1204c0be9247999efc799f0aa",
         "bytes": 11551
       },
       "producer_sha256": "2d9ab9fc7998359601bce6caef63945697aa16030cbf47e98de41085726b8350",
       "recipe_sha256": "326adb35d8b94347749118fbb06658cc2ca699a7bea00b685a49dc5f38ca8799",
-      "package_manifest_sha256": "c6bd80254028fa2c60b2be58160098db0258e7b0eb6613301d83458b0fa185bc",
-      "ci_job_sha": "8f85c1e6975dedcbed423d2499600f61aa0d0c16",
+      "package_manifest_sha256": "c7bfce94359bef1bedbbc93322036b0102025700fc5d212e430af9418843978c",
+      "ci_job_sha": "17e5e443ca201f7bf7a83e9d9212391244896b24",
       "files": [
         {
           "source_path": "plugin/contracts/cockpit-slot.v1.json",

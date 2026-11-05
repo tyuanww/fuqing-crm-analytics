@@ -1,30 +1,30 @@
 {
   "schema": "shinemage-workbench-author-evidence/v1",
   "package": "@shine-mage/dsh-analytics-workbench-b0",
-  "source_sha": "62b82b002239148543278be12e8a3ac53f093d03",
-  "formal_manifest_sha256": "da1741853e6938b13785bea8ccdc1e9d7299c4cf1cf5d6d64c07ee10095f952b",
-  "formal_tarball_sha256": "b2874c48d4a12e2ae5a7157bf56d6582e65379327069d4f533719015a73348db",
+  "source_sha": "bef77947ee70499cfb3e6608782d9ee8e75d13c3",
+  "formal_manifest_sha256": "7833ce6349e815a0707845f0e335a394995cebf7f93c3e9356e2683d9f2c1b9f",
+  "formal_tarball_sha256": "1c61af8c80652bc3bdd32de560095fa9c4412a5411299b70103e1b36b84525d0",
   "archive": {
     "repository": "tyuanww/dsh-analytics-workbench",
-    "run_id": 41872857221,
+    "run_id": 41961164549,
     "event": "pull_request",
-    "artifact_id": 13345695999,
-    "sha256": "6430b623e9b05b462b6208276be17c893359bfc7d2be2502786f4fae19a0de31",
-    "bytes": 613857
+    "artifact_id": 13385024152,
+    "sha256": "7cc43f865be4cd8c584fb191aed9d2287e7b1c3198c7aa283fdf7761df900628",
+    "bytes": 654532
   },
   "files": {
     "content_pack": {
       "path": "workbench-content-pack/shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
-      "sha256": "7ab45e89aa639d8044c008e6714b39b3da2c7f17730f3b2b80c7720e1f6ca792",
-      "bytes": 503923
+      "sha256": "cfee9aad807641e0ab46bad6005773624d0485b0eb21c567696605a374772c1a",
+      "bytes": 544616
     },
     "plan": {
-      "path": "workbench-author-tests-41872857221-1/plan.json",
+      "path": "workbench-author-tests-41961164549-1/plan.json",
       "sha256": "2dceefb522356c06bf87470b1db6af7abca8563589ce464407304b4a04253075",
       "bytes": 8659
     },
     "result": {
-      "path": "workbench-author-tests-41872857221-1/result.json",
+      "path": "workbench-author-tests-41961164549-1/result.json",
       "sha256": "5ae07764faea4e65e9b53b003edbf22ab09d570d55d13210f944b022f0a81e41",
       "bytes": 1060
     }
