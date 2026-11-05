@@ -16,9 +16,9 @@
     {
       "directory": "analytics-workbench",
       "id": "@shine-mage/dsh-analytics-workbench-b0",
-      "source_sha": "62b82b002239148543278be12e8a3ac53f093d03",
+      "source_sha": "bef77947ee70499cfb3e6608782d9ee8e75d13c3",
       "version": "0.0.0-b0",
-      "manifest_sha256": "da1741853e6938b13785bea8ccdc1e9d7299c4cf1cf5d6d64c07ee10095f952b"
+      "manifest_sha256": "7833ce6349e815a0707845f0e335a394995cebf7f93c3e9356e2683d9f2c1b9f"
     },
     {
       "directory": "crm-knowledge",
