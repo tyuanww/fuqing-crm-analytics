@@ -46,7 +46,7 @@ from backend.services.analytics.acp_transport import (
 from backend.services.analytics.first_purchase.native_identity import NativeSessionIdentityResolver
 from backend.services.analytics.runtime import HostBridge, RunDispatcher
 from backend.services.analytics.transport import HostTransport
-from backend.tests.analytics_run_support import actor, make_store
+from backend.tests.analytics_run_support import actor, make_store, successful_step
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 NATIVE_EVIDENCE = REPO_ROOT / "dsh-plugins" / "analytics-workbench" / "src" / "native-evidence.mjs"
@@ -390,7 +390,11 @@ def test_all_five_operations_route_through_the_acp_transport(acp):
     assert server.methods[:2] == ["initialize", "session/list"]
 
     dispatch = dispatch_payload()
-    assert receiver.call("dispatch", dispatch) == {"accepted": True}
+    receipt = receiver.call("dispatch", dispatch)
+    assert receipt["accepted"] is True
+    assert receipt["transport"] == "acp"
+    assert receipt["acp_session_id"] in server.sessions
+    assert str(receipt["prompt_rpc_id"]).isdigit()
     assert server.prompt_started.wait(5.0)
     assert server.prompts == ["合成渠道"]
     settled = observe_until(receiver, dispatch, "SUCCEEDED")
@@ -404,7 +408,7 @@ def test_all_five_operations_route_through_the_acp_transport(acp):
     # One prompt per session; a second one is refused before it reaches the child.
     server.prompt_mode = "hang_ignore_cancel"
     second = dispatch_payload("native-2", attempt="attempt-2")
-    assert receiver.call("dispatch", second) == {"accepted": True}
+    assert receiver.call("dispatch", second)["accepted"] is True
     assert wait_until(lambda: len(server.prompts) == 2)
     with pytest.raises(AcpTransportError):
         receiver.call("dispatch", dispatch_payload("native-3", attempt="attempt-3"))
@@ -760,6 +764,78 @@ def test_acp_lost_settlement_is_unknown_and_a_requested_cancel_stays_held(tmp_pa
         assert snapshot.status == "CANCELLING"  # exit unproven; never CANCELLED
         assert snapshot.diagnostics.execution_active
         assert not dispatcher.ready
+    finally:
+        dispatcher.close()
+        receiver.close()
+
+
+# ---------------------------------------------------------------------------
+# Persisted ACP binding: written before the prompt, settled only by exit proof
+# ---------------------------------------------------------------------------
+
+
+def test_binding_sink_runs_after_session_new_and_before_the_prompt(tmp_path):
+    server = FakeAcpServer()
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0)
+    seen = []
+    receiver.attach_binding_sink(lambda binding: seen.append(dict(binding)) or True)
+    try:
+        receiver.call("health", {})
+        payload = dispatch_payload()
+        assert receiver.call("dispatch", payload)["accepted"] is True
+        assert len(seen) == 1
+        binding = seen[0]
+        assert (binding["run_id"], binding["attempt_id"], binding["session_id"]) == (
+            payload["run_id"], payload["attempt_id"], payload["session_id"])
+        assert binding["acp_session_id"] in server.sessions
+        assert binding["prompt_rpc_id"].isdigit()
+        assert wait_until(lambda: server.prompts == ["合成渠道"])
+        # session/new precedes the sink; the prompt is written only after it.
+        assert server.methods.index("session/new") < server.methods.index("session/prompt")
+        assert observe_until(receiver, payload, "SUCCEEDED")["execution_exited"] is True
+    finally:
+        receiver.close()
+
+
+def test_binding_sink_refusal_blocks_the_prompt(tmp_path):
+    server = FakeAcpServer()
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0)
+    receiver.attach_binding_sink(lambda _binding: False)
+    try:
+        receiver.call("health", {})
+        with pytest.raises(AcpTransportError) as error:
+            receiver.call("dispatch", dispatch_payload())
+        assert "already bound" in str(error.value)
+        assert server.prompts == []
+    finally:
+        receiver.close()
+
+
+def test_dispatcher_persists_the_binding_and_settles_it_with_exit_evidence(tmp_path):
+    server = FakeAcpServer()
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0)
+    store, run = bound_run(tmp_path)
+    dispatcher = RunDispatcher(store, lambda _: actor(), receiver)
+    dispatcher.start()
+    try:
+        dispatcher.tick()
+        intent = store.runtime_work()[0]["intent"]
+        binding = store.acp_binding(intent.run_id, intent.attempt_id)
+        assert binding is not None and binding.state == "BOUND"
+        assert binding.acp_session_id in server.sessions
+        assert binding.prompt_rpc_id.isdigit()
+
+        # The fake child reports call-1 completed; give the dispatcher the same
+        # successful step the bridge path would have written, then let the
+        # settled prompt refresh the binding.
+        successful_step(store, intent, call_id="call-1")
+        for _ in range(200):
+            dispatcher.tick()
+            if store.get(actor(), run.run_id).status == "SUCCEEDED":
+                break
+            time.sleep(0.01)
+        assert store.get(actor(), run.run_id).status == "SUCCEEDED"
+        assert store.acp_binding(intent.run_id, intent.attempt_id).state == "SETTLED"
     finally:
         dispatcher.close()
         receiver.close()

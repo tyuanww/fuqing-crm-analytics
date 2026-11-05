@@ -245,6 +245,9 @@ class AcpTransport:
         self._sessions: dict[str, _Session] = {}
         self._kernel_by_acp: dict[str, str] = {}
         self._reader: threading.Thread | None = None
+        # The kernel's persistent binding sink; None means "no persistence
+        # configured" and the transport keeps its in-memory binding only.
+        self._binding_sink: Callable[[Mapping[str, Any]], bool] | None = None
 
     # -- construction -----------------------------------------------------
 
@@ -289,6 +292,18 @@ class AcpTransport:
 
     def supports(self, operation: str) -> bool:
         return operation in self.capabilities
+
+    def attach_binding_sink(self, sink: Callable[[Mapping[str, Any]], bool] | None) -> None:
+        """Attach the kernel's ACP binding store (design §3 invariant 2).
+
+        The sink is called after ``session/new``/``session/resume`` and before
+        the prompt is written. Returning anything but True aborts the dispatch
+        before any model work starts; raising is treated the same way.
+        """
+        if sink is not None and not callable(sink):
+            raise ValueError("ACP binding sink must be callable")
+        with self._state_lock:
+            self._binding_sink = sink
 
     def call(self, operation: str, payload: Mapping[str, Any]) -> dict[str, Any]:
         """Run one seam operation; every failure is a transport failure."""
@@ -339,6 +354,17 @@ class AcpTransport:
             session.prompt = prompt
             try:
                 rpc_id = self._allocate_id()
+                sink = self._binding_sink
+                if sink is not None:
+                    bound = sink({
+                        "run_id": run_id, "attempt_id": attempt_id, "session_id": session_id,
+                        "acp_session_id": session.acp_session_id, "prompt_rpc_id": str(rpc_id),
+                        "generation": generation, "transport": "acp",
+                    })
+                    if bound is not True:
+                        # The attempt is already bound: never write a second
+                        # prompt for it, even if the caller retried.
+                        raise AcpTransportError("ACP attempt is already bound to another transport")
                 pending = _Pending("session/prompt", prompt=prompt)
                 self._write_request(rpc_id, "session/prompt", {
                     "sessionId": session.acp_session_id,
@@ -348,7 +374,8 @@ class AcpTransport:
                 session.prompt = None
                 raise AcpTransportError(f"ACP dispatch failed: {error}") from error
         self.logger.debug("acp: dispatched run %s attempt %s (rpc %s)", run_id, attempt_id, rpc_id)
-        return {"accepted": True}
+        return {"accepted": True, "transport": "acp", "acp_session_id": session.acp_session_id,
+                "prompt_rpc_id": str(rpc_id), "generation": generation}
 
     def _observe(self, payload: Mapping[str, Any]) -> dict[str, Any]:
         _run_id, attempt_id, session_id, request_id = _correlation(payload)
