@@ -107,9 +107,20 @@ class RunDispatcher:
 
     def close(self):
         self.ready = False
-        if self._lock is not None:
-            os.close(self._lock)
-            self._lock = None
+        try:
+            # The app lifespan owns the transport: an ACP child must be reaped
+            # on a clean shutdown, not left until kernel process exit. Bridge
+            # transports have no close method and keep their behavior.
+            close = getattr(self.bridge, "close", None)
+            if callable(close):
+                try:
+                    close()
+                except Exception as error:  # noqa: BLE001 - shutdown still releases the lock
+                    logging.getLogger(__name__).warning("B0 transport close failed: %s", error)
+        finally:
+            if self._lock is not None:
+                os.close(self._lock)
+                self._lock = None
 
     def _apply(self, work, evidence):
         intent = work["intent"]
@@ -155,6 +166,23 @@ class RunDispatcher:
                 logging.getLogger(__name__).warning("B0 %s; new dispatch paused until reconciliation", code)
             self.last_error = code
 
+    def _reclaim_acp_lost(self, work) -> bool:
+        """Fence one ACP attempt whose prompt settlement is provably lost.
+
+        The transport marks the lost condition structurally (``settlement_lost``)
+        so this dispatcher stays import-free of AcpTransport. The public
+        ``settle_acp_binding`` is the production caller that records history as
+        LOST; ``fence_acp_attempt`` then releases the unique active slot with a
+        fail-closed FAILED/EXECUTION_UNKNOWN terminal. A binding that is absent
+        or already SETTLED is not a lost prompt, so the caller keeps the generic
+        UNKNOWN observation instead of guessing.
+        """
+        intent = work["intent"]
+        if not self.store.settle_acp_binding(intent.run_id, intent.attempt_id, "LOST"):
+            return False
+        self.store.fence_acp_attempt(intent.run_id, intent.attempt_id)
+        return True
+
     def _tick(self):
         if self.workers is not None:
             self.workers.recover()
@@ -183,6 +211,10 @@ class RunDispatcher:
                     # Local persistence/identity failure is not unknown Host evidence.
                     # Let tick pause admissions and reconcile the same intent.
                     raise
+                if getattr(error, "settlement_lost", False) and self._reclaim_acp_lost(item):
+                    # The ACP prompt can never settle; the attempt is terminally
+                    # fenced with its slot released. Continue with other work.
+                    continue
                 self.ready = False
                 self.store.observe(self.resolve_actor(item["owner"]), ExecutionObservation(
                     intent.run_id, intent.attempt_id, intent.session_id, intent.request_id, False, "UNKNOWN"))
@@ -226,6 +258,13 @@ def execute_native_fixture(store, resolve_actor, session_id, request_id, call_id
     }}
 
 
+def execute_acp_fixture(store, resolve_actor, acp_session_id, call_id, query, *, workers):
+    """ACP C2: the child sends its ACP session id, never kernel correlation ids."""
+    session_id, request_id = store.acp_correlation(acp_session_id)
+    return execute_native_fixture(store, resolve_actor, session_id, request_id, call_id, query,
+                                  workers=workers)
+
+
 def execute_native_query(store, resolve_actor, session_id, request_id, call_id, query_request, *, workers):
     """Trusted query-tool lookup, never the latest run and never a model-supplied path."""
     if store.family != QUERY_RUN_FAMILY:
@@ -247,6 +286,13 @@ def execute_native_query(store, resolve_actor, session_id, request_id, call_id, 
         run_id=intent.run_id, attempt_id=intent.attempt_id, step_id=step.step_id,
         disposition=step.disposition, result=result,
     ).model_dump(mode="json")
+
+
+def execute_acp_query(store, resolve_actor, acp_session_id, call_id, query_request, *, workers):
+    """ACP C2 for the channel-followup family: binding first, then step reserve."""
+    session_id, request_id = store.acp_correlation(acp_session_id)
+    return execute_native_query(store, resolve_actor, session_id, request_id, call_id, query_request,
+                                workers=workers)
 
 
 def execute_native_first_purchase(store, resolve_actor, session_id, request_id, call_id, query_request, *, workers):
@@ -314,3 +360,10 @@ def execute_native_first_purchase(store, resolve_actor, session_id, request_id, 
         attempt_id=intent.attempt_id, step_id=step.step_id,
         disposition=step.disposition, run_status=snapshot.status, result=result,
     ).model_dump(mode="json")
+
+
+def execute_acp_first_purchase(store, resolve_actor, acp_session_id, call_id, query_request, *, workers):
+    """ACP C2 for the first-purchase family; returns the same (status, receipt)."""
+    session_id, request_id = store.acp_correlation(acp_session_id)
+    return execute_native_first_purchase(store, resolve_actor, session_id, request_id, call_id,
+                                         query_request, workers=workers)

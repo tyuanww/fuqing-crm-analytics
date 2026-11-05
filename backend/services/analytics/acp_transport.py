@@ -39,19 +39,21 @@ after this transport wrote a ``session/cancel`` notification for the same
 prompt -> ``CANCELLED``, never ``SUCCEEDED``: rc.5 reports an aborted turn as
 ``end_turn`` and the request record is the only evidence that distinguishes it
 from a completed one, including the cancel-then-tool-call-then-end_turn case.
-``end_turn`` with no tool call and no cancel request -> ``UNKNOWN``: rc.5
-collapses ``blocked`` (which the bridge maps to ``NEEDS_INPUT``) and ``aborted``
-into the same ``end_turn``, so the only fail-closed reading for a no-tool turn
-is "cannot prove success". Every automation family in scope calls a server-side
-tool, so a text-only turn is not a valid completion. ``cancelled`` ->
-``CANCELLED`` (rc.5 also collapses ``interrupted`` and explicit cancellation
-here). ``max_tokens``, ``max_turn_requests``, ``refusal`` and a JSON-RPC prompt
-error -> ``FAILED``; a cancel request never rewrites a real failure. Any other
-reason -> ``UNKNOWN``. Only a settled prompt response proves exit: a cancel
-receipt, a write success or a process signal never does. If the child dies, the
-prompt's settlement is lost and ``observe`` raises, so the dispatcher records
-one ``UNKNOWN`` and keeps the slot; it never fabricates an outcome from process
-exit.
+``end_turn`` with no tool call and no cancel request -> ``FAILED`` /
+``EXECUTION_UNKNOWN``: rc.5 collapses ``blocked`` (which the bridge maps to
+``NEEDS_INPUT``) and ``aborted`` into the same ``end_turn``, so the only
+fail-closed reading is "the turn settled but success is unproven". The prompt
+response proves exit, so the run is fenced terminally and the unique active slot
+is released instead of stalling all automation. ``cancelled`` -> ``CANCELLED``
+(rc.5 also collapses ``interrupted`` and explicit cancellation here).
+``max_tokens``, ``max_turn_requests``, ``refusal`` and a JSON-RPC prompt error
+-> ``FAILED``; a cancel request never rewrites a real failure. Any other
+settled reason -> ``FAILED`` / ``EXECUTION_UNKNOWN``. Only a settled prompt
+response proves exit: a cancel receipt, a write success or a process signal
+never does. If the child dies, the prompt's settlement is lost and ``observe``
+raises ``AcpSettlementLost``; the dispatcher CASes the binding ``LOST`` and
+fences the run ``FAILED`` / ``EXECUTION_UNKNOWN`` with the slot released. It
+never fabricates CANCELLED or SUCCEEDED from process exit.
 
 Deadline with a prompt in flight
 --------------------------------
@@ -60,9 +62,10 @@ The dispatch envelope carries the kernel deadline. After this transport wrote
 ``observe`` escalates once: a bounded ``session/close`` (the child may settle
 the prompt, and then the settlement is classified normally), otherwise the
 child is retired so the old prompt cannot keep executing and the settlement is
-recorded LOST. The observation then fails and the dispatcher records UNKNOWN
-while the run stays CANCELLING with its slot held. Neither a cancel receipt nor
-a deadline writes CANCELLED; only a prompt settlement can.
+recorded LOST. The observation then raises ``AcpSettlementLost``, which the
+dispatcher turns into one ``FAILED`` / ``EXECUTION_UNKNOWN`` fence with the
+binding ``LOST`` and the slot released. Neither a cancel receipt nor a deadline
+writes CANCELLED; only a prompt settlement can.
 
 Correlation
 -----------
@@ -75,6 +78,13 @@ transport keeps its ACP session id in memory, keyed by the kernel
 ``session_id``; after a child exit it tries ``session/resume`` and only falls
 back to ``session/new`` on a definitive JSON-RPC rejection (a timeout is
 ambiguous and is never retried).
+
+The child's tool callback uses the persisted ``acp_bindings`` row instead of the
+journal: it sends its ACP session id plus the model call id, and the kernel
+resolves the live run/dispatch from that binding before reserving the step.
+The scoped ``B0_ACP_BASE_URL`` / ``B0_ACP_RUNTIME_TOKEN`` / ``B0_RUNTIME_FAMILY``
+values cross into the child through an explicit environment allowlist, never by
+inheriting the kernel process environment.
 
 Profile wiring is a separate, generated artifact: ``scripts/dsh-b0/acp-profile.mjs``
 writes ``<DSH_HOME>/profiles/analytics-acp`` (the shipped ``acp`` template plus
@@ -92,6 +102,8 @@ from __future__ import annotations
 import json
 import logging
 import os
+import secrets
+import select
 import subprocess
 import threading
 import time
@@ -100,6 +112,7 @@ from pathlib import Path
 from typing import Any, BinaryIO, Callable, Final, Mapping, Protocol
 
 from . import transport
+from .runtime_ports import loopback_origin, runtime_port_base
 
 PROTOCOL_VERSION: Final[int] = 1
 DEFAULT_COMMAND: Final[str] = "dsh"
@@ -107,6 +120,21 @@ DEFAULT_ARGS: Final[tuple[str, ...]] = ("--profile", "analytics-acp")
 CONNECT_ATTEMPTS: Final[int] = 2
 EOF_GRACE_SECONDS: Final[float] = 1.0
 MAX_PROMPT_CHARS: Final[int] = 8000
+DEFAULT_WRITE_TIMEOUT_SECONDS: Final[float] = 5.0
+# The generated profile is a reviewed artifact: health verifies it before
+# admission instead of trusting initialize + session/list alone.
+ACP_PROFILE_NAME: Final[str] = "analytics-acp"
+ACP_PROFILE_PACKAGE: Final[str] = "dsh-profile-analytics-acp"
+ACP_PROFILE_BUNDLES: Final[tuple[str, ...]] = (
+    "@deepseek-ai/dsh-base", "@deepseek-ai/dsh-acp-app")
+ACP_TOOLS_ROW: Final[str] = "@shine-mage/dsh-analytics-workbench-b0/tools"
+ACP_PLUGIN_ROW: Final[str] = "@shine-mage/dsh-analytics-workbench-b0"
+# Child processes are model-driven: never inherit the kernel's full environment.
+# Only the runtime basics plus explicitly configured, scoped values cross.
+CHILD_ENV_ALLOWLIST: Final[frozenset[str]] = frozenset({
+    "PATH", "HOME", "LANG", "LC_ALL", "TZ", "TMPDIR", "TEMP", "TMP",
+    "SYSTEMROOT", "OPENSSL_CONF",
+})
 # A prompt whose run deadline passed after a cancel request gets this long to
 # settle before the transport closes the session and, if needed, restarts the
 # child. Both are bounded deployment knobs, not forced-exit claims.
@@ -136,6 +164,18 @@ class AcpContaminationError(AcpProtocolError):
 
 class AcpChildExited(AcpTransportError):
     """The child process or its protocol stream went away."""
+
+
+class AcpSettlementLost(AcpTransportError):
+    """A prompt that can never settle again: its child died or its deadline expired.
+
+    ``settlement_lost`` is a structural marker so the bridge-agnostic dispatcher
+    can reclaim the attempt without importing this module (the standalone
+    first-purchase kernel never ships it). A generic transport error stays
+    ambiguous and must not release the unique active slot.
+    """
+
+    settlement_lost = True
 
 
 class _RpcError(AcpTransportError):
@@ -247,6 +287,10 @@ class AcpTransport:
         timeout: float = 30.0,
         cancel_grace: float = DEFAULT_CANCEL_GRACE_SECONDS,
         close_timeout: float = DEFAULT_CLOSE_TIMEOUT_SECONDS,
+        write_timeout: float = DEFAULT_WRITE_TIMEOUT_SECONDS,
+        callback_token: str | None = None,
+        verify_profile: bool = False,
+        profile_home: str | None = None,
         logger: logging.Logger | None = None,
     ):
         if not isinstance(cwd, str) or not os.path.isabs(cwd):
@@ -266,12 +310,24 @@ class AcpTransport:
         if (not isinstance(close_timeout, (int, float)) or isinstance(close_timeout, bool)
                 or close_timeout <= 0):
             raise ValueError("ACP close timeout must be positive")
+        if (not isinstance(write_timeout, (int, float)) or isinstance(write_timeout, bool)
+                or write_timeout <= 0):
+            raise ValueError("ACP write timeout must be positive")
+        if callback_token is not None and (not isinstance(callback_token, str) or len(callback_token) < 32):
+            raise ValueError("ACP callback token must be at least 32 characters")
+        if verify_profile and (not isinstance(profile_home, str) or not os.path.isabs(profile_home)):
+            raise ValueError("ACP profile verification requires an absolute home")
         self.cwd = cwd
         self.argv = tuple(argv)
         self.env = dict(env or {})
         self.timeout = float(timeout)
         self.cancel_grace = float(cancel_grace)
         self.close_timeout = float(close_timeout)
+        self.write_timeout = float(write_timeout)
+        self.callback_token = callback_token or secrets.token_urlsafe(32)
+        self._verify_profile = verify_profile
+        self._profile_home = profile_home
+        self._profile_checked = False
         self.logger = logger or logging.getLogger(__name__)
         self._spawn = spawn
         self._state_lock = threading.RLock()
@@ -328,13 +384,37 @@ class AcpTransport:
         close_ms = config.get("acp_close_timeout_ms", int(DEFAULT_CLOSE_TIMEOUT_SECONDS * 1000))
         if type(close_ms) is not int or close_ms <= 0:
             raise ValueError("acp_close_timeout_ms must be a positive integer")
-        env = dict(os.environ)
+        write_ms = config.get("acp_write_timeout_ms", int(DEFAULT_WRITE_TIMEOUT_SECONDS * 1000))
+        if type(write_ms) is not int or write_ms <= 0:
+            raise ValueError("acp_write_timeout_ms must be a positive integer")
+        family = config.get("family", "b0")
+        if family not in {"b0", "channel_followup", "first_purchase"}:
+            raise ValueError("transport=acp requires a supported family")
+        # The child must call the kernel directly; the bridge is bridge-only.
+        raw_base = extra.get("B0_ACP_BASE_URL", config.get("acp_base_url", config.get("base_url")))
+        if raw_base is None:
+            raw_base = f"http://127.0.0.1:{runtime_port_base(config)}"
+        base_url = loopback_origin(raw_base, "acp_base_url")
+        callback_token = extra.get("B0_ACP_RUNTIME_TOKEN", config.get("acp_callback_token"))
+        if callback_token is None:
+            callback_token = secrets.token_urlsafe(32)
+        if not isinstance(callback_token, str) or len(callback_token) < 32:
+            raise ValueError("acp_callback_token must be at least 32 characters")
+        # Explicit allowlist plus the scoped callback values. No other kernel
+        # process variable (provider key, gateway token, state path) crosses.
+        env = {key: value for key, value in os.environ.items() if key in CHILD_ENV_ALLOWLIST}
         env.update(extra)
         # The ACP harness gets its own home; it must never resume a session
         # that belongs to the web host's store (design R7).
         env["DSH_HOME"] = str(home_path)
+        env["B0_ACP_CALLBACK"] = "1"
+        env["B0_ACP_BASE_URL"] = base_url
+        env["B0_ACP_RUNTIME_TOKEN"] = callback_token
+        env["B0_RUNTIME_FAMILY"] = family
         return cls(cwd=cwd, env=env, command=command, args=args, timeout=timeout_ms / 1000,
-                   cancel_grace=grace_ms / 1000, close_timeout=close_ms / 1000)
+                   cancel_grace=grace_ms / 1000, close_timeout=close_ms / 1000,
+                   write_timeout=write_ms / 1000, callback_token=callback_token,
+                   verify_profile=True, profile_home=str(home_path))
 
     # -- seam -------------------------------------------------------------
 
@@ -381,11 +461,46 @@ class AcpTransport:
     # -- operations -------------------------------------------------------
 
     def _health(self, payload: Mapping[str, Any]) -> dict[str, Any]:
+        self._verify_profile_once()
         generation = self._ensure_child()
         response = self._request("session/list", {}, generation, timeout=self.timeout)
         if not isinstance(response.get("sessions"), list):
             raise AcpProtocolError("ACP session/list did not return a session list")
         return {"ready": True}
+
+    def _verify_profile_once(self) -> None:
+        """Verify the generated tools-only profile before admitting any turn.
+
+        ``initialize`` + ``session/list`` prove the ACP app is alive; they do not
+        prove the child mounted the reviewed workbench tools row. Reading the
+        generated profile is cheap, local and fail-closed, and it catches a
+        business/bridge profile or a missing plugin install before a prompt is
+        ever written.
+        """
+        if not self._verify_profile or self._profile_checked:
+            return
+        home = self._profile_home
+        if not isinstance(home, str):
+            raise AcpTransportError("ACP profile verification requires a profile home")
+        profile = Path(home) / "profiles" / ACP_PROFILE_NAME
+        try:
+            package = json.loads((profile / "package.json").read_text(encoding="utf-8"))
+            patch = (profile / "cordis.patch.yml").read_text(encoding="utf-8")
+        except (OSError, ValueError) as error:
+            raise AcpTransportError(
+                f"ACP profile {ACP_PROFILE_NAME} is not installed or unreadable: {error}") from error
+        bundles = package.get("dsh", {}).get("profile", {}).get("bundles")
+        if package.get("name") != ACP_PROFILE_PACKAGE or bundles != list(ACP_PROFILE_BUNDLES):
+            raise AcpTransportError("ACP profile manifest is not the generated analytics-acp composition")
+        rows = [line.strip() for line in patch.splitlines()
+                if line.strip() and not line.strip().startswith("#")]
+        if f"name: '{ACP_PLUGIN_ROW}'" in rows:
+            raise AcpTransportError("ACP profile mounts the business bridge row")
+        if f"name: '{ACP_TOOLS_ROW}'" not in rows:
+            raise AcpTransportError("ACP profile does not mount the workbench tools row")
+        if any("connection" in row or "webServer" in row or "bridge" in row.lower() for row in rows):
+            raise AcpTransportError("ACP profile contains a bridge or browser row")
+        self._profile_checked = True
 
     def _dispatch(self, payload: Mapping[str, Any]) -> dict[str, Any]:
         run_id, attempt_id, session_id, request_id = _correlation(payload)
@@ -439,16 +554,16 @@ class AcpTransport:
             # slot held, exactly like a bridge observation without journal entry.
             return _observation(payload, False, "UNKNOWN", [])
         if prompt.settlement_lost:
-            raise AcpChildExited("ACP prompt settlement was lost with the child process")
+            raise AcpSettlementLost("ACP prompt settlement was lost with the child process")
         if not prompt.settled:
             # The process poll is authoritative even before the reader reports
             # EOF: a dead child can never settle this prompt.
             if not self._child_alive() or session_generation != self._generation:
-                raise AcpChildExited("ACP child holding the prompt is gone")
+                raise AcpSettlementLost("ACP child holding the prompt is gone")
             if self._deadline_passed(prompt):
                 self._expire_prompt(session, prompt)
                 if not prompt.settled:
-                    raise AcpChildExited("ACP prompt deadline expired without settlement")
+                    raise AcpSettlementLost("ACP prompt deadline expired without settlement")
             else:
                 return _observation(payload, False, "RUNNING", [])
         outcome, error_code, exited = _classify_prompt(prompt)
@@ -468,13 +583,14 @@ class AcpTransport:
             raise AcpTransportError("cancel does not belong to the in-flight prompt")
         if not self._child_alive() or session.generation != self._generation:
             raise AcpChildExited("ACP child is not the one that holds this session")
+        self._write_notification("session/cancel", {"sessionId": session.acp_session_id})
         with self._state_lock:
             if prompt is not None and not prompt.settled and not prompt.settlement_lost:
-                # Record intent BEFORE the notification can race a settlement;
-                # an end_turn arriving after this point is read as CANCELLED.
+                # Record intent only after the notification was written: a
+                # settlement that won the race is a real completion, never a
+                # cancel the child never received.
                 prompt.cancel_requested = True
                 prompt.cancel_requested_at = time.monotonic()
-        self._write_notification("session/cancel", {"sessionId": session.acp_session_id})
         # Fire-and-forget by contract: no ack exists and none is invented. Only
         # the prompt response settles the run; observe remains the exit proof.
         return {"accepted": True}
@@ -496,8 +612,9 @@ class AcpTransport:
         applies (including CANCELLED, because it is a real settlement). If no
         settlement arrives, the child is restarted so the old prompt cannot keep
         executing, and the settlement is recorded as LOST. This method never
-        returns an exit claim: the caller must map the missing settlement to
-        UNKNOWN, never to CANCELLED.
+        returns an exit claim: ``AcpSettlementLost`` is the explicit lost signal
+        the dispatcher turns into one FAILED/EXECUTION_UNKNOWN fence, never
+        CANCELLED.
         """
         with self._state_lock:
             if prompt.settled or prompt.settlement_lost or prompt.expiring:
@@ -526,7 +643,7 @@ class AcpTransport:
         with self._state_lock:
             prompt.settlement_lost = True
             prompt.error = "ACP prompt deadline expired without settlement"
-        raise AcpChildExited("ACP prompt deadline expired without settlement")
+        raise AcpSettlementLost("ACP prompt deadline expired without settlement")
 
     # -- child lifecycle --------------------------------------------------
 
@@ -581,7 +698,8 @@ class AcpTransport:
         if child is None:
             return
         try:
-            child.stdin.close()
+            with self._io_lock:
+                child.stdin.close()
         except Exception:  # noqa: BLE001 - a closed pipe is already retired
             pass
         if not kill:
@@ -597,12 +715,15 @@ class AcpTransport:
             child.wait(timeout=EOF_GRACE_SECONDS)
         except Exception:  # noqa: BLE001 - reader EOF still retires the transport
             pass
-        for stream in (child.stdout, child.stderr):
-            try:
-                if stream is not None:
-                    stream.close()
-            except Exception:  # noqa: BLE001
-                pass
+        # Serialize stream teardown with writes/responses, but never join the
+        # reader while holding _io_lock: the reader may need that lock itself.
+        with self._io_lock:
+            for stream in (child.stdout, child.stderr):
+                try:
+                    if stream is not None:
+                        stream.close()
+                except Exception:  # noqa: BLE001
+                    pass
         reader, self._reader = self._reader, None
         if reader is not None and reader is not threading.current_thread():
             reader.join(timeout=EOF_GRACE_SECONDS)
@@ -684,8 +805,42 @@ class AcpTransport:
         if child is None or child.stdin is None or self._dead:
             raise AcpChildExited("ACP child is not running")
         payload = json.dumps(message, ensure_ascii=True, separators=(",", ":")).encode("utf-8") + b"\n"
-        child.stdin.write(payload)
-        child.stdin.flush()
+        try:
+            fd = child.stdin.fileno()
+        except (AttributeError, OSError, ValueError) as error:
+            raise AcpChildExited(f"ACP child stdin has no writable descriptor: {error}") from error
+        # A model-driven child can stop reading stdin forever. Bound the write
+        # at the descriptor and retire the child instead of blocking the tick.
+        view = memoryview(payload)
+        deadline = time.monotonic() + self.write_timeout
+        while view:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                self._kill_quietly(child)
+                raise AcpTransportError("ACP write timed out")
+            try:
+                _, writable, _ = select.select([], [fd], [], remaining)
+            except (OSError, ValueError) as error:
+                raise AcpChildExited(f"ACP write wait failed: {error}") from error
+            if not writable:
+                self._kill_quietly(child)
+                raise AcpTransportError("ACP write timed out")
+            try:
+                written = os.write(fd, view)
+            except BlockingIOError:
+                continue
+            except OSError as error:
+                raise AcpChildExited(f"ACP write failed: {error}") from error
+            if written <= 0:
+                raise AcpChildExited("ACP write returned no bytes")
+            view = view[written:]
+
+    @staticmethod
+    def _kill_quietly(child: AcpChild) -> None:
+        try:
+            child.kill()
+        except Exception:  # noqa: BLE001 - teardown never replaces the write error
+            pass
 
     # -- reader -----------------------------------------------------------
 
@@ -938,12 +1093,16 @@ def _classify_prompt(prompt: _Prompt) -> tuple[str, str | None, bool]:
             # while the cancel was in flight.
             return "CANCELLED", None, True
         if not prompt.tool_calls:
-            # rc.5 collapses blocked/aborted into end_turn; without tool-call
-            # evidence this is UNKNOWN, never a manufactured success.
-            return "UNKNOWN", None, False
+            # rc.5 collapses blocked/aborted into end_turn; without a completed
+            # tool call this attempt has no success evidence. The prompt response
+            # still proves the turn ended, so the slot is released through the
+            # fail-closed EXECUTION_UNKNOWN fence rather than held forever.
+            return "FAILED", "EXECUTION_UNKNOWN", True
         return "SUCCEEDED", None, True
     if stop_reason == "cancelled":
         return "CANCELLED", None, True
     if stop_reason in {"max_tokens", "max_turn_requests", "refusal"}:
         return "FAILED", "MODEL_FAILED", True
-    return "UNKNOWN", None, False
+    # A settled prompt with an unknown stop reason is still exit evidence, but
+    # it can never be a manufactured success or cancellation.
+    return "FAILED", "EXECUTION_UNKNOWN", True

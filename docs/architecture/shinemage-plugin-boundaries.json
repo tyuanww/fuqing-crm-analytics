@@ -76,13 +76,13 @@
       },
       "commands": {
         "build": "node build.mjs",
-        "test": "node --test test/model.test.mjs test/initial-session.test.mjs test/native-account-settings.test.mjs test/native-evidence.test.mjs test/run-view.test.mjs test/page-navigation-continuity.test.mjs test/cockpit-shell-contract.test.mjs test/client-request-envelope.test.mjs test/connection-fetch-ledger.test.mjs test/connection-fetch-ownership.test.mjs src/client/competition-shell/competition-shell.test.mjs && pnpm test:html-edit",
+        "test": "node --test test/model.test.mjs test/initial-session.test.mjs test/native-account-settings.test.mjs test/native-evidence.test.mjs test/acp-callback.test.mjs test/run-view.test.mjs test/page-navigation-continuity.test.mjs test/cockpit-shell-contract.test.mjs test/client-request-envelope.test.mjs test/connection-fetch-ledger.test.mjs test/connection-fetch-ownership.test.mjs src/client/competition-shell/competition-shell.test.mjs && pnpm test:html-edit",
         "test:html-edit": "node --test src/client/source-authorization.test.mjs src/client/ai-edit-target.test.mjs src/client/free-html-library/generate-context.test.mjs src/client/protected-page-edit.test.mjs src/free-page/resource/package-normalize.test.mjs src/client/free-html-library/html-import.test.mjs src/client/html-selection-bridge.test.mjs src/client/free-html-library/store.test.mjs src/client/free-html-library/p12-live-adapters.test.mjs src/client/free-html-library/native-page-http.test.mjs src/client/free-html-library/native-preview-entry.test.mjs src/client/free-html-library/source-draft.test.mjs test/cockpit-ai-client.test.mjs test/ai-preview-overlay-regression.test.mjs src/client/navigation/navigation-epoch.test.mjs src/free-page/edit/intent-router.test.mjs src/free-page/edit/selection-context.test.mjs test/dynamic-chart-browser-seam.test.mjs test/draft-save-regression.test.mjs test/canvas-input-regression.test.mjs test/open-native-html-artifact.test.mjs src/free-page/preview/srcdoc-builder.test.mjs src/client/host-facts.test.mjs src/client/library-workspace.test.mjs src/client/page-package-card.test.mjs src/client/cockpit-page-tab.test.mjs",
         "test:built": "node --test test/built.test.mjs test/runtime-dependencies.test.mjs",
         "test:host-facts": "node --test src/client/host-facts.test.mjs src/client/library-workspace.test.mjs",
         "test:host-facts:browser": "node src/client/host-facts-browser.test.mjs"
       },
-      "manifest_sha256": "4240613a1d225c807de260c2422938c206a802e82ecb85b8d876e9ce8e466133"
+      "manifest_sha256": "f831ec5a7890309269f517e1ecc747fd0c7246e3643c6ccfff4c62b3016f21f9"
     },
     {
       "path": "dsh-plugins/board-components",
@@ -651,7 +651,7 @@
       "manifest_sha256": "e6ade327d5fa086dd9fd07c46b1a6ec29e9349b8a4dc6086baa1280e44661377"
     }
   ],
-  "source_files_scanned": 680,
+  "source_files_scanned": 682,
   "cross_package_edges": [
     {
       "consumer": "analytics-workbench",
@@ -1735,6 +1735,20 @@
     {
       "consumer": "analytics-workbench",
       "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/acp-callback.mjs",
+      "route": "/internal/acp/run-context",
+      "contract": "INTERNAL_NOT_PUBLIC"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/acp-callback.mjs",
+      "route": "/internal/acp/tool-call",
+      "contract": "INTERNAL_NOT_PUBLIC"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
       "source": "dsh-plugins/analytics-workbench/src/asset-http.mjs",
       "route": "/b0/assets",
       "contract": "OBSERVED_NOT_FROZEN"
@@ -2151,6 +2165,20 @@
       "source": "dsh-plugins/analytics-workbench/src/free-page/resource/network-policy.test.mjs",
       "route": "/api/stream",
       "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/acp-callback.test.mjs",
+      "route": "/internal/acp/run-context",
+      "contract": "INTERNAL_NOT_PUBLIC"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/acp-callback.test.mjs",
+      "route": "/internal/acp/tool-call",
+      "contract": "INTERNAL_NOT_PUBLIC"
     },
     {
       "consumer": "analytics-workbench",

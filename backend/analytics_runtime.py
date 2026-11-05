@@ -16,6 +16,7 @@ from typing import Annotated, Literal
 
 from fastapi import Request
 from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from pydantic import Field, field_validator
 from starlette.concurrency import run_in_threadpool
 
@@ -36,7 +37,10 @@ from backend.services.analytics.cockpit import CockpitStore
 from backend.services.analytics.jobs import RunStore
 from backend.services.analytics.saved_analyses import SavedAnalysisStore
 from backend.services.analytics.resource_profile import B0ResourceProfile, B0_SMALL_FIXTURE_PROFILE
-from backend.services.analytics.runtime import HostBridge, RunDispatcher, execute_native_fixture, execute_native_query
+from backend.services.analytics.runtime import (
+    HostBridge, RunDispatcher, execute_acp_fixture, execute_acp_first_purchase,
+    execute_acp_query, execute_native_fixture, execute_native_query,
+)
 from backend.services.analytics.worker import WorkerManager
 
 
@@ -81,6 +85,29 @@ class QueryNativeStep(AnalyticsModel):
     request: ChannelFollowupQueryRequest
 
 
+class AcpToolCall(AnalyticsModel):
+    """Binding-correlated ACP tool call: no kernel session/request id crosses.
+
+    The child only knows its ACP session id and the model tool-call id. The
+    kernel resolves both through ``acp_bindings`` and never trusts a model
+    supplied session/request pair.
+    """
+
+    acp_session_id: OpaqueId
+    call_id: OpaqueId
+    query: Literal["channel_repeat_rate"] | None = None
+    request: dict | None = None
+
+
+class AcpContextRequest(AnalyticsModel):
+    """Binding-correlated ACP pre-step context read; same C2 join as a tool call."""
+
+    acp_session_id: OpaqueId
+    unit_id: OpaqueId
+    package_digest: Annotated[str, Field(pattern=r"^[a-f0-9]{64}$")]
+    resource: Literal["SKILL.md", "references/evidence-policy.md", "assets/result-example.json"] | None = None
+
+
 def _attach_lifecycle(app, dispatcher):
     @asynccontextmanager
     async def lifecycle(_app):
@@ -106,6 +133,73 @@ def _attach_lifecycle(app, dispatcher):
                 dispatcher.close()
 
     app.router.lifespan_context = lifecycle
+
+
+def _attach_acp_callback(app, host, config) -> None:
+    """Mount the binding-correlated ACP callbacks on an ACP runtime only.
+
+    These are transport callbacks, not native tool surfaces: they exist only
+    when the host transport supplies a per-boot callback token, so the
+    family-based ``/internal/native`` route table stays transport-neutral and
+    the bridge default mounts nothing. The token is passed to the child through
+    its scoped environment and authorizes exactly these model-driven reads.
+    """
+    token = getattr(host, "callback_token", None)
+    if not isinstance(token, str) or not token:
+        return
+    dispatcher = getattr(app.state, "dispatcher", None)
+    store = getattr(app.state, "store", None)
+    workers = getattr(app.state, "workers", None)
+    if dispatcher is None or store is None:
+        return
+    family = config.get("family", "b0")
+
+    @app.post("/internal/acp/run-context", include_in_schema=False)
+    def acp_run_context(payload: AcpContextRequest, request: Request):
+        credential = _single_header(request, "authorization")
+        if not credential or not secrets.compare_digest(credential, "Bearer " + token):
+            raise AnalyticsError(401, "UNAUTHENTICATED", "需要运行时能力。")
+        expected = config.get("method_package_digest")
+        if not isinstance(expected, str) or len(expected) != 64 or payload.package_digest != expected:
+            raise AnalyticsError(409, "METHOD_VERSION_MISMATCH", "方法包版本未绑定或发生变化。")
+        session_id, request_id = store.acp_correlation(payload.acp_session_id)
+        matches = store.runtime_work(session_id=session_id, request_id=request_id)
+        if len(matches) != 1:
+            raise AnalyticsError(409, "UNBOUND_NATIVE_REQUEST", "当前原生请求没有已登记的任务绑定。")
+        work = matches[0]
+        principal = dispatcher.resolve_actor(work["owner"])
+        if principal is None:
+            raise AnalyticsError(403, "FORBIDDEN", "当前任务身份已失效。")
+        state = store.rebuild_context(
+            principal, work["intent"].run_id, work["intent"].attempt_id,
+            package_digest=expected, unit_id=payload.unit_id, resource=payload.resource)
+        # The child-facing identity is its own ACP session id; the kernel
+        # session/request pair never leaves the resolver.
+        return {**state, "session_id": payload.acp_session_id, "request_id": payload.acp_session_id}
+
+    @app.post("/internal/acp/tool-call", include_in_schema=False)
+    def acp_tool_call(payload: AcpToolCall, request: Request):
+        credential = _single_header(request, "authorization")
+        if not credential or not secrets.compare_digest(credential, "Bearer " + token):
+            raise AnalyticsError(401, "UNAUTHENTICATED", "需要运行时能力。")
+        if family == "b0":
+            if payload.query is None or payload.request is not None:
+                raise AnalyticsError(422, "INVALID_REQUEST", "ACP 工具调用与当前任务合同不匹配。")
+            return execute_acp_fixture(store, dispatcher.resolve_actor, payload.acp_session_id,
+                                       payload.call_id, payload.query, workers=workers)
+        if family == "channel_followup":
+            if payload.request is None or payload.query is not None:
+                raise AnalyticsError(422, "INVALID_REQUEST", "ACP 工具调用与当前任务合同不匹配。")
+            return execute_acp_query(store, dispatcher.resolve_actor, payload.acp_session_id,
+                                     payload.call_id, payload.request, workers=workers)
+        if family == "first_purchase":
+            if payload.request is None or payload.query is not None:
+                raise AnalyticsError(422, "INVALID_REQUEST", "ACP 工具调用与当前任务合同不匹配。")
+            status, receipt = execute_acp_first_purchase(
+                store, dispatcher.resolve_actor, payload.acp_session_id, payload.call_id,
+                payload.request, workers=workers)
+            return JSONResponse(status_code=status, content=receipt)
+        raise AnalyticsError(409, "FAMILY_MISMATCH", "任务合同与当前实例不一致。")
 
 
 QUERY_CAPABILITIES = frozenset({"run:create", "run:read", "run:cancel"})
@@ -277,11 +371,13 @@ def runtime_app(config, *, bridge=None):
     family = config.get("family", "b0")
     if family == QUERY_RUN_FAMILY:
         app = _query_runtime_app(config, bridge=host)
+        _attach_acp_callback(app, host, config)
         assert_native_routes(app, family)
         return app
     if family == "first_purchase":
         from backend.analytics_first_purchase_native import create_first_purchase_native_app
         app = create_first_purchase_native_app(config, bridge=host)
+        _attach_acp_callback(app, host, config)
         assert_native_routes(app, family)
         return app
     if family != "b0":
@@ -381,6 +477,7 @@ def runtime_app(config, *, bridge=None):
         runtime_identity(request, payload.session_id)
         return execute_native_fixture(store, resolve_actor, payload.session_id, payload.request_id, payload.call_id, payload.query, workers=workers)
 
+    _attach_acp_callback(app, host, config)
     assert_native_routes(app, "b0")
     return app
 

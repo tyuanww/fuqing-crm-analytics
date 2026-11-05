@@ -1,4 +1,5 @@
 import { NATIVE_BOUNDS, kernelUrl, resolveNativeRuntime } from './runtime-endpoints.ts';
+import { acpCallbackEnabled, acpCallbackPayload, acpCallbackUrl } from './acp-callback.mjs';
 import { toolSurface } from './native-tools.mjs';
 import type { Context } from '@deepseek-ai/cordis';
 import { defineTool } from '@deepseek-ai/dsh-tools';
@@ -78,14 +79,27 @@ export function apply(ctx: Context, config: unknown = {}): void {
       exec.signal.throwIfAborted();
       const token = runtime.runtimeToken;
       const agent = exec.agent;
-      if (!token || !agent || !isRegisteredSession(agent.id)) throw new Error('first-purchase tool has no bound execution context');
+      if (!token || !agent) throw new Error('first-purchase tool has no bound execution context');
       const request = decodeFirstPurchaseRequest(args);
       if (!request) throw new Error('first-purchase tool rejected invalid parameters');
-      const requestId = requestForToolIn(await nativeJournal(ctx).ready(agent.session), exec.callId);
-      if (!requestId) throw new Error('first-purchase tool has no journal-correlated native request');
-      const response = await fetch(kernelUrl(runtime, surface.id), {
+      let url: string;
+      let body: Record<string, unknown>;
+      let requestId: string | undefined;
+      if (acpCallbackEnabled()) {
+        // ACP C2: no kernel request id exists in the child; the kernel returns
+        // the authoritative one in the receipt and the call id is still bound.
+        url = acpCallbackUrl(runtime.kernelOrigin);
+        body = acpCallbackPayload(agent, exec.callId, { request });
+      } else {
+        if (!isRegisteredSession(agent.id)) throw new Error('first-purchase tool has no bound execution context');
+        requestId = requestForToolIn(await nativeJournal(ctx).ready(agent.session), exec.callId);
+        if (!requestId) throw new Error('first-purchase tool has no journal-correlated native request');
+        url = kernelUrl(runtime, surface.id);
+        body = { session_id: agent.id, request_id: requestId, call_id: exec.callId, request };
+      }
+      const response = await fetch(url, {
         method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
-        body: JSON.stringify({ session_id: agent.id, request_id: requestId, call_id: exec.callId, request }),
+        body: JSON.stringify(body),
         signal: AbortSignal.any([exec.signal, AbortSignal.timeout(NATIVE_BOUNDS.toolTimeoutMs)]), redirect: 'error',
       });
       if (response.status !== 200 && response.status !== 202) {
@@ -98,7 +112,8 @@ export function apply(ctx: Context, config: unknown = {}): void {
         throw new Error(code === 'TOOL_FAILED' ? 'first-purchase run failed' : 'first-purchase run kernel refused tool execution');
       }
       const receipt = decodeFirstPurchaseReceipt(await readBoundedJson(response, FIRST_PURCHASE_RECEIPT_LIMIT));
-      if (!receipt || !receiptMatchesRequest(receipt, request, { requestId, callId: exec.callId })) {
+      if (!receipt || !receiptMatchesRequest(receipt, request,
+        requestId === undefined ? { callId: exec.callId } : { requestId, callId: exec.callId })) {
         throw new Error('first-purchase run kernel returned invalid receipt');
       }
       if (response.status === 202 && receipt.disposition !== 'IN_FLIGHT') {
