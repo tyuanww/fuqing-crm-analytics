@@ -13,13 +13,13 @@
     "repository": "tyuanww/fuqing-crm-analytics",
     "workflow": "dsh-release-preflight",
     "branch": "main",
-    "run_id": null,
-    "artifact_id": null,
-    "artifact_sha256": null,
-    "artifact_head_sha": null,
-    "expires_at": null,
-    "status": "NOT_RUN",
-    "remote_main": "NOT_RUN"
+    "run_id": 42047750019,
+    "artifact_id": 13425154354,
+    "artifact_sha256": "56f6f7c9dfb7d9ed1f8ef96f0edaf9a5b2d9671186726bdf9feb23ea47348747",
+    "artifact_head_sha": "545be05d8fd9f2b59f6147898716e27827b2b1f9",
+    "expires_at": "2027-02-03T14:43:24Z",
+    "status": "PASS",
+    "remote_main": "PASS"
   },
   "toolchain": {
     "sdk_version": "0.2.1-rc.5",
@@ -123,7 +123,6 @@
   "deletion_gate": {
     "status": "BLOCKED",
     "blocking_reasons": [
-      "remote_main_not_verified",
       "production_only_closure_not_recorded"
     ]
   },
