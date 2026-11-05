@@ -104,7 +104,7 @@ test('the lock admits push evidence only with the default branch recorded', asyn
   const original = JSON.parse(await readFile(lockFile));
   for (const [edit, code] of [
     [row => { row.archive.event = 'merge'; }, /DOMAIN_AUTHOR_EVENT/],
-    [row => { row.archive.event = 'push'; }, /DOMAIN_AUTHOR_PUSH_BRANCH/],
+    [row => { row.archive.event = 'push'; delete row.archive.head_branch; }, /DOMAIN_AUTHOR_PUSH_BRANCH/],
     [row => { row.archive.event = 'push'; row.archive.head_branch = 'release'; }, /DOMAIN_AUTHOR_PUSH_BRANCH/],
   ]) {
     const row = structuredClone(original); edit(row); await writeFile(lockPath, json(row));
@@ -193,7 +193,7 @@ async function remoteFixture(t, { badSource = false, badDigest = false } = {}) {
   const { mkdir } = await import('node:fs/promises'); await mkdir(bin);
   const lock = JSON.parse(await readFile(lockFile));
   const run = { head_sha: badSource ? '0'.repeat(40) : lock.source_sha, event: lock.archive.event,
-    run_attempt: lock.archive.attempt, status: 'completed', conclusion: 'success' };
+    head_branch: lock.archive.head_branch, run_attempt: lock.archive.attempt, status: 'completed', conclusion: 'success' };
   const artifact = { id: lock.archive.artifact_id, expired: false,
     workflow_run: { id: lock.archive.run_id, head_sha: lock.source_sha },
     digest: `sha256:${badDigest ? '0'.repeat(64) : lock.archive.sha256}`, size_in_bytes: lock.archive.bytes };
@@ -217,7 +217,8 @@ test('owned mock acquisition preserves original archive/input and rejects output
   assert.equal(result.release_ready, false);
   assert.equal(await readFile(f.githubEnv, 'utf8'), `DOMAIN_AUTHOR_CI_ARCHIVE=${join(await realpath(f.output), 'author-ci.zip')}\n`);
   assert.throws(f.invoke, /DOMAIN_AUTHOR_OUTPUT_EXISTS/);
-  assert.equal((await readFile(join(f.directory, 'calls.log'), 'utf8')).trim().split('\n').length, 3);
+  assert.equal((await readFile(join(f.directory, 'calls.log'), 'utf8')).trim().split('\n').length,
+    result.archive.event === 'push' ? 4 : 3);
 });
 
 test('owned mock acquisition rejects wrong source and digest before creating output', options, async t => {
