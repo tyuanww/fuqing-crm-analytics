@@ -16,6 +16,7 @@ import { canonicalTreeDigest, GENERATED_PROVENANCE_SCHEMA } from './generated-pr
 import { comparablePackageBytes } from './runtime-package-identity.mjs';
 import { assertPeerAliasesPresent } from './runtime-peer-aliases.mjs';
 import { pruneUnsupportedLinuxNative, rewriteGeneratedPathShims, verifyPortableLinuxRuntime } from './runtime-portability.mjs';
+import { clientTitleFromEnvironment, clientTitleProvenance, installClientRuntimeTitle, rewriteClientRuntimeTitle } from './client-runtime-title.mjs';
 
 const execFile = promisify(execFileCallback);
 const REQUIRED = [
@@ -389,7 +390,15 @@ const deployed = join(work, 'dsh');
 try {
   if (online) await prepareRuntimeInputs(upstream);
   const workspace = await stageRuntimeWorkspace(upstream, join(work, 'workspace'));
+  const preparedSourceTree = await runtimeSourceTree(workspace);
+  if (preparation) assert.equal(preparedSourceTree.sha256, preparation.source_tree.sha256, 'RUNTIME_SOURCE_TREE_MISMATCH');
   const restoreStagedMetadata = await bindRuntimeInputs(upstream, workspace, work);
+  // The title is a build input: rewrite the staged client artifacts before
+  // `pnpm deploy` so every deployed copy derives from the shipped bytes. With
+  // no DSH_CLIENT_TITLE the staged tree is untouched and the bundle is the
+  // pinned official output.
+  const clientTitle = clientTitleFromEnvironment(process.env);
+  const clientTitleBuild = clientTitle === null ? null : await rewriteClientRuntimeTitle(workspace, { title: clientTitle });
   // A production runtime must never execute upstream lifecycle hooks in the
   // temporary deploy directory. Preparation already hydrated and built the
   // pinned checkout; deploy only materializes those verified files.
@@ -410,11 +419,11 @@ try {
     maxBuffer: 4 * 1024 * 1024,
   });
   await restoreStagedMetadata();
-  const sourceTree = await runtimeSourceTree(workspace);
-  if (preparation) assert.equal(sourceTree.sha256, preparation.source_tree.sha256, 'RUNTIME_SOURCE_TREE_MISMATCH');
+  const sourceTree = clientTitleBuild === null ? preparedSourceTree : await runtimeSourceTree(workspace);
   const materialized = await materializeExternalSymlinks(deployed, workspace, upstreamSha, { portableLinux, sourceRoot: upstream });
   const rewrittenPathShims = portableLinux ? await rewriteGeneratedPathShims(deployed) : 0;
   const removedNative = portableLinux ? await pruneUnsupportedLinuxNative(deployed) : [];
+  const runtimeClientPaths = clientTitleBuild === null ? [] : installClientRuntimeTitle(workspace, deployed, clientTitleBuild);
   const portable = portableLinux ? await verifyPortableLinuxRuntime(deployed) : null;
   for (const path of REQUIRED) await access(join(deployed, path));
   await execFile('tar', ['--zstd', '--no-xattrs', '--no-acls', '-cf', output, '-C', deployed, '.'], { maxBuffer: 4 * 1024 * 1024 });
@@ -432,11 +441,19 @@ try {
       platform: process.platform, arch: process.arch, command: 'scripts/release/runtime-bundle.mjs',
       network_mode: online ? 'online' : 'offline' },
     preparation_receipt_sha256: preparation?.receipt_sha256 ?? null,
+    ...(clientTitleBuild === null ? {} : {
+      client_title_build: clientTitleProvenance({
+        build: clientTitleBuild,
+        preparedSourceTree,
+        shippedSourceTree: sourceTree,
+        runtimePaths: runtimeClientPaths,
+      }),
+    }),
     portable_linux: portable ? { ...portable, rewritten_path_shims: rewrittenPathShims, removed_native: removedNative } : null,
     archive: { name: output.split('/').at(-1), bytes: info.size, sha256: archiveSha256 },
   };
   await writeFile(provenanceOption, `${JSON.stringify(provenance, null, 2)}\n`, { mode: 0o600, flag: 'wx' });
-  console.log(JSON.stringify({ status: 'BUILT', upstream_sha: upstreamSha, network_mode: online ? 'online' : 'offline', portable_linux: portableLinux, path: output, provenance: provenanceOption, bytes: info.size, sha256: archiveSha256, ...materialized, rewritten_path_shims: rewrittenPathShims, removed_native: removedNative }));
+  console.log(JSON.stringify({ status: 'BUILT', upstream_sha: upstreamSha, network_mode: online ? 'online' : 'offline', portable_linux: portableLinux, path: output, provenance: provenanceOption, bytes: info.size, sha256: archiveSha256, ...(clientTitleBuild === null ? {} : { client_title: clientTitleBuild.status }), ...materialized, rewritten_path_shims: rewrittenPathShims, removed_native: removedNative }));
 } finally {
   await rm(work, { recursive: true, force: true });
 }

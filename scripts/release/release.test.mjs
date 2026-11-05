@@ -426,7 +426,24 @@ test('runtime bundle enforces production pruning, secret scan and peer collision
   assert.match(source, /archiveSha256/);
   assert.match(source, /generatedTree/);
   assert.match(source, /cwd: workspace/);
+  assert.match(source, /clientTitleFromEnvironment\(process\.env\)/);
+  assert.match(source, /rewriteClientRuntimeTitle\(workspace, \{ title: clientTitle \}\)/);
+  assert.match(source, /sourceTree = clientTitleBuild === null \? preparedSourceTree : await runtimeSourceTree\(workspace\)/);
+  assert.match(source, /installClientRuntimeTitle\(workspace, deployed, clientTitleBuild\)/);
+  assert.match(source, /client_title_build/);
+  assert.doesNotMatch(source, /rewriteClientRuntimeTitle\(workspace\)/);
   assert.doesNotMatch(source, /scanAssignments:\s*!\/\(\^\|\\\/\)node_modules/);
+});
+test('runtime bundle keeps the title rewrite inert without an explicit build input', async () => {
+  const source = await readFile(join(process.cwd(), 'scripts/release/runtime-bundle.mjs'), 'utf8');
+  const title = await readFile(join(process.cwd(), 'scripts/release/client-runtime-title.mjs'), 'utf8');
+  assert.match(title, /prepared_source_tree/);
+  assert.match(title, /shipped_source_tree/);
+  assert.match(source, /const clientTitleBuild = clientTitle === null \? null : await rewriteClientRuntimeTitle/);
+  assert.match(source, /clientTitleBuild === null \? preparedSourceTree : await runtimeSourceTree/);
+  assert.match(source, /clientTitleBuild === null \? \[\] : installClientRuntimeTitle/);
+  assert.match(source, /clientTitleBuild === null \? \{\} : \{/);
+  assert.match(source, /clientTitleBuild === null \? \{\} : \{ client_title: clientTitleBuild\.status \}/);
 });
 test('runtime peer identity ignores development-only metadata', () => {
   const source = Buffer.from(JSON.stringify({ name: '@deepseek-ai/example', version: '1.0.0', devDependencies: { test: '1.0.0' }}));
