@@ -9,7 +9,7 @@ all passed. It deliberately does **not** clear `remote_main_not_verified`
 and does not claim a real production host.
 
 - Tested ref: `origin/main`
-- Commit: `8bb713e86277dae0b800e2d86ab6eabb88386221` (2026-11-05T21:52:56+08:00)
+- Commit: `d53a573dd8274786a2a0ca2890fa66ddd1c68c53` (2026-11-05T23:24:01+08:00)
 - Verdict: **PASS**
 - Install mode: `PRODUCTION_ONLY`
 - Absence boundary: S1/S2/S3/S5 delete exactly the ten plugin source trees; dsh-plugins/{contracts,plugin-kit} stay in main, query-agent stays under the S4 retention decision, and locks, manifests, profiles, packs and release scripts are retained.
@@ -39,7 +39,7 @@ and does not claim a real production host.
 | Input | Path / id | SHA-256 |
 |---|---|---|
 | lock | `config/shinemage-composition-packs.lock.json` | `81a10f70e7f4a220676cdfb0e15a4422e6ceef65988cf0406452bd965adb2842` |
-| manifest | `config/shinemage-composition-pack-manifest.v1.json` | `0dc8070def4a271f4ba3e005c8bdd246076fde81551dc30a5a72d6efbc83a794` |
+| manifest | `config/shinemage-composition-pack-manifest.v1.json` | `29055f92d0ac8d739a01091a4252470e6b8b4ab747cc1c10203ca22dc40f5931` |
 | artifact lock | `config/shinemage-composition-artifact.lock.json` | `5fcd381b564bc60fcf0e0f83d54f863199b262c2414b9b9f4b9e1d67a28e0493` |
 | sealed artifact | `id 13417537931 / run 42035243845` | `b1fb2976c6299136224240422f5f64a701e36100ecd73ef40b234a235b358589` |
 
@@ -49,15 +49,15 @@ and does not claim a real production host.
 |---|---|
 | node | `v24.19.0` |
 | pnpm | `11.28.2` |
-| python | `3.14.8` |
-| platform | `darwin` |
-| arch | `arm64` |
+| python | `3.14.10` |
+| platform | `linux` |
+| arch | `x64` |
 | install_mode | `PRODUCTION_ONLY` |
-| commit_date | `2026-11-05T21:52:56+08:00` |
+| commit_date | `2026-11-05T23:24:01+08:00` |
 
 ## What this proves
 
-- `git archive` of `8bb713e86277dae0b800e2d86ab6eabb88386221` contains no `.git` and no untracked files; the rehearsal never touched the caller's worktree.
+- `git archive` of `d53a573dd8274786a2a0ca2890fa66ddd1c68c53` contains no `.git` and no untracked files; the rehearsal never touched the caller's worktree.
 - The ten deleted trees were removed from the temp copy with `rm -rf`; the retained `contracts`, `plugin-kit` and `query-agent` trees were asserted to survive.
 - Both profile digests, the business-profile re-derivation, the source-manifest/lock binding and all nine pack manifest/pack digests were read from the locks, not from plugin source.
 - The pack readers and 16 backend/kernel modules imported from the copied tree with plugin sources absent.
@@ -89,8 +89,8 @@ absence, lock and import checks; a committed receipt must be a full PASS.
   "schema_version": "shinemage-production-only-closure-receipt/v1",
   "verdict": "PASS",
   "ref": "origin/main",
-  "commit": "8bb713e86277dae0b800e2d86ab6eabb88386221",
-  "tree": "4ea2c2d09fa6c7dc5e6f98093abb89557a5710fa",
+  "commit": "d53a573dd8274786a2a0ca2890fa66ddd1c68c53",
+  "tree": "4bd688483683bfac5f924789da27a68573ec0056",
   "absence": {
     "simulated_absent": [
       "analytics-workbench",
@@ -118,7 +118,7 @@ absence, lock and import checks; a committed receipt must be a full PASS.
     },
     "manifest": {
       "path": "config/shinemage-composition-pack-manifest.v1.json",
-      "sha256": "0dc8070def4a271f4ba3e005c8bdd246076fde81551dc30a5a72d6efbc83a794"
+      "sha256": "29055f92d0ac8d739a01091a4252470e6b8b4ab747cc1c10203ca22dc40f5931"
     },
     "artifact_lock": {
       "path": "config/shinemage-composition-artifact.lock.json",
@@ -220,11 +220,11 @@ absence, lock and import checks; a committed receipt must be a full PASS.
   "environment": {
     "node": "v24.19.0",
     "pnpm": "11.28.2",
-    "python": "3.14.8",
-    "platform": "darwin",
-    "arch": "arm64",
+    "python": "3.14.10",
+    "platform": "linux",
+    "arch": "x64",
     "install_mode": "PRODUCTION_ONLY",
-    "commit_date": "2026-11-05T21:52:56+08:00"
+    "commit_date": "2026-11-05T23:24:01+08:00"
   },
   "checks": [
     {
@@ -290,7 +290,7 @@ absence, lock and import checks; a committed receipt must be a full PASS.
   ],
   "composition": {
     "lock_sha256": "81a10f70e7f4a220676cdfb0e15a4422e6ceef65988cf0406452bd965adb2842",
-    "source_manifest_sha256": "0dc8070def4a271f4ba3e005c8bdd246076fde81551dc30a5a72d6efbc83a794",
+    "source_manifest_sha256": "29055f92d0ac8d739a01091a4252470e6b8b4ab747cc1c10203ca22dc40f5931",
     "profiles": [
       {
         "name": "crm",
@@ -383,8 +383,8 @@ absence, lock and import checks; a committed receipt must be a full PASS.
     }
   },
   "release_payload": {
-    "files": 1642,
-    "bytes": 24193805,
+    "files": 1647,
+    "bytes": 24307197,
     "profile_pack_snapshot": {
       "path": "shinemage-release-pack-inputs.json",
       "sha256": "b8d69e799f07ee83cab4bd192244eb5da6cae27622fb83ca8dcb154c58614dff"
