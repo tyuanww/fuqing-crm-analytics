@@ -1,0 +1,354 @@
+{
+  "schema": "shinemage-kit-vendored/v1",
+  "package": "@shine-mage/dsh-plugin-kit",
+  "observed_at": "2026-11-05",
+  "observed_with": "gh api repos/tyuanww/<repo>/{commits/main,contents/vendor,contents/vendor/KIT-SHA256,pulls}; read-only",
+  "authoritative": {
+    "version": "0.1.1",
+    "sha256": "e22161688cbc7bc345e64264223c9aa367e859a8dccd000a65b91c6621559fdb",
+    "bytes": 49341,
+    "entries": 19,
+    "tarball": "shine-mage-dsh-plugin-kit-0.1.1.tgz",
+    "commit": "f8aa3fa9daba13266c9e28e0211cc5e6fc689cff",
+    "commit_subject": "Merge pull request #246 from tyuanww/codex/p4-runbook-corrections-20261105",
+    "cut_tool": "scripts/dsh-b0/cut-kit-artifact.mjs",
+    "pin": {
+      "node_major": 24,
+      "pnpm": "11.28.2"
+    },
+    "surface": {
+      "exports": [
+        "./toolchain",
+        "./provenance",
+        "./client-banner",
+        "./packaged-dependencies",
+        "./pin",
+        "./package.json"
+      ],
+      "contract_package_name": "@shine-mage/dsh-contracts"
+    },
+    "also_proven_at": "8da3c613"
+  },
+  "history": [
+    {
+      "label": "kit-0.1.0-author-main",
+      "version": "0.1.0",
+      "sha256": "251383e18a76fe345ac837d8767f6c325c4616c027e2ea250d2dcec45b22c901",
+      "bytes": 43944,
+      "entries": 17,
+      "note": "Still vendored by all 10 author mains on 2026-11-05 (vendor/dsh-plugin-kit-0.1.0.tgz). 17 members; no provenance.mjs or client-banner.mjs and no ./provenance or ./client-banner export, so it cannot build the rc.5 authors."
+    },
+    {
+      "label": "kit-0.1.1-pre-a9980f3-pr",
+      "version": "0.1.1",
+      "sha256": "a527b2a5ec54731c85930bd795a74ef8eab972731d4915dc3b01b318855f0e11",
+      "bytes": 49013,
+      "entries": 19,
+      "note": "Vendored by all 10 open author PR heads on 2026-11-05. Cut from the #211 line before main a9980f3: package/packaged-dependencies.mjs has no CONTRACT_PACKAGE_NAME, and package/package.json keeps the dev-only packageManager plus the pre-fd6bc25 compact formatting, so the pinned pnpm does not reproduce it from any main commit."
+    },
+    {
+      "label": "kit-0.1.1-main-runbook-baseline",
+      "version": "0.1.1",
+      "sha256": "e22161688cbc7bc345e64264223c9aa367e859a8dccd000a65b91c6621559fdb",
+      "bytes": 49341,
+      "entries": 19,
+      "commit": "8da3c613",
+      "note": "First proven at the P4 runbook baseline 8da3c613 and unchanged at current main 304abf9f; both cuts are byte-identical."
+    }
+  ],
+  "repos": [
+    {
+      "repository": "tyuanww/dsh-analytics-workbench",
+      "author_main": "865fe2e6fbb77bb7d37be2c77c6f895f4f0641d4",
+      "kit_sha256_file_format": "bare-digest",
+      "carriers": [
+        "vendor/dsh-plugin-kit-0.1.1.tgz",
+        "vendor/KIT-SHA256",
+        "inputs/ci/identity.json",
+        "package.json",
+        "pnpm-lock.yaml"
+      ],
+      "main": {
+        "ref": "main",
+        "head": "865fe2e6fbb77bb7d37be2c77c6f895f4f0641d4",
+        "tarball": "vendor/dsh-plugin-kit-0.1.0.tgz",
+        "version": "0.1.0",
+        "sha256": "251383e18a76fe345ac837d8767f6c325c4616c027e2ea250d2dcec45b22c901",
+        "bytes": 43944
+      },
+      "pr": {
+        "number": 16,
+        "ref": "wb15-provenance",
+        "head": "bef77947ee70499cfb3e6608782d9ee8e75d13c3",
+        "tarball": "vendor/dsh-plugin-kit-0.1.1.tgz",
+        "version": "0.1.1",
+        "sha256": "a527b2a5ec54731c85930bd795a74ef8eab972731d4915dc3b01b318855f0e11",
+        "bytes": 49013,
+        "stack": "merge #15 first"
+      }
+    },
+    {
+      "repository": "tyuanww/dsh-crm-knowledge",
+      "author_main": "78eb9f7dd2156f9d32e7892da072bd0bd96bffa6",
+      "kit_sha256_file_format": "bare-digest",
+      "carriers": [
+        "vendor/dsh-plugin-kit-0.1.1.tgz",
+        "vendor/KIT-SHA256",
+        "inputs/ci/identity.json",
+        "package.json",
+        "pnpm-lock.yaml"
+      ],
+      "main": {
+        "ref": "main",
+        "head": "78eb9f7dd2156f9d32e7892da072bd0bd96bffa6",
+        "tarball": "vendor/dsh-plugin-kit-0.1.0.tgz",
+        "version": "0.1.0",
+        "sha256": "251383e18a76fe345ac837d8767f6c325c4616c027e2ea250d2dcec45b22c901",
+        "bytes": 43944
+      },
+      "pr": {
+        "number": 6,
+        "ref": "codex/crm-source-reauthorization-20261028",
+        "head": "1874e28c3467ea0c08a01dc27227a6d4ca11ad0a",
+        "tarball": "vendor/dsh-plugin-kit-0.1.1.tgz",
+        "version": "0.1.1",
+        "sha256": "a527b2a5ec54731c85930bd795a74ef8eab972731d4915dc3b01b318855f0e11",
+        "bytes": 49013,
+        "stack": "merge #2-#5 first"
+      }
+    },
+    {
+      "repository": "tyuanww/dsh-knowledge",
+      "author_main": "ef8960ededd5f4214d9f3e77a8b61a761a046d3d",
+      "kit_sha256_file_format": "digest-and-filename",
+      "carriers": [
+        "vendor/dsh-plugin-kit-0.1.1.tgz",
+        "vendor/KIT-SHA256",
+        "inputs/ci/identity.json",
+        "package.json",
+        "pnpm-lock.yaml"
+      ],
+      "main": {
+        "ref": "main",
+        "head": "ef8960ededd5f4214d9f3e77a8b61a761a046d3d",
+        "tarball": "vendor/dsh-plugin-kit-0.1.0.tgz",
+        "version": "0.1.0",
+        "sha256": "251383e18a76fe345ac837d8767f6c325c4616c027e2ea250d2dcec45b22c901",
+        "bytes": 43944
+      },
+      "pr": {
+        "number": 2,
+        "ref": "codex/dsh-rc3-ci",
+        "head": "f80bcbd7ca46e23e7743e7153dfa5bf46d7b67d2",
+        "tarball": "vendor/dsh-plugin-kit-0.1.1.tgz",
+        "version": "0.1.1",
+        "sha256": "a527b2a5ec54731c85930bd795a74ef8eab972731d4915dc3b01b318855f0e11",
+        "bytes": 49013
+      }
+    },
+    {
+      "repository": "tyuanww/dsh-shine-board",
+      "author_main": "75eced472d4d1af55efe51648115545a68c60ef4",
+      "kit_sha256_file_format": "digest-and-filename",
+      "carriers": [
+        "vendor/dsh-plugin-kit-0.1.1.tgz",
+        "vendor/KIT-SHA256",
+        "inputs/ci/identity.json",
+        "package.json",
+        "pnpm-lock.yaml"
+      ],
+      "main": {
+        "ref": "main",
+        "head": "75eced472d4d1af55efe51648115545a68c60ef4",
+        "tarball": "vendor/dsh-plugin-kit-0.1.0.tgz",
+        "version": "0.1.0",
+        "sha256": "251383e18a76fe345ac837d8767f6c325c4616c027e2ea250d2dcec45b22c901",
+        "bytes": 43944
+      },
+      "pr": {
+        "number": 2,
+        "ref": "codex/dsh-rc3-ci",
+        "head": "04cc7cc9a394c18799af5153f03dfb6b38136263",
+        "tarball": "vendor/dsh-plugin-kit-0.1.1.tgz",
+        "version": "0.1.1",
+        "sha256": "a527b2a5ec54731c85930bd795a74ef8eab972731d4915dc3b01b318855f0e11",
+        "bytes": 49013
+      }
+    },
+    {
+      "repository": "tyuanww/dsh-shine-crowd-action",
+      "author_main": "d709e80f10a948bf4007c51fed5a4da3753fbeaa",
+      "kit_sha256_file_format": "digest-and-filename",
+      "carriers": [
+        "vendor/dsh-plugin-kit-0.1.1.tgz",
+        "vendor/KIT-SHA256",
+        "inputs/ci/identity.json",
+        "package.json",
+        "pnpm-lock.yaml"
+      ],
+      "main": {
+        "ref": "main",
+        "head": "d709e80f10a948bf4007c51fed5a4da3753fbeaa",
+        "tarball": "vendor/dsh-plugin-kit-0.1.0.tgz",
+        "version": "0.1.0",
+        "sha256": "251383e18a76fe345ac837d8767f6c325c4616c027e2ea250d2dcec45b22c901",
+        "bytes": 43944
+      },
+      "pr": {
+        "number": 2,
+        "ref": "codex/dsh-rc3-ci",
+        "head": "c8a9cd1965739b9d00f285ba3c796bd3857ea8c9",
+        "tarball": "vendor/dsh-plugin-kit-0.1.1.tgz",
+        "version": "0.1.1",
+        "sha256": "a527b2a5ec54731c85930bd795a74ef8eab972731d4915dc3b01b318855f0e11",
+        "bytes": 49013
+      }
+    },
+    {
+      "repository": "tyuanww/dsh-shine-query",
+      "author_main": "37c853bba5fc92edf9158aba51b3b0c25c8e6313",
+      "kit_sha256_file_format": "digest-and-filename",
+      "carriers": [
+        "vendor/dsh-plugin-kit-0.1.1.tgz",
+        "vendor/KIT-SHA256",
+        "inputs/ci/identity.json",
+        "package.json",
+        "pnpm-lock.yaml"
+      ],
+      "main": {
+        "ref": "main",
+        "head": "37c853bba5fc92edf9158aba51b3b0c25c8e6313",
+        "tarball": "vendor/dsh-plugin-kit-0.1.0.tgz",
+        "version": "0.1.0",
+        "sha256": "251383e18a76fe345ac837d8767f6c325c4616c027e2ea250d2dcec45b22c901",
+        "bytes": 43944
+      },
+      "pr": {
+        "number": 2,
+        "ref": "codex/dsh-rc3-ci",
+        "head": "1702408b11a88e877f584636005b9a666a2713c5",
+        "tarball": "vendor/dsh-plugin-kit-0.1.1.tgz",
+        "version": "0.1.1",
+        "sha256": "a527b2a5ec54731c85930bd795a74ef8eab972731d4915dc3b01b318855f0e11",
+        "bytes": 49013
+      }
+    },
+    {
+      "repository": "tyuanww/dsh-shine-funnel",
+      "author_main": "c37326170258764d394c708f25535cf34685c5af",
+      "kit_sha256_file_format": "digest-and-filename",
+      "carriers": [
+        "vendor/dsh-plugin-kit-0.1.1.tgz",
+        "vendor/KIT-SHA256",
+        "inputs/ci/identity.json",
+        "package.json",
+        "pnpm-lock.yaml"
+      ],
+      "main": {
+        "ref": "main",
+        "head": "c37326170258764d394c708f25535cf34685c5af",
+        "tarball": "vendor/dsh-plugin-kit-0.1.0.tgz",
+        "version": "0.1.0",
+        "sha256": "251383e18a76fe345ac837d8767f6c325c4616c027e2ea250d2dcec45b22c901",
+        "bytes": 43944
+      },
+      "pr": {
+        "number": 2,
+        "ref": "codex/dsh-rc3-ci",
+        "head": "105f7aa416b5944b6cba3ed6b8c8d5cfa27d3d24",
+        "tarball": "vendor/dsh-plugin-kit-0.1.1.tgz",
+        "version": "0.1.1",
+        "sha256": "a527b2a5ec54731c85930bd795a74ef8eab972731d4915dc3b01b318855f0e11",
+        "bytes": 49013,
+        "extra_input": "board tgz"
+      }
+    },
+    {
+      "repository": "tyuanww/dsh-shine-waterfall",
+      "author_main": "cd0a4996e1df1cb64a2717434052919c7f0b1679",
+      "kit_sha256_file_format": "digest-and-filename",
+      "carriers": [
+        "vendor/dsh-plugin-kit-0.1.1.tgz",
+        "vendor/KIT-SHA256",
+        "inputs/ci/identity.json",
+        "package.json",
+        "pnpm-lock.yaml"
+      ],
+      "main": {
+        "ref": "main",
+        "head": "cd0a4996e1df1cb64a2717434052919c7f0b1679",
+        "tarball": "vendor/dsh-plugin-kit-0.1.0.tgz",
+        "version": "0.1.0",
+        "sha256": "251383e18a76fe345ac837d8767f6c325c4616c027e2ea250d2dcec45b22c901",
+        "bytes": 43944
+      },
+      "pr": {
+        "number": 2,
+        "ref": "codex/dsh-rc3-ci",
+        "head": "47b19e81c753e63e29304aef5d79c898916217bb",
+        "tarball": "vendor/dsh-plugin-kit-0.1.1.tgz",
+        "version": "0.1.1",
+        "sha256": "a527b2a5ec54731c85930bd795a74ef8eab972731d4915dc3b01b318855f0e11",
+        "bytes": 49013,
+        "extra_input": "board tgz"
+      }
+    },
+    {
+      "repository": "tyuanww/dsh-shine-brand",
+      "author_main": "6754f37075ad00d1b17478c9ed42e901419bda0f",
+      "kit_sha256_file_format": "digest-and-filename",
+      "carriers": [
+        "vendor/dsh-plugin-kit-0.1.1.tgz",
+        "vendor/KIT-SHA256",
+        "package.json",
+        "pnpm-lock.yaml"
+      ],
+      "main": {
+        "ref": "main",
+        "head": "6754f37075ad00d1b17478c9ed42e901419bda0f",
+        "tarball": "vendor/dsh-plugin-kit-0.1.0.tgz",
+        "version": "0.1.0",
+        "sha256": "251383e18a76fe345ac837d8767f6c325c4616c027e2ea250d2dcec45b22c901",
+        "bytes": 43944
+      },
+      "pr": {
+        "number": 2,
+        "ref": "codex/dsh-rc3-ci",
+        "head": "c81b6ef4283bbbdba2d0ce09f091f74806496735",
+        "tarball": "vendor/dsh-plugin-kit-0.1.1.tgz",
+        "version": "0.1.1",
+        "sha256": "a527b2a5ec54731c85930bd795a74ef8eab972731d4915dc3b01b318855f0e11",
+        "bytes": 49013
+      }
+    },
+    {
+      "repository": "tyuanww/shinemage-board-components",
+      "author_main": "68abb1ead321a4772f337ad8fa12e4246e0d3db7",
+      "kit_sha256_file_format": "bare-digest",
+      "carriers": [
+        "vendor/dsh-plugin-kit-0.1.1.tgz",
+        "vendor/KIT-SHA256",
+        "vendor/PROVENANCE.json",
+        "package.json",
+        "pnpm-lock.yaml"
+      ],
+      "main": {
+        "ref": "main",
+        "head": "68abb1ead321a4772f337ad8fa12e4246e0d3db7",
+        "tarball": "vendor/dsh-plugin-kit-0.1.0.tgz",
+        "version": "0.1.0",
+        "sha256": "251383e18a76fe345ac837d8767f6c325c4616c027e2ea250d2dcec45b22c901",
+        "bytes": 43944
+      },
+      "pr": {
+        "number": 2,
+        "ref": "codex/rc5-pack-rebuild",
+        "head": "26de61fc783ecf0c2fb38a89ad2901e92e15f1c8",
+        "tarball": "vendor/dsh-plugin-kit-0.1.1.tgz",
+        "version": "0.1.1",
+        "sha256": "a527b2a5ec54731c85930bd795a74ef8eab972731d4915dc3b01b318855f0e11",
+        "bytes": 49013
+      }
+    }
+  ]
+}
