@@ -23,7 +23,7 @@
 | `SESSION_ID` | 内核配置里的 `session_id`，b0 合成会话使用固定值 |
 | `RUNTIME_TOKEN` | 内核配置里的 `runtime_token`，供 K 的 native 路由校验 |
 | `GATEWAY_TOKEN` | 内核配置里的 `gateway_token`，供公开 run API 读取 |
-| `PRE_CUTOVER_REPO` | 回退用的 cutover 前内核 checkout，记录 head 与 artifact sha256 |
+| `PRE_CUTOVER_REPO` | 回退用的 cutover 前内核 checkout，记录 head 与依赖摘要 |
 
 在 bash 下执行并先设置 `set -o pipefail` 和 `umask 077`，不要在 shell 里开 `set -x`。token 只从既有 0600 环境文件或内核私密配置读取，不写进命令行、不写进仓库、不打印到终端。证据里出现 token 的文件按秘密材料处理。
 
@@ -134,7 +134,7 @@ done | tee "$EVID/00-preconditions/legacy-env.txt"
 | typed tool 的 `B0_SESSION_ID` 守卫重做，三个 family 都按 K 的 dispatch 绑定识别 ACP 随机 UUID | 5.1 | 工具执行报 `no bound execution context`，run 不结算 SUCCEEDED |
 | tools 行的 `baseUrl` 与 `runtimeToken` Config 注入 | 3.2 和 4 | 工具回落到 `B0_PORT_BASE`，连接失败或打到错误端口 |
 | `dispatch_intents.transport` 列，dispatch 时写 `acp` | 5.1 至 5.4 的 receipt | `dispatch.transport` 不存在，无法证明 attempt 由 ACP 路径持有 |
-| bridge 行、端口块和 token 的删除范围与回退窗口 | 8 | 回退时没有可用的 cutover 前 artifact 或 W 侧 bridge 行 |
+| bridge 行、端口块和 token 的删除范围与回退窗口 | 8 | 回退时没有可用的 cutover 前内核或 W 侧 bridge 行 |
 
 ### 1.7 内核 ACP 块
 
@@ -651,7 +651,7 @@ for path in sys.argv[1:]:
     for line in lines:
         msg = json.loads(line)
         assert msg.get('jsonrpc') == '2.0', (path, msg)
-        assert 'id' in msg and ('result' in msg or 'error' in msg), (path, msg)
+        assert 'method' in msg or ('id' in msg and ('result' in msg or 'error' in msg)), (path, msg)
 print('stdout-pure')
 PY
 python3 - "$EVID/08-stdout/session.stdout" <<'PY'
@@ -721,7 +721,7 @@ PY
 
 ## 8. 回退到 bridge
 
-回退是内核配置切换加 cutover 前 artifact，不是改代码、锁或 profile。先停掉 ACP 内核，保留 `acp_bindings` 与全部证据，再用 cutover 前的内核 artifact 启动 `transport=bridge`。
+回退是内核配置切换加 cutover 前内核 checkout，不是改代码、锁或 profile。先停掉 ACP 内核，保留 `acp_bindings` 与全部证据，再用 cutover 前的内核 checkout 启动 `transport=bridge`。
 
 ```bash
 mkdir -p "$EVID/10-rollback"
