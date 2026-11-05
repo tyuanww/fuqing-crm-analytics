@@ -1,8 +1,9 @@
 {
   "schema": "shinemage-kit-vendored/v1",
   "package": "@shine-mage/dsh-plugin-kit",
-  "observed_at": "2026-11-05",
-  "observed_with": "gh api repos/tyuanww/<repo>/{commits/main,contents/vendor,contents/vendor/KIT-SHA256,pulls}; read-only",
+  "observed_at": "2026-11-06",
+  "observed_with": "gh api repos/tyuanww/<repo>/{commits/main,contents/vendor,contents/vendor/KIT-SHA256,pulls}; re-read after the 2026-11-05 S0 re-vendor",
+  "snapshot": "post-refill: author_main/main/pr rows reflect the distributed e2216168 kit; history[] keeps the pre-refill cuts",
   "authoritative": {
     "version": "0.1.1",
     "sha256": "e22161688cbc7bc345e64264223c9aa367e859a8dccd000a65b91c6621559fdb",
@@ -53,13 +54,13 @@
       "bytes": 49341,
       "entries": 19,
       "commit": "8da3c613",
-      "note": "First proven at the P4 runbook baseline 8da3c613 and unchanged at current main 304abf9f; both cuts are byte-identical."
+      "note": "First proven at the P4 runbook baseline 8da3c613 and unchanged at the then-current main 304abf9f; both cuts are byte-identical."
     }
   ],
   "repos": [
     {
       "repository": "tyuanww/dsh-analytics-workbench",
-      "author_main": "865fe2e6fbb77bb7d37be2c77c6f895f4f0641d4",
+      "author_main": "ae922fa3ff80c238d47bee7c8cbed1705b55f836",
       "kit_sha256_file_format": "bare-digest",
       "carriers": [
         "vendor/dsh-plugin-kit-0.1.1.tgz",
@@ -70,26 +71,25 @@
       ],
       "main": {
         "ref": "main",
-        "head": "865fe2e6fbb77bb7d37be2c77c6f895f4f0641d4",
-        "tarball": "vendor/dsh-plugin-kit-0.1.0.tgz",
-        "version": "0.1.0",
-        "sha256": "251383e18a76fe345ac837d8767f6c325c4616c027e2ea250d2dcec45b22c901",
-        "bytes": 43944
-      },
-      "pr": {
-        "number": 16,
-        "ref": "wb15-provenance",
-        "head": "bef77947ee70499cfb3e6608782d9ee8e75d13c3",
+        "head": "ae922fa3ff80c238d47bee7c8cbed1705b55f836",
         "tarball": "vendor/dsh-plugin-kit-0.1.1.tgz",
         "version": "0.1.1",
-        "sha256": "a527b2a5ec54731c85930bd795a74ef8eab972731d4915dc3b01b318855f0e11",
-        "bytes": 49013,
-        "stack": "merge #15 first"
+        "sha256": "e22161688cbc7bc345e64264223c9aa367e859a8dccd000a65b91c6621559fdb",
+        "bytes": 49341
+      },
+      "pr": {
+        "number": 18,
+        "ref": "codex/kit-0.1.1-revendor-20261105",
+        "head": "6dd084b68056fcb717f93fb604c4d5ddee31517a",
+        "tarball": "vendor/dsh-plugin-kit-0.1.1.tgz",
+        "version": "0.1.1",
+        "sha256": "e22161688cbc7bc345e64264223c9aa367e859a8dccd000a65b91c6621559fdb",
+        "bytes": 49341
       }
     },
     {
       "repository": "tyuanww/dsh-crm-knowledge",
-      "author_main": "78eb9f7dd2156f9d32e7892da072bd0bd96bffa6",
+      "author_main": "86ff10b9926c4e393829ad3bccbfad43a028158f",
       "kit_sha256_file_format": "bare-digest",
       "carriers": [
         "vendor/dsh-plugin-kit-0.1.1.tgz",
@@ -100,26 +100,25 @@
       ],
       "main": {
         "ref": "main",
-        "head": "78eb9f7dd2156f9d32e7892da072bd0bd96bffa6",
-        "tarball": "vendor/dsh-plugin-kit-0.1.0.tgz",
-        "version": "0.1.0",
-        "sha256": "251383e18a76fe345ac837d8767f6c325c4616c027e2ea250d2dcec45b22c901",
-        "bytes": 43944
-      },
-      "pr": {
-        "number": 6,
-        "ref": "codex/crm-source-reauthorization-20261028",
-        "head": "1874e28c3467ea0c08a01dc27227a6d4ca11ad0a",
+        "head": "86ff10b9926c4e393829ad3bccbfad43a028158f",
         "tarball": "vendor/dsh-plugin-kit-0.1.1.tgz",
         "version": "0.1.1",
-        "sha256": "a527b2a5ec54731c85930bd795a74ef8eab972731d4915dc3b01b318855f0e11",
-        "bytes": 49013,
-        "stack": "merge #2-#5 first"
+        "sha256": "e22161688cbc7bc345e64264223c9aa367e859a8dccd000a65b91c6621559fdb",
+        "bytes": 49341
+      },
+      "pr": {
+        "number": 7,
+        "ref": "codex/kit-0.1.1-revendor-20261105",
+        "head": "98a962ddf5becbf74299145524330639efe65be6",
+        "tarball": "vendor/dsh-plugin-kit-0.1.1.tgz",
+        "version": "0.1.1",
+        "sha256": "e22161688cbc7bc345e64264223c9aa367e859a8dccd000a65b91c6621559fdb",
+        "bytes": 49341
       }
     },
     {
       "repository": "tyuanww/dsh-knowledge",
-      "author_main": "ef8960ededd5f4214d9f3e77a8b61a761a046d3d",
+      "author_main": "902a1b41307c0c88a3b29c91294ca416bc0d00b7",
       "kit_sha256_file_format": "digest-and-filename",
       "carriers": [
         "vendor/dsh-plugin-kit-0.1.1.tgz",
@@ -130,25 +129,25 @@
       ],
       "main": {
         "ref": "main",
-        "head": "ef8960ededd5f4214d9f3e77a8b61a761a046d3d",
-        "tarball": "vendor/dsh-plugin-kit-0.1.0.tgz",
-        "version": "0.1.0",
-        "sha256": "251383e18a76fe345ac837d8767f6c325c4616c027e2ea250d2dcec45b22c901",
-        "bytes": 43944
-      },
-      "pr": {
-        "number": 2,
-        "ref": "codex/dsh-rc3-ci",
-        "head": "f80bcbd7ca46e23e7743e7153dfa5bf46d7b67d2",
+        "head": "902a1b41307c0c88a3b29c91294ca416bc0d00b7",
         "tarball": "vendor/dsh-plugin-kit-0.1.1.tgz",
         "version": "0.1.1",
-        "sha256": "a527b2a5ec54731c85930bd795a74ef8eab972731d4915dc3b01b318855f0e11",
-        "bytes": 49013
+        "sha256": "e22161688cbc7bc345e64264223c9aa367e859a8dccd000a65b91c6621559fdb",
+        "bytes": 49341
+      },
+      "pr": {
+        "number": 3,
+        "ref": "codex/kit-0.1.1-revendor-20261105",
+        "head": "2047c5dfce92d0c45d9a9daaa8615223a93f0f19",
+        "tarball": "vendor/dsh-plugin-kit-0.1.1.tgz",
+        "version": "0.1.1",
+        "sha256": "e22161688cbc7bc345e64264223c9aa367e859a8dccd000a65b91c6621559fdb",
+        "bytes": 49341
       }
     },
     {
       "repository": "tyuanww/dsh-shine-board",
-      "author_main": "75eced472d4d1af55efe51648115545a68c60ef4",
+      "author_main": "97885ddfdfca8efa779c06b00e9ee61d0d05dbf9",
       "kit_sha256_file_format": "digest-and-filename",
       "carriers": [
         "vendor/dsh-plugin-kit-0.1.1.tgz",
@@ -159,25 +158,25 @@
       ],
       "main": {
         "ref": "main",
-        "head": "75eced472d4d1af55efe51648115545a68c60ef4",
-        "tarball": "vendor/dsh-plugin-kit-0.1.0.tgz",
-        "version": "0.1.0",
-        "sha256": "251383e18a76fe345ac837d8767f6c325c4616c027e2ea250d2dcec45b22c901",
-        "bytes": 43944
-      },
-      "pr": {
-        "number": 2,
-        "ref": "codex/dsh-rc3-ci",
-        "head": "04cc7cc9a394c18799af5153f03dfb6b38136263",
+        "head": "97885ddfdfca8efa779c06b00e9ee61d0d05dbf9",
         "tarball": "vendor/dsh-plugin-kit-0.1.1.tgz",
         "version": "0.1.1",
-        "sha256": "a527b2a5ec54731c85930bd795a74ef8eab972731d4915dc3b01b318855f0e11",
-        "bytes": 49013
+        "sha256": "e22161688cbc7bc345e64264223c9aa367e859a8dccd000a65b91c6621559fdb",
+        "bytes": 49341
+      },
+      "pr": {
+        "number": 3,
+        "ref": "codex/kit-0.1.1-revendor-20261105",
+        "head": "0b64d65296b27ac21753478612fef2002dcc9d8e",
+        "tarball": "vendor/dsh-plugin-kit-0.1.1.tgz",
+        "version": "0.1.1",
+        "sha256": "e22161688cbc7bc345e64264223c9aa367e859a8dccd000a65b91c6621559fdb",
+        "bytes": 49341
       }
     },
     {
       "repository": "tyuanww/dsh-shine-crowd-action",
-      "author_main": "d709e80f10a948bf4007c51fed5a4da3753fbeaa",
+      "author_main": "dc6f0d2c2bf18eb6d29cb1117c004b462485a0d2",
       "kit_sha256_file_format": "digest-and-filename",
       "carriers": [
         "vendor/dsh-plugin-kit-0.1.1.tgz",
@@ -188,25 +187,25 @@
       ],
       "main": {
         "ref": "main",
-        "head": "d709e80f10a948bf4007c51fed5a4da3753fbeaa",
-        "tarball": "vendor/dsh-plugin-kit-0.1.0.tgz",
-        "version": "0.1.0",
-        "sha256": "251383e18a76fe345ac837d8767f6c325c4616c027e2ea250d2dcec45b22c901",
-        "bytes": 43944
-      },
-      "pr": {
-        "number": 2,
-        "ref": "codex/dsh-rc3-ci",
-        "head": "c8a9cd1965739b9d00f285ba3c796bd3857ea8c9",
+        "head": "dc6f0d2c2bf18eb6d29cb1117c004b462485a0d2",
         "tarball": "vendor/dsh-plugin-kit-0.1.1.tgz",
         "version": "0.1.1",
-        "sha256": "a527b2a5ec54731c85930bd795a74ef8eab972731d4915dc3b01b318855f0e11",
-        "bytes": 49013
+        "sha256": "e22161688cbc7bc345e64264223c9aa367e859a8dccd000a65b91c6621559fdb",
+        "bytes": 49341
+      },
+      "pr": {
+        "number": 3,
+        "ref": "codex/kit-0.1.1-revendor-20261105",
+        "head": "591fb5dd98648d81a8b9ad1ad7302ba0971256f4",
+        "tarball": "vendor/dsh-plugin-kit-0.1.1.tgz",
+        "version": "0.1.1",
+        "sha256": "e22161688cbc7bc345e64264223c9aa367e859a8dccd000a65b91c6621559fdb",
+        "bytes": 49341
       }
     },
     {
       "repository": "tyuanww/dsh-shine-query",
-      "author_main": "37c853bba5fc92edf9158aba51b3b0c25c8e6313",
+      "author_main": "7202f182af696f11b6b7691fbff7f626e2ee711c",
       "kit_sha256_file_format": "digest-and-filename",
       "carriers": [
         "vendor/dsh-plugin-kit-0.1.1.tgz",
@@ -217,25 +216,25 @@
       ],
       "main": {
         "ref": "main",
-        "head": "37c853bba5fc92edf9158aba51b3b0c25c8e6313",
-        "tarball": "vendor/dsh-plugin-kit-0.1.0.tgz",
-        "version": "0.1.0",
-        "sha256": "251383e18a76fe345ac837d8767f6c325c4616c027e2ea250d2dcec45b22c901",
-        "bytes": 43944
-      },
-      "pr": {
-        "number": 2,
-        "ref": "codex/dsh-rc3-ci",
-        "head": "1702408b11a88e877f584636005b9a666a2713c5",
+        "head": "7202f182af696f11b6b7691fbff7f626e2ee711c",
         "tarball": "vendor/dsh-plugin-kit-0.1.1.tgz",
         "version": "0.1.1",
-        "sha256": "a527b2a5ec54731c85930bd795a74ef8eab972731d4915dc3b01b318855f0e11",
-        "bytes": 49013
+        "sha256": "e22161688cbc7bc345e64264223c9aa367e859a8dccd000a65b91c6621559fdb",
+        "bytes": 49341
+      },
+      "pr": {
+        "number": 3,
+        "ref": "codex/kit-0.1.1-revendor-20261105",
+        "head": "50f96daba6c4e8444a1a0b5cc8905f3d9eb0225b",
+        "tarball": "vendor/dsh-plugin-kit-0.1.1.tgz",
+        "version": "0.1.1",
+        "sha256": "e22161688cbc7bc345e64264223c9aa367e859a8dccd000a65b91c6621559fdb",
+        "bytes": 49341
       }
     },
     {
       "repository": "tyuanww/dsh-shine-funnel",
-      "author_main": "c37326170258764d394c708f25535cf34685c5af",
+      "author_main": "c3dd9d3c107abe1cb7c558e9230fb4aa2b91a3c9",
       "kit_sha256_file_format": "digest-and-filename",
       "carriers": [
         "vendor/dsh-plugin-kit-0.1.1.tgz",
@@ -246,26 +245,25 @@
       ],
       "main": {
         "ref": "main",
-        "head": "c37326170258764d394c708f25535cf34685c5af",
-        "tarball": "vendor/dsh-plugin-kit-0.1.0.tgz",
-        "version": "0.1.0",
-        "sha256": "251383e18a76fe345ac837d8767f6c325c4616c027e2ea250d2dcec45b22c901",
-        "bytes": 43944
-      },
-      "pr": {
-        "number": 2,
-        "ref": "codex/dsh-rc3-ci",
-        "head": "105f7aa416b5944b6cba3ed6b8c8d5cfa27d3d24",
+        "head": "c3dd9d3c107abe1cb7c558e9230fb4aa2b91a3c9",
         "tarball": "vendor/dsh-plugin-kit-0.1.1.tgz",
         "version": "0.1.1",
-        "sha256": "a527b2a5ec54731c85930bd795a74ef8eab972731d4915dc3b01b318855f0e11",
-        "bytes": 49013,
-        "extra_input": "board tgz"
+        "sha256": "e22161688cbc7bc345e64264223c9aa367e859a8dccd000a65b91c6621559fdb",
+        "bytes": 49341
+      },
+      "pr": {
+        "number": 3,
+        "ref": "codex/kit-0.1.1-revendor-20261105",
+        "head": "c9269e784690dfa7b8accc6a1180eafba903d7a7",
+        "tarball": "vendor/dsh-plugin-kit-0.1.1.tgz",
+        "version": "0.1.1",
+        "sha256": "e22161688cbc7bc345e64264223c9aa367e859a8dccd000a65b91c6621559fdb",
+        "bytes": 49341
       }
     },
     {
       "repository": "tyuanww/dsh-shine-waterfall",
-      "author_main": "cd0a4996e1df1cb64a2717434052919c7f0b1679",
+      "author_main": "d5d2c6fcb4aa08fc9b57969e94bb38d269c992cd",
       "kit_sha256_file_format": "digest-and-filename",
       "carriers": [
         "vendor/dsh-plugin-kit-0.1.1.tgz",
@@ -276,26 +274,25 @@
       ],
       "main": {
         "ref": "main",
-        "head": "cd0a4996e1df1cb64a2717434052919c7f0b1679",
-        "tarball": "vendor/dsh-plugin-kit-0.1.0.tgz",
-        "version": "0.1.0",
-        "sha256": "251383e18a76fe345ac837d8767f6c325c4616c027e2ea250d2dcec45b22c901",
-        "bytes": 43944
-      },
-      "pr": {
-        "number": 2,
-        "ref": "codex/dsh-rc3-ci",
-        "head": "47b19e81c753e63e29304aef5d79c898916217bb",
+        "head": "d5d2c6fcb4aa08fc9b57969e94bb38d269c992cd",
         "tarball": "vendor/dsh-plugin-kit-0.1.1.tgz",
         "version": "0.1.1",
-        "sha256": "a527b2a5ec54731c85930bd795a74ef8eab972731d4915dc3b01b318855f0e11",
-        "bytes": 49013,
-        "extra_input": "board tgz"
+        "sha256": "e22161688cbc7bc345e64264223c9aa367e859a8dccd000a65b91c6621559fdb",
+        "bytes": 49341
+      },
+      "pr": {
+        "number": 3,
+        "ref": "codex/kit-0.1.1-revendor-20261105",
+        "head": "4ea2d135cb70599d3687fb6a53b9c094c1f7dae2",
+        "tarball": "vendor/dsh-plugin-kit-0.1.1.tgz",
+        "version": "0.1.1",
+        "sha256": "e22161688cbc7bc345e64264223c9aa367e859a8dccd000a65b91c6621559fdb",
+        "bytes": 49341
       }
     },
     {
       "repository": "tyuanww/dsh-shine-brand",
-      "author_main": "6754f37075ad00d1b17478c9ed42e901419bda0f",
+      "author_main": "6aa335d29d59c21034b41103ed7858b5b912aca7",
       "kit_sha256_file_format": "digest-and-filename",
       "carriers": [
         "vendor/dsh-plugin-kit-0.1.1.tgz",
@@ -305,25 +302,25 @@
       ],
       "main": {
         "ref": "main",
-        "head": "6754f37075ad00d1b17478c9ed42e901419bda0f",
-        "tarball": "vendor/dsh-plugin-kit-0.1.0.tgz",
-        "version": "0.1.0",
-        "sha256": "251383e18a76fe345ac837d8767f6c325c4616c027e2ea250d2dcec45b22c901",
-        "bytes": 43944
-      },
-      "pr": {
-        "number": 2,
-        "ref": "codex/dsh-rc3-ci",
-        "head": "c81b6ef4283bbbdba2d0ce09f091f74806496735",
+        "head": "6aa335d29d59c21034b41103ed7858b5b912aca7",
         "tarball": "vendor/dsh-plugin-kit-0.1.1.tgz",
         "version": "0.1.1",
-        "sha256": "a527b2a5ec54731c85930bd795a74ef8eab972731d4915dc3b01b318855f0e11",
-        "bytes": 49013
+        "sha256": "e22161688cbc7bc345e64264223c9aa367e859a8dccd000a65b91c6621559fdb",
+        "bytes": 49341
+      },
+      "pr": {
+        "number": 3,
+        "ref": "codex/kit-0.1.1-revendor-20261105",
+        "head": "ff866cfcbaa024baf5ea46d8c1d983b72194f614",
+        "tarball": "vendor/dsh-plugin-kit-0.1.1.tgz",
+        "version": "0.1.1",
+        "sha256": "e22161688cbc7bc345e64264223c9aa367e859a8dccd000a65b91c6621559fdb",
+        "bytes": 49341
       }
     },
     {
       "repository": "tyuanww/shinemage-board-components",
-      "author_main": "68abb1ead321a4772f337ad8fa12e4246e0d3db7",
+      "author_main": "4245aa811771f45d847bc7644234fabe5a6eee45",
       "kit_sha256_file_format": "bare-digest",
       "carriers": [
         "vendor/dsh-plugin-kit-0.1.1.tgz",
@@ -334,20 +331,20 @@
       ],
       "main": {
         "ref": "main",
-        "head": "68abb1ead321a4772f337ad8fa12e4246e0d3db7",
-        "tarball": "vendor/dsh-plugin-kit-0.1.0.tgz",
-        "version": "0.1.0",
-        "sha256": "251383e18a76fe345ac837d8767f6c325c4616c027e2ea250d2dcec45b22c901",
-        "bytes": 43944
-      },
-      "pr": {
-        "number": 2,
-        "ref": "codex/rc5-pack-rebuild",
-        "head": "26de61fc783ecf0c2fb38a89ad2901e92e15f1c8",
+        "head": "4245aa811771f45d847bc7644234fabe5a6eee45",
         "tarball": "vendor/dsh-plugin-kit-0.1.1.tgz",
         "version": "0.1.1",
-        "sha256": "a527b2a5ec54731c85930bd795a74ef8eab972731d4915dc3b01b318855f0e11",
-        "bytes": 49013
+        "sha256": "e22161688cbc7bc345e64264223c9aa367e859a8dccd000a65b91c6621559fdb",
+        "bytes": 49341
+      },
+      "pr": {
+        "number": 3,
+        "ref": "codex/kit-0.1.1-revendor-20261105",
+        "head": "d499375755a8b06a37eedbb1ce67bb2f85d103f0",
+        "tarball": "vendor/dsh-plugin-kit-0.1.1.tgz",
+        "version": "0.1.1",
+        "sha256": "e22161688cbc7bc345e64264223c9aa367e859a8dccd000a65b91c6621559fdb",
+        "bytes": 49341
       }
     }
   ]

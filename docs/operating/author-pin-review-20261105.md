@@ -107,8 +107,9 @@ expiry applies to the author artifacts, not the sealed artifact.
    domain formal-pack digest; there is no independent author-side attestation of that JSON.
 4. **Sealed head is not main-reachable.** `b29a84f3` is a sealing-branch commit by design;
    regenerating or re-verifying the artifact requires the sealing branch/workflow, not just main.
-5. **Deletion gate remains blocked** (`remote_main_not_verified`, `production_only_closure_not_recorded`).
-   This review does not change it and does not advance `consumer.reviewed_sha`.
+5. **Deletion gate remains blocked** (at review time `remote_main_not_verified`, `production_only_closure_not_recorded`;
+   `remote_main_not_verified` is now closed and the remaining reason is `real_host_acceptance_not_recorded`).
+   This review did not change it and did not advance `consumer.reviewed_sha`.
 
 ## Verdict
 
@@ -117,3 +118,5 @@ REVIEWED_SHA_VERDICT = PASS_WITH_NOTES
 
 This PR does not advance `consumer.reviewed_sha` (still `60d7f4e8…`). The follow-up that changes
 that one line must reference this document, `docs/operating/author-pin-review-20261105.md`.
+
+**2026-11-05 follow-up.** #260 advanced `consumer.reviewed_sha` to `727f4b94…` after this review; the verdict above is unchanged.

@@ -151,10 +151,10 @@ export function validateSourceManifest(manifest, { lockSha256 = null, expectedId
     domainDirectories.add(domain.directory);
   }
   validateGate(manifest.deletion_gate, [...manifest.sources, ...manifest.domains.map(domain => ({ ...domain, id: domain.package }))], manifest.bundle);
-  // A READY gate removes `production_only_closure_not_recorded`, so it must
-  // point at a receipt that binds the same lock, sources and domains. This is
-  // the machine check that prevents a hand-edited READY from skipping the
-  // provenance-only closure evidence.
+  // A READY gate clears `blocking_reasons`, so it must point at a receipt that
+  // binds the same lock, sources and domains. This is the machine check that
+  // prevents a hand-edited READY from skipping the provenance-only closure
+  // evidence.
   if (manifest.deletion_gate.status === 'READY') {
     assert.ok(typeof productionOnlyClosurePath === 'string' && productionOnlyClosurePath.length > 0,
       'SOURCE_MANIFEST_PRODUCTION_ONLY_CLOSURE_RECEIPT_REQUIRED');

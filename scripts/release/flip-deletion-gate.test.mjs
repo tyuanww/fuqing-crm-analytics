@@ -59,7 +59,7 @@ async function fixture(t) {
   await editManifest({ manifestPath }, manifest => {
     manifest.deletion_gate = {
       status: 'BLOCKED',
-      blocking_reasons: ['production_only_closure_not_recorded'],
+      blocking_reasons: ['real_host_acceptance_not_recorded'],
     };
   });
   const acceptance = join(dir, 'acceptance');
