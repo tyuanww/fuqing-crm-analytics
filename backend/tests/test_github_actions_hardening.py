@@ -295,3 +295,120 @@ def test_rc5_shadow_evidence_is_a_separate_non_blocking_job():
     # Every shadow step reports instead of blocking unrelated work.
     assert all(step.get('continue-on-error') is True
                for step in shadow['steps'] if step.get('name', '').startswith(('rc.5 ', 'Connection Fetch')))
+
+
+# --- B0 preparation cache producer (main-scoped) ---------------------------
+# GitHub scopes a pull_request cache to that PR's ref, so the first b0 run of
+# every PR is cold. Caches saved on the default branch are restorable from PRs,
+# so `b0-prepare-cache.yml` publishes the same key the PR job reads. These tests
+# keep the producer on the exact same key/paths identity, keep it main-scoped and
+# cheap, and keep save/restore failures out of the push gate.
+
+
+def _load_workflow(name: str) -> dict:
+    return yaml.safe_load((WORKFLOWS_DIR / name).read_text(encoding="utf-8"))
+
+
+def _workflow_events(document: dict) -> dict:
+    # PyYAML resolves the bare `on` key to the boolean True.
+    return document.get("on", document.get(True))
+
+
+def _named_step(steps: list[dict], name: str) -> dict:
+    return next(step for step in steps if step.get("name") == name)
+
+
+def _identity_inputs() -> list[str]:
+    """The keyed prepare inputs, read from the module that owns the key."""
+    source = (REPO_ROOT / "scripts/dsh-b0/prepare-cache.mjs").read_text(encoding="utf-8")
+    constants = dict(re.findall(r"^const ([A-Z_]+) = '([^']+)';$", source, re.MULTILINE))
+    block = source.split(
+        "export const PREPARE_INPUT_FILES = Object.freeze([", 1
+    )[1].split("]);", 1)[0]
+    paths: list[str] = []
+    for template, literal, identifier in re.findall(
+        r"`([^`]+)`|'([^']+)'|\b([A-Z][A-Z0-9_]{2,})\b", block
+    ):
+        raw = template or literal or constants[identifier]
+        for name, value in constants.items():
+            raw = raw.replace("${" + name + "}", value)
+        paths.append(raw)
+    return paths
+
+
+def test_b0_prepare_cache_producer_is_main_scoped_and_hardened() -> None:
+    workflow = _load_workflow("b0-prepare-cache.yml")
+    events = _workflow_events(workflow)
+    assert set(events) == {"push", "workflow_dispatch", "schedule"}
+
+    # Push triggers only when a keyed identity input can have changed.
+    identity = set(_identity_inputs())
+    assert len(identity) == 16
+    patch_glob = "dsh-plugins/plugin-kit/build-tools/patches/**"
+    assert identity <= set(events["push"]["paths"])
+    assert set(events["push"]["paths"]) <= identity | {patch_glob}
+    assert events["push"]["branches"] == ["main"]
+
+    # Weekly refresh keeps the entry inside the 7-day no-access eviction window.
+    cron = events["schedule"][0]["cron"].split()
+    assert len(cron) == 5
+    assert cron[4].isdigit() and 0 <= int(cron[4]) <= 7
+
+    assert workflow["permissions"] == {"contents": "read"}
+    job = workflow["jobs"]["b0-prepare-cache"]
+    assert job["if"] == "github.ref == 'refs/heads/main'"
+    assert job["runs-on"] == "ubuntu-24.04"
+    assert job["timeout-minutes"] <= 15
+
+    steps = job["steps"]
+    checkout = next(step for step in steps if str(step.get("uses", "")).startswith("actions/checkout@"))
+    assert checkout["with"]["persist-credentials"] is False
+    assert checkout["with"].get("lfs") is not True
+
+    # The producer only warms the cache: no `--check`, no `--audit`.
+    runs = "\n".join(step.get("run", "") for step in steps)
+    assert "--check" not in runs and "--audit" not in runs
+
+    prepare = _named_step(steps, "Prepare exact public DSH and private build tools")
+    assert prepare.get("continue-on-error") is not True
+    assert "pipeline.mjs --prepare" in prepare["run"]
+    assert "--python" in prepare["run"]
+    assert _named_step(steps, "Verify the restored preparation or fall back to a full prepare")["run"] == (
+        "node scripts/dsh-b0/prepare-cache.mjs --guard"
+    )
+    assert _named_step(steps, "Verify the prepared closure before caching it")["run"] == (
+        "node scripts/dsh-b0/prepare-cache.mjs --verify"
+    )
+    # Cache outages and save failures degrade to the cold path.
+    assert _named_step(steps, "Restore the prepared B0 closure").get("continue-on-error") is True
+    assert _named_step(steps, "Save the verified B0 preparation").get("continue-on-error") is True
+
+
+def test_b0_prepare_cache_producer_matches_the_pr_consumer() -> None:
+    """Producer and PR job must derive one key and restore one path list."""
+    consumer = _load_workflow("lint.yml")["jobs"]["b0-contract-build"]["steps"]
+    producer = _load_workflow("b0-prepare-cache.yml")["jobs"]["b0-prepare-cache"]["steps"]
+
+    for name in (
+        "Resolve the B0 pnpm store",
+        "Compute the B0 preparation cache key",
+        "Verify the restored preparation or fall back to a full prepare",
+    ):
+        assert _named_step(producer, name)["run"] == _named_step(consumer, name)["run"], name
+
+    for name in ("Restore the prepared B0 closure", "Save the verified B0 preparation"):
+        left = _named_step(consumer, name)
+        right = _named_step(producer, name)
+        assert str(left["uses"]) == str(right["uses"]), name
+        assert left["with"]["path"] == right["with"]["path"], name
+        assert left["with"]["key"] == right["with"]["key"], name
+
+    for name in (
+        "Prepare exact public DSH and private build tools",
+        "Verify the prepared closure before caching it",
+        "Save the verified B0 preparation",
+    ):
+        assert _named_step(producer, name)["if"] == _named_step(consumer, name)["if"], name
+
+    guard = "Verify the restored preparation or fall back to a full prepare"
+    assert _named_step(producer, guard)["env"]["B0_CACHE_HIT"] == _named_step(consumer, guard)["env"]["B0_CACHE_HIT"]

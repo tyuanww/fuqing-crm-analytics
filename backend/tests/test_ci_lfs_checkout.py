@@ -22,6 +22,7 @@ WORKFLOWS = ROOT / ".github" / "workflows"
     ("lint.yml", "frontend"),
     ("lint.yml", "docker-smoke"),
     ("dsh-b0.yml", "b0-contract-build"),
+    ("b0-prepare-cache.yml", "b0-prepare-cache"),
 ])
 def test_asset_consumers_do_not_request_an_lfs_transport(workflow, job_name):
     document = yaml.safe_load((WORKFLOWS / workflow).read_text())

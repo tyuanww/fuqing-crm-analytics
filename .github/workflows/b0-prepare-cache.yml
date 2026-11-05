@@ -1,0 +1,172 @@
+name: B0 prepare cache producer
+
+# Main-scoped producer for the B0 preparation cache consumed by pull requests.
+#
+# GitHub scopes a cache written by a pull_request run to that PR's ref, so a
+# PR's first `b0-contract-build` is always cold. Caches written on the default
+# branch are restorable from PRs, so this workflow exists only to publish — and
+# periodically refresh — the one entry every PR's b0 job can restore.
+#
+# It is not a gate. It never runs `pipeline.mjs --check`, the sealed composition
+# stage or the fixed author evidence: those need per-run inputs and are not
+# cacheable. A restore or save failure leaves PRs on the cold path instead of
+# failing anything; only `--guard`, `--prepare` and `--verify` can fail, exactly
+# as they do inside the b0 job.
+#
+# Shape (the pre-`--check` half of `.github/workflows/lint.yml`, byte-identical
+# where it matters):
+#   key -> restore -> guard -> [prepare -> verify -> save]
+# The key command and the cached path list must stay identical to lint.yml's
+# b0 job; `backend/tests/test_github_actions_hardening.py` fails on drift.
+# Both jobs run the same fixed toolchain (ubuntu-24.04, x64, Node 24.19.0 —
+# `process.version` is part of the key) and derive the key with
+# `node scripts/dsh-b0/prepare-cache.mjs --key`. Its identity is
+# `toolchain.json` + the pinned upstream SHA/lock + the build-tools locks and
+# patches + the prepare-script import closure + the fixed board tarball. Those
+# are exactly the `paths` below: a keyed edit re-produces the cache on main,
+# and a keyed edit that also changes the digest makes PRs cold only until this
+# job saves the new key.
+#
+# Refresh and bootstrap: the weekly schedule restores the current key (a
+# restore is an access, which keeps the entry inside GitHub's 7-day
+# no-access eviction window) and re-prepares/re-saves if the entry was evicted.
+# The first entry after this workflow lands needs either a keyed-file push or
+# `gh workflow run b0-prepare-cache.yml --ref main`.
+on:
+  push:
+    branches: [main]
+    # Identity inputs only. Any other path cannot change the cached bytes, so it
+    # must not pay for a prepare (and must not race a producer run).
+    paths:
+      - dsh-plugins/plugin-kit/toolchain.json
+      - dsh-plugins/plugin-kit/provenance.mjs
+      - dsh-plugins/plugin-kit/package-manager.mjs
+      - dsh-plugins/plugin-kit/build-tools/package.json
+      - dsh-plugins/plugin-kit/build-tools/pnpm-lock.yaml
+      - dsh-plugins/plugin-kit/build-tools/pnpm-workspace.yaml
+      - dsh-plugins/plugin-kit/build-tools/patches/**
+      - scripts/dsh-b0/pipeline.mjs
+      - scripts/dsh-b0/pinned-source.mjs
+      - scripts/dsh-b0/prepare-cache.mjs
+      - scripts/dsh-b0/package-manager-env.mjs
+      - scripts/dsh-b0/upstream-dir.mjs
+      - scripts/release/runtime-inputs.mjs
+      - scripts/release/toolchain.mjs
+      - scripts/release/package-manager-contract.mjs
+      - scripts/release/generated-provenance.mjs
+      - vendor/dsh-package-inputs/shine-mage-board-components-0.1.0.tgz
+  workflow_dispatch:
+  schedule:
+    # Weekly: refresh the entry's last-access time and re-create it after an
+    # eviction. Deliberately off the hour to avoid the platform-wide cron spike.
+    - cron: '23 4 * * 1'
+
+# Same least privilege as every other workflow: the cache service authenticates
+# with ACTIONS_RUNTIME_TOKEN, so no repository write scope is required.
+permissions:
+  contents: read
+
+# One producer at a time. A queued run restores what the running one just
+# saved, which is cheaper than two cold prepares. Never cancel: a killed save
+# wastes the prepare, and the cache service is the only thing that should decide
+# whether an entry exists.
+concurrency:
+  group: b0-prepare-cache-main
+  cancel-in-progress: false
+
+jobs:
+  b0-prepare-cache:
+    # Only main may publish the cache PRs read. A dispatch on a feature branch
+    # would save a branch-scoped entry that no PR ever looks up.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    # On #241 a cold `--prepare` was 234s; the rest is checkout, toolchain
+    # setup, guard verification and the ~751MB save. This cap only stops a hung
+    # runner and stays well under the 30-minute b0 gate. Warm runs hit the guard
+    # and skip prepare/verify/save in well under 2 minutes.
+    timeout-minutes: 15
+    steps:
+      # Each action's pinned action.yml declares node24. This is distinct from
+      # the Node 24 runtime selected for the preparation below.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24.19.0'
+          package-manager-cache: false
+      - name: Activate the pinned package manager
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack install
+          test "$(pnpm --version)" = "11.28.2"
+      # `--prepare` does not execute Python, but it takes the absolute
+      # interpreter the b0 job prepared with. Keep the same 3.14 toolchain so a
+      # future prepare step cannot silently diverge from the PR consumer.
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        id: python
+        with:
+          python-version: '3.14'
+      - name: Resolve the B0 pnpm store
+        id: b0-pnpm-store
+        run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+      - name: Compute the B0 preparation cache key
+        id: b0-cache-key
+        run: echo "key=$(node scripts/dsh-b0/prepare-cache.mjs --key)" >> "$GITHUB_OUTPUT"
+      - name: Restore the prepared B0 closure
+        id: b0-cache-restore
+        # A cache outage must degrade to the cold path, never fail the producer.
+        continue-on-error: true
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            .context/dsh-b0/upstream-*
+            .context/dsh-b0/runtime-inputs
+            .context/dsh-b0/package-inputs
+            dsh-plugins/plugin-kit/build-tools/node_modules
+            ${{ steps.b0-pnpm-store.outputs.path }}
+          key: ${{ steps.b0-cache-key.outputs.key }}
+      - name: Verify the restored preparation or fall back to a full prepare
+        id: b0-cache-guard
+        env:
+          B0_CACHE_HIT: ${{ steps.b0-cache-restore.outputs.cache-hit }}
+        # Same fail-closed guard the PR consumer runs: a mismatch removes only
+        # the restored paths and returns 0 so the cold prepare below rebuilds
+        # them. This step is deliberately not softened.
+        run: node scripts/dsh-b0/prepare-cache.mjs --guard
+      - name: Prepare exact public DSH and private build tools
+        if: steps.b0-cache-guard.outputs.verified != 'true'
+        # Not `continue-on-error`: a broken preparation must surface here
+        # instead of leaving a silently stale cache on main.
+        run: node scripts/dsh-b0/pipeline.mjs --prepare --python "${{ steps.python.outputs.python-path }}"
+      - name: Verify the prepared closure before caching it
+        if: steps.b0-cache-guard.outputs.verified != 'true'
+        run: node scripts/dsh-b0/prepare-cache.mjs --verify
+      - name: Save the verified B0 preparation
+        if: steps.b0-cache-guard.outputs.verified != 'true'
+        # A save failure (quota, transient outage, an entry another run already
+        # reserved) must not fail the push run; PRs stay on the cold path.
+        continue-on-error: true
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            .context/dsh-b0/upstream-*
+            .context/dsh-b0/runtime-inputs
+            .context/dsh-b0/package-inputs
+            dsh-plugins/plugin-kit/build-tools/node_modules
+            ${{ steps.b0-pnpm-store.outputs.path }}
+          key: ${{ steps.b0-cache-key.outputs.key }}
+      - name: Record producer outcome
+        if: always()
+        env:
+          CACHE_KEY: ${{ steps.b0-cache-key.outputs.key }}
+          CACHE_HIT: ${{ steps.b0-cache-restore.outputs.cache-hit }}
+          VERIFIED: ${{ steps.b0-cache-guard.outputs.verified }}
+        run: |
+          {
+            echo '### B0 prepare cache producer'
+            echo "- key: \`${CACHE_KEY:-unavailable}\`"
+            echo "- exact-key restore: ${CACHE_HIT:-false}; guard verified: ${VERIFIED:-false}"
+            echo '- consumer: PR `b0-contract-build` restores this key from `main`'
+          } >> "$GITHUB_STEP_SUMMARY"
