@@ -11,7 +11,7 @@
 | 门禁单测 | [scripts/ci/rc5-surface-gate.test.mjs](../../scripts/ci/rc5-surface-gate.test.mjs) | 每条失败规则都有负向夹具；另有“当前仓库 0 error”的基线断言 |
 | P3-1 归属 | [dsh-plugins/analytics-workbench/src/connection-fetch-ledger.mjs](../../dsh-plugins/analytics-workbench/src/connection-fetch-ledger.mjs)、[dsh-plugins/crm-knowledge/src/connection-fetch-ledger.mjs](../../dsh-plugins/crm-knowledge/src/connection-fetch-ledger.mjs) | 每个插件唯一允许直接调用 `connection.fetch.register` 的模块；两包各自发布，副本必须逐字节一致 |
 | P3-1 单测 | `dsh-plugins/analytics-workbench/test/connection-fetch-{ledger,ownership}.test.mjs` | 释放顺序、幂等、并发注册、重挂载不重复；归属单测覆盖 5/5 条生产路由和两包账本一致性 |
-| CI | `.github/workflows/lint.yml` 的 `rc5-shadow` job | 独立非阻塞 job（`continue-on-error`，不在 `merge-gate.needs`），两个 step：门禁 + 归属单测；不进 4 分片 `test` 矩阵 |
+| CI | `.github/workflows/lint.yml` 的 `rc5-shadow` job | 独立非阻塞 job（`continue-on-error`，不在 `merge-gate.needs`），三个 step：门禁 + 归属单测 + [P3-3c 离线投影对拍](dsh-rc5-shadow-compare.md)；不进 4 分片 `test` 矩阵 |
 
 本地运行：`node scripts/ci/rc5-surface-gate.mjs`（0 error 退出 0；`--shadow` 恒退出 0）。
 
@@ -70,4 +70,4 @@ node scripts/ci/rc5-surface-gate.mjs \
 
 1. P0 把 pin 提到 rc.5 并清空 `PIN_DRIFT`；
 2. `routeOwnership.debt` 已清空、5/5 条生产路由全部经两本账本登记（本轮已完成）；
-3. 删除 `.github/workflows/lint.yml` 的 `rc5-shadow` job 及其两个 step 的 `continue-on-error`，并把该 job 加入 `merge-gate` 的 `needs` 与失败条件。
+3. 删除 `.github/workflows/lint.yml` 的 `rc5-shadow` job 及其各 step 的 `continue-on-error`，并把该 job 加入 `merge-gate` 的 `needs` 与失败条件。

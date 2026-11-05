@@ -1,0 +1,64 @@
+{
+  "schema_version": "dsh-rc5-shadow-fixture/v1",
+  "name": "cancelled",
+  "description": "Mid-turn user cancellation: the harness records turn/end interrupted, so rc.5 collapses it to cancelled while the native fold keeps FAILED/EXECUTION_UNKNOWN.",
+  "sessionId": "sess-shadow-cancelled",
+  "intent": {
+    "run_id": "run-shadow-cancelled",
+    "attempt_id": "att-shadow-cancelled-1"
+  },
+  "observations": [
+    {
+      "request_id": "req-shadow-cancelled",
+      "execution_exited": true
+    }
+  ],
+  "events": [
+    {
+      "seq": 0,
+      "type": "turn/start",
+      "data": {
+        "turn": 3
+      }
+    },
+    {
+      "seq": 1,
+      "type": "user/message",
+      "data": {
+        "id": "msg-shadow-cancelled",
+        "role": "user",
+        "source": {
+          "kind": "user",
+          "rpcId": "req-shadow-cancelled"
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "跑一个很慢的查询。"
+          }
+        ]
+      }
+    },
+    {
+      "seq": 2,
+      "type": "tool/call",
+      "data": {
+        "turn": 3,
+        "step": 1,
+        "callId": "call-shadow-cancelled",
+        "name": "analytics_b0_query",
+        "arguments": "{}"
+      }
+    },
+    {
+      "seq": 3,
+      "type": "turn/end",
+      "data": {
+        "turn": 3,
+        "reason": {
+          "kind": "interrupted"
+        }
+      }
+    }
+  ]
+}

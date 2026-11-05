@@ -1,0 +1,72 @@
+{
+  "schema_version": "dsh-rc5-shadow-fixture/v1",
+  "name": "normal-end-turn",
+  "description": "Legacy bridge observation fixture (event shape taken from the native-evidence corpus): one completed turn, so the native fold reports SUCCEEDED and rc.5 projects end_turn.",
+  "sessionId": "sess-shadow-normal",
+  "intent": {
+    "run_id": "run-shadow-normal",
+    "attempt_id": "att-shadow-normal-1"
+  },
+  "observations": [
+    {
+      "request_id": "req-shadow-normal",
+      "execution_exited": true
+    }
+  ],
+  "events": [
+    {
+      "seq": 0,
+      "type": "turn/start",
+      "data": {
+        "turn": 1
+      }
+    },
+    {
+      "seq": 1,
+      "type": "user/message",
+      "data": {
+        "id": "msg-shadow-normal",
+        "role": "user",
+        "source": {
+          "kind": "user",
+          "rpcId": "req-shadow-normal"
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "统计上周订单。"
+          }
+        ]
+      }
+    },
+    {
+      "seq": 2,
+      "type": "assistant/message",
+      "data": {
+        "turn": 1,
+        "step": 1,
+        "message": {
+          "id": "asst-shadow-normal",
+          "role": "assistant",
+          "content": [
+            {
+              "type": "text",
+              "text": "已完成。"
+            }
+          ]
+        },
+        "stream": []
+      }
+    },
+    {
+      "seq": 3,
+      "type": "turn/end",
+      "data": {
+        "turn": 1,
+        "reason": {
+          "kind": "completed"
+        }
+      }
+    }
+  ]
+}

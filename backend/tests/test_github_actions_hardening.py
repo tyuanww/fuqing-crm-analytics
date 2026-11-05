@@ -266,7 +266,7 @@ def test_ci_python_uses_deduplicated_runner_and_lint_remains_required():
 
 
 def test_rc5_shadow_evidence_is_a_separate_non_blocking_job():
-    """P3-0/P3-1 证据只跑一次，且不进入分片矩阵或 merge-gate。"""
+    """P3-0/P3-1/P3-3c 证据只跑一次，且不进入分片矩阵或 merge-gate。"""
     workflow = yaml.safe_load((WORKFLOWS_DIR / 'lint.yml').read_text())
     jobs = workflow['jobs']
     test_job = jobs['test']
@@ -275,6 +275,7 @@ def test_rc5_shadow_evidence_is_a_separate_non_blocking_job():
     test_runs = '\n'.join(step.get('run', '') for step in test_job['steps'])
     assert 'rc5-surface-gate.mjs' not in test_runs
     assert 'connection-fetch-ownership.test.mjs' not in test_runs
+    assert 'rc5-shadow-compare.mjs' not in test_runs
 
     shadow = jobs['rc5-shadow']
     assert shadow.get('continue-on-error') is True
@@ -286,6 +287,9 @@ def test_rc5_shadow_evidence_is_a_separate_non_blocking_job():
         'connection-fetch-ledger.test.mjs',
         'connection-fetch-ownership.test.mjs',
         'scripts/ci/rc5-surface-gate.test.mjs',
+        'scripts/ci/rc5-shadow-compare.mjs',
+        'scripts/ci/rc5-shadow-compare.test.mjs',
+        'scripts/ci/fixtures/rc5-shadow',
     ):
         assert evidence in shadow_runs
     # Every shadow step reports instead of blocking unrelated work.
