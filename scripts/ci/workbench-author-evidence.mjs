@@ -10,6 +10,11 @@ const root = fileURLToPath(new URL('../..', import.meta.url));
 const defaultLock = join(root, 'config/workbench-author-evidence.lock.json');
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const packageId = '@shine-mage/dsh-analytics-workbench-b0';
+// After the 2026-11-05 author-repo normalization the reviewed tree lives on the
+// author `main`, so the author run may be a `push` run on the default branch.
+// A push run is still pinned to the locked source commit, never to later main.
+const events = new Set(['pull_request', 'push']);
+const defaultBranch = 'main';
 
 function validateLock(lock) {
   assert.equal(lock.schema, 'shinemage-workbench-author-evidence/v1', 'WORKBENCH_AUTHOR_LOCK_SCHEMA');
@@ -20,13 +25,27 @@ function validateLock(lock) {
     assert.match(digest, /^[a-f0-9]{64}$/, 'WORKBENCH_AUTHOR_LOCK_DIGEST');
   }
   assert.equal(lock.archive.repository, 'tyuanww/dsh-analytics-workbench', 'WORKBENCH_AUTHOR_REPOSITORY');
-  assert.equal(lock.archive.event, 'pull_request', 'WORKBENCH_AUTHOR_EVENT');
+  assert.ok(events.has(lock.archive.event), 'WORKBENCH_AUTHOR_EVENT');
+  // The lock also states the branch a push run must have run on: the default
+  // branch. A pull_request lock keeps its existing shape without this field.
+  if (lock.archive.event === 'push') assert.equal(lock.archive.head_branch, defaultBranch, 'WORKBENCH_AUTHOR_PUSH_BRANCH');
   for (const name of ['artifact_id', 'run_id', 'bytes']) assert.ok(Number.isSafeInteger(lock.archive[name]) && lock.archive[name] > 0, 'WORKBENCH_AUTHOR_ARCHIVE_ID');
   assert.ok(lock.archive.bytes <= 4 * 1024 * 1024, 'WORKBENCH_AUTHOR_ARCHIVE_SIZE');
   for (const name of ['files', 'tests', 'pass']) assert.ok(Number.isSafeInteger(lock.core[name]) && lock.core[name] > 0, 'WORKBENCH_AUTHOR_CORE_COUNT');
   assert.equal(lock.core.tests, lock.core.pass, 'WORKBENCH_AUTHOR_CORE_TOTAL');
   for (const name of ['fail', 'skipped', 'cancelled', 'todo', 'status']) assert.equal(lock.core[name], 0, 'WORKBENCH_AUTHOR_CORE_FAILED');
   assert.deepEqual(Object.keys(lock.files).sort(), ['content_pack', 'plan', 'result'], 'WORKBENCH_AUTHOR_LOCK_MEMBERS');
+}
+
+/** Bind the fetched run to the locked archive identity. Pull-request evidence
+ *  keeps the existing shape; push evidence must additionally come from the
+ *  repository default branch and from the exact locked source commit. */
+export function assertWorkbenchRunBinding(lock, run, branch = defaultBranch) {
+  assert.equal(run.head_sha, lock.source_sha, 'WORKBENCH_AUTHOR_RUN_SOURCE');
+  assert.equal(run.event, lock.archive.event, 'WORKBENCH_AUTHOR_RUN_EVENT');
+  if (lock.archive.event !== 'push') return;
+  assert.equal(branch, defaultBranch, 'WORKBENCH_AUTHOR_REPOSITORY_BRANCH');
+  assert.equal(run.head_branch, branch, 'WORKBENCH_AUTHOR_RUN_BRANCH');
 }
 
 /** Relate author results to the strict reader's current formal package, not its name alone. */
@@ -87,8 +106,12 @@ export async function prepareWorkbenchAuthorEvidence({ output, python, githubEnv
   validateLock(lock);
   await mkdir(output, { mode: 0o700 });
   const run = JSON.parse(execFileSync('gh', ['api', `repos/${lock.archive.repository}/actions/runs/${lock.archive.run_id}`], { encoding: 'utf8', timeout: 30000, maxBuffer: 256 * 1024 }));
-  assert.equal(run.head_sha, lock.source_sha, 'WORKBENCH_AUTHOR_RUN_SOURCE');
-  assert.equal(run.event, lock.archive.event, 'WORKBENCH_AUTHOR_RUN_EVENT');
+  // Only a push lock needs the repository lookup; the pull_request path keeps
+  // its existing request sequence unchanged.
+  const branch = lock.archive.event === 'push'
+    ? JSON.parse(execFileSync('gh', ['api', `repos/${lock.archive.repository}`], { encoding: 'utf8', timeout: 30000, maxBuffer: 256 * 1024 })).default_branch
+    : defaultBranch;
+  assertWorkbenchRunBinding(lock, run, branch);
   assert.equal(run.status, 'completed', 'WORKBENCH_AUTHOR_RUN_STATUS');
   assert.equal(run.conclusion, 'success', 'WORKBENCH_AUTHOR_RUN_CONCLUSION');
   const artifact = JSON.parse(execFileSync('gh', ['api', `repos/${lock.archive.repository}/actions/artifacts/${lock.archive.artifact_id}`], { encoding: 'utf8', timeout: 30000, maxBuffer: 256 * 1024 }));

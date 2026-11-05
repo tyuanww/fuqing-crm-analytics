@@ -6,7 +6,7 @@ import { access, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promi
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { bindWorkbenchAuthorEvidence, readWorkbenchAuthorEvidence } from './workbench-author-evidence.mjs';
+import { assertWorkbenchRunBinding, bindWorkbenchAuthorEvidence, readWorkbenchAuthorEvidence } from './workbench-author-evidence.mjs';
 
 const root = fileURLToPath(new URL('../..', import.meta.url));
 const python = process.env.FQ_B0_PYTHON ?? 'python3';
@@ -116,6 +116,51 @@ test('fixed author evidence binds all three current formal package identities', 
     assert.throws(() => bindWorkbenchAuthorEvidence(evidence, { plugins: [changed] }), code);
   }
   assert.throws(() => bindWorkbenchAuthorEvidence(evidence, { plugins: [row, row] }), /WORKBENCH_AUTHOR_PACK_REQUIRED/);
+});
+
+test('push evidence reads the sealed archive only when it names the default branch', async t => {
+  const f = await fixture(t);
+  const pushed = structuredClone(f.lock); pushed.archive.event = 'push'; pushed.archive.head_branch = 'main';
+  await writeFile(f.lockPath, json(pushed));
+  const evidence = await readWorkbenchAuthorEvidence(f);
+  assert.equal(evidence.archive.event, 'push');
+  assert.equal(evidence.archive.head_branch, 'main');
+  for (const [edit, code] of [
+    [row => { row.archive.event = 'merge'; }, /WORKBENCH_AUTHOR_EVENT/],
+    [row => { row.archive.event = 'push'; delete row.archive.head_branch; }, /WORKBENCH_AUTHOR_PUSH_BRANCH/],
+    [row => { row.archive.event = 'push'; row.archive.head_branch = 'release'; }, /WORKBENCH_AUTHOR_PUSH_BRANCH/],
+  ]) {
+    const row = structuredClone(f.lock); edit(row); await writeFile(f.lockPath, json(row));
+    await assert.rejects(readWorkbenchAuthorEvidence(f), code);
+  }
+});
+
+const pushSource = '1'.repeat(40);
+const fetched = overrides => ({ event: 'push', head_branch: 'main', head_sha: pushSource, ...overrides });
+
+test('a push run on the default branch at the locked source is accepted; pull_request keeps working', () => {
+  const pushed = { source_sha: pushSource, archive: { event: 'push', head_branch: 'main' } };
+  assert.doesNotThrow(() => assertWorkbenchRunBinding(pushed, fetched()));
+  assert.doesNotThrow(() => assertWorkbenchRunBinding({ source_sha: pushSource, archive: { event: 'pull_request' } },
+    fetched({ event: 'pull_request', head_branch: 'codex/author' })));
+});
+
+test('a push run describing a later main is rejected', () => {
+  assert.throws(() => assertWorkbenchRunBinding({ source_sha: pushSource, archive: { event: 'push', head_branch: 'main' } },
+    fetched({ head_sha: '2'.repeat(40) })), /WORKBENCH_AUTHOR_RUN_SOURCE/);
+});
+
+test('a push run from a non-default branch or repository is rejected', () => {
+  const pushed = { source_sha: pushSource, archive: { event: 'push', head_branch: 'main' } };
+  assert.throws(() => assertWorkbenchRunBinding(pushed, fetched({ head_branch: 'codex/author' })), /WORKBENCH_AUTHOR_RUN_BRANCH/);
+  assert.throws(() => assertWorkbenchRunBinding(pushed, fetched(), 'release'), /WORKBENCH_AUTHOR_REPOSITORY_BRANCH/);
+});
+
+test('an event mismatch keeps the existing run event code', () => {
+  assert.throws(() => assertWorkbenchRunBinding({ source_sha: pushSource, archive: { event: 'push', head_branch: 'main' } },
+    fetched({ event: 'pull_request' })), /WORKBENCH_AUTHOR_RUN_EVENT/);
+  assert.throws(() => assertWorkbenchRunBinding({ source_sha: pushSource, archive: { event: 'pull_request' } }, fetched()),
+    /WORKBENCH_AUTHOR_RUN_EVENT/);
 });
 
 test('remote acquisition without an explicit token creates no output and invokes no gh', async t => {

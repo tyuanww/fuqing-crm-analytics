@@ -18,6 +18,11 @@ const generators = ['content-theme', 'cockpit-slot', 'run-kernel', 'query', 'que
 const pathPattern = /^(?!\/)(?!.*(?:^|\/)\.{1,2}(?:\/|$))(?!.*\\)[A-Za-z0-9_./-]+$/;
 const hex = /^[a-f0-9]{64}$/;
 const sha = /^[a-f0-9]{40}$/;
+// After the 2026-11-05 author-repo normalization the reviewed tree lives on the
+// author `main`, so the author run may be a `push` run on the default branch.
+// A push run is still pinned to the locked source commit, never to later main.
+const events = new Set(['pull_request', 'push']);
+const defaultBranch = 'main';
 function descriptor(row) {
   assert.match(row?.sha256 ?? '', hex, 'PUBLIC_CONTRACT_DIGEST');
   assert.ok(Number.isSafeInteger(row.bytes) && row.bytes > 0 && row.bytes <= 512 * 1024, 'PUBLIC_CONTRACT_BYTES');
@@ -57,7 +62,10 @@ export function validatePublicContractLock(lock) {
     assert.match(owner.source_sha ?? '', sha, 'PUBLIC_CONTRACT_SOURCE_SHA');
     assert.match(owner.ci_job_sha ?? '', sha, 'PUBLIC_CONTRACT_JOB_SHA');
     assert.equal(owner.archive.repository, repo, 'PUBLIC_CONTRACT_REPOSITORY');
-    assert.equal(owner.archive.event, 'pull_request', 'PUBLIC_CONTRACT_EVENT');
+    assert.ok(events.has(owner.archive.event), 'PUBLIC_CONTRACT_EVENT');
+    // The lock also states the branch a push run must have run on: the default
+    // branch. A pull_request lock keeps its existing shape without this field.
+    if (owner.archive.event === 'push') assert.equal(owner.archive.head_branch, defaultBranch, 'PUBLIC_CONTRACT_PUSH_BRANCH');
     assert.equal(owner.archive.conclusion, 'success', 'PUBLIC_CONTRACT_CONCLUSION');
     for (const key of ['run_id', 'attempt', 'artifact_id']) assert.ok(Number.isSafeInteger(owner.archive[key]) && owner.archive[key] > 0, 'PUBLIC_CONTRACT_ID');
     assert.equal(owner.archive.name, `public-contracts-${owner.archive.run_id}-${owner.archive.attempt}`, 'PUBLIC_CONTRACT_ARTIFACT_NAME');
@@ -86,6 +94,16 @@ export function validatePublicContractLock(lock) {
   for (const path of [...generators, 'scripts/dsh-b0/content-theme-contract.test.mjs', 'scripts/dsh-b0/cockpit-slot-contract.test.mjs', 'backend/contracts/tests/test_competition_c0.py'])
     assert.ok(lock.canonical_sources.includes(path), 'PUBLIC_CONTRACT_CANONICAL_REQUIRED');
   return lock;
+}
+/** Bind the fetched owner run to the locked archive identity. Pull-request
+ *  evidence keeps the existing shape; push evidence must additionally come from
+ *  the repository default branch and from the exact locked source commit. */
+export function assertOwnerRunBinding(owner, run, branch = defaultBranch) {
+  assert.equal(run.head_sha, owner.source_sha, 'PUBLIC_CONTRACT_RUN_SOURCE');
+  assert.equal(run.event, owner.archive.event, 'PUBLIC_CONTRACT_RUN_EVENT');
+  if (owner.archive.event !== 'push') return;
+  assert.equal(branch, defaultBranch, 'PUBLIC_CONTRACT_REPOSITORY_BRANCH');
+  assert.equal(run.head_branch, branch, 'PUBLIC_CONTRACT_RUN_BRANCH');
 }
 export async function boundedContractFile(path, maximum) {
   assert.ok(isAbsolute(path ?? ''), 'PUBLIC_CONTRACT_ABSOLUTE_FILE');
@@ -176,13 +194,19 @@ export async function preparePublicContractInputs({ output, python, githubEnv } 
   assert.ok(rest && (rest === '..' || rest.startsWith(`..${sep}`) || isAbsolute(rest)), 'PUBLIC_CONTRACT_OUTPUT_OUTSIDE_SOURCE');
   assert.ok(!(await lstat(target).catch(error => { if (error.code === 'ENOENT') return null; throw error; })), 'PUBLIC_CONTRACT_OUTPUT_EXISTS');
   const api = path => JSON.parse(execFileSync('gh', ['api', path], { encoding: 'utf8', timeout: 30000, maxBuffer: 512 * 1024 }));
+  // Only push locks need the repository lookup, once per repository; a
+  // pull_request lock keeps its existing request sequence unchanged.
+  const defaultBranches = new Map();
+  const branchOf = repo => {
+    if (!defaultBranches.has(repo)) defaultBranches.set(repo, api(`repos/${repo}`).default_branch);
+    return defaultBranches.get(repo);
+  };
   const archives = {}, observed = {};
   for (const [name, owner] of Object.entries(lock.owners)) {
     const prefix = `repos/${owner.archive.repository}`;
     const run = api(`${prefix}/actions/runs/${owner.archive.run_id}`);
     assert.equal(run.id, owner.archive.run_id, 'PUBLIC_CONTRACT_RUN_ID');
-    assert.equal(run.head_sha, owner.source_sha, 'PUBLIC_CONTRACT_RUN_SOURCE');
-    assert.equal(run.event, owner.archive.event, 'PUBLIC_CONTRACT_RUN_EVENT');
+    assertOwnerRunBinding(owner, run, owner.archive.event === 'push' ? branchOf(owner.archive.repository) : defaultBranch);
     assert.equal(run.run_attempt, owner.archive.attempt, 'PUBLIC_CONTRACT_RUN_ATTEMPT');
     assert.equal(run.status, 'completed', 'PUBLIC_CONTRACT_RUN_STATUS');
     assert.equal(run.conclusion, 'success', 'PUBLIC_CONTRACT_RUN_CONCLUSION');

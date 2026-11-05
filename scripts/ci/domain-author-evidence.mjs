@@ -11,6 +11,11 @@ const defaultLock = join(root, 'config/domain-author-evidence.lock.json');
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const hex = /^[a-f0-9]{64}$/;
 const pathPattern = /^(?!\/)(?!.*(?:^|\/)\.{1,2}(?:\/|$))(?!.*\\)[A-Za-z0-9_./-]+$/;
+// After the 2026-11-05 author-repo normalization the reviewed tree lives on the
+// author `main`, so the author run may be a `push` run on the default branch.
+// A push run is still pinned to the locked source commit, never to later main.
+const events = new Set(['pull_request', 'push']);
+const defaultBranch = 'main';
 const groups = [
   { name: 'geometry', files: ['library/test/geometry.test.mjs'], tests: 28 },
   { name: 'producer-inputs', files: ['scripts/producer.test.mjs', 'scripts/build-input.test.mjs'], tests: 6 },
@@ -34,7 +39,10 @@ function validateLock(lock) {
   assert.equal(lock.source_files, 30, 'DOMAIN_AUTHOR_SOURCE_COUNT');
   assert.match(lock.source_inventory_sha256 ?? '', hex, 'DOMAIN_AUTHOR_SOURCE_INVENTORY');
   assert.equal(lock.archive.repository, 'tyuanww/shinemage-board-components', 'DOMAIN_AUTHOR_REPOSITORY');
-  assert.equal(lock.archive.event, 'pull_request', 'DOMAIN_AUTHOR_EVENT');
+  assert.ok(events.has(lock.archive.event), 'DOMAIN_AUTHOR_EVENT');
+  // The lock also states the branch a push run must have run on: the default
+  // branch. A pull_request lock keeps its existing shape without this field.
+  if (lock.archive.event === 'push') assert.equal(lock.archive.head_branch, defaultBranch, 'DOMAIN_AUTHOR_PUSH_BRANCH');
   assert.equal(lock.archive.conclusion, 'success', 'DOMAIN_AUTHOR_RUN_CONCLUSION');
   for (const key of ['run_id', 'attempt', 'artifact_id', 'bytes']) {
     assert.ok(Number.isSafeInteger(lock.archive[key]) && lock.archive[key] > 0, 'DOMAIN_AUTHOR_ARCHIVE_ID');
@@ -63,6 +71,17 @@ function validateLock(lock) {
     assert.equal(group.exit_code, 0, 'DOMAIN_AUTHOR_GROUP_EXIT');
     assert.deepEqual(group.counts, { tests: expected.tests, pass: expected.tests, fail: 0, cancelled: 0, skipped: 0, todo: 0 }, 'DOMAIN_AUTHOR_GROUP_COUNTS');
   }
+}
+
+/** Bind the fetched run to the locked archive identity. Pull-request evidence
+ *  keeps the existing shape; push evidence must additionally come from the
+ *  repository default branch and from the exact locked source commit. */
+export function assertRunBinding(lock, run, branch = defaultBranch) {
+  assert.equal(run.head_sha, lock.source_sha, 'DOMAIN_AUTHOR_RUN_SOURCE');
+  assert.equal(run.event, lock.archive.event, 'DOMAIN_AUTHOR_RUN_EVENT');
+  if (lock.archive.event !== 'push') return;
+  assert.equal(branch, defaultBranch, 'DOMAIN_AUTHOR_REPOSITORY_BRANCH');
+  assert.equal(run.head_branch, branch, 'DOMAIN_AUTHOR_RUN_BRANCH');
 }
 
 function tapCounts(text, expected) {
@@ -161,8 +180,10 @@ export async function prepareDomainAuthorEvidence({ output, python, githubEnv } 
   validateLock(lock);
   const api = path => JSON.parse(execFileSync('gh', ['api', path], { encoding: 'utf8', timeout: 30000, maxBuffer: 256 * 1024 }));
   const run = api(`repos/${lock.archive.repository}/actions/runs/${lock.archive.run_id}`);
-  assert.equal(run.head_sha, lock.source_sha, 'DOMAIN_AUTHOR_RUN_SOURCE');
-  assert.equal(run.event, lock.archive.event, 'DOMAIN_AUTHOR_RUN_EVENT');
+  // Only a push lock needs the repository lookup; the pull_request path keeps
+  // its existing three-request sequence unchanged.
+  const branch = lock.archive.event === 'push' ? api(`repos/${lock.archive.repository}`).default_branch : defaultBranch;
+  assertRunBinding(lock, run, branch);
   assert.equal(run.run_attempt, lock.archive.attempt, 'DOMAIN_AUTHOR_RUN_ATTEMPT');
   assert.equal(run.status, 'completed', 'DOMAIN_AUTHOR_RUN_STATUS');
   assert.equal(run.conclusion, lock.archive.conclusion, 'DOMAIN_AUTHOR_RUN_CONCLUSION');
