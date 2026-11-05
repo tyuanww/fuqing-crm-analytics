@@ -424,6 +424,8 @@ node --test scripts/ci/composition-pack-inputs.test.mjs
 
 **阻塞** P3 未完成；作者仓未全部迁移；删除门禁仍 BLOCKED。
 
+**Runbook** 执行顺序、删除门禁与回滚证据见 [p4-repo-split-runbook.md](../operating/p4-repo-split-runbook.md)（2026-11-05）。
+
 **授权** 删除 `dsh-plugins/` 是单独动作，必须单独提交、先生成恢复 bundle，并单独授权。
 
 ### C13 交付层遗留（低细节）
