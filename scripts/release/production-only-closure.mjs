@@ -535,8 +535,8 @@ function renderMarkdown(receipt) {
     .map(([key, value]) => `| ${key} | \`${value}\` |`).join('\n');
   return `# Production-only closure receipt
 
-Machine-checked evidence for the \`deletion_gate\` reason
-\`production_only_closure_not_recorded\`. It records one rehearsal of
+Machine-checked evidence for the production-only closure condition
+(the gate reason once labelled \`production_only_closure_not_recorded\`). It records one rehearsal of
 \`origin/main\` with the ten P4 source trees removed: profile inputs, the
 composition manifest, the pack readers, the backend/kernel imports, a
 production-only install, the sealed consumer install and the release payload

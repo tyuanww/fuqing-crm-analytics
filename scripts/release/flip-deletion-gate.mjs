@@ -3,10 +3,11 @@
 /**
  * Fail-closed flip lever for the P4 `deletion_gate`.
  *
- * The gate is the last hand edit in the repo split: `validateGate` forces a
- * `READY` gate once `production_only_closure_not_recorded` is dropped, and the
- * runbook also requires G3 real-host ACP acceptance. This command encodes every
- * precondition and writes the gate exactly once:
+ * The gate is the last hand edit in the repo split: `validateGate` accepts a
+ * `READY` gate only when every source/domain and the bundle are `PASS`, and the
+ * runbook also requires the production-only closure receipt plus G3 real-host
+ * ACP acceptance. This command encodes every precondition and writes the gate
+ * exactly once:
  *
  *   1. every `sources[]`/`domains[]` status is PASS;
  *   2. `bundle.status`/`bundle.remote_main` are PASS and the bundle is bound to

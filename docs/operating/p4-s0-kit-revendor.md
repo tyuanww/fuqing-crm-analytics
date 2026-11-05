@@ -1,8 +1,14 @@
 # P4 S0 kit re-cut and author re-vendor
 
-Prepared 2026-11-05 against `origin/main` `f8aa3fa` (`#246` merge; the kit source is unchanged since `8da3c613`). This is preparation only: no author repo was written, no main lock pin moved, and the sealed artifact was not rebuilt. S0 is strictly serial and first; this document supplies the cut, the drift gate and the per-repo checklist that S0 executes under a separate authorization.
+Prepared 2026-11-05 against `origin/main` `f8aa3fa` (`#246` merge; the kit source is unchanged since `8da3c613`). It began as preparation only; S0 was executed on 2026-11-05 (§0), so the pre-refill observations in §1–§2 and the checklist in §3 are kept as history. S0 is strictly serial and first; this document supplies the cut, the drift gate and the per-repo checklist that S0 executed under a separate authorization.
 
-Machine-readable state: [`p4-s0-kit-vendored.v1.json`](p4-s0-kit-vendored.v1.json) (10 repos × author `main` + open PR head, with sha256, bytes, tarball name and the files each repo carries the kit in). Tool: [`scripts/dsh-b0/cut-kit-artifact.mjs`](../../scripts/dsh-b0/cut-kit-artifact.mjs). Domain contradiction: [`p4-s0-domain-sha-reconciliation.md`](p4-s0-domain-sha-reconciliation.md).
+Machine-readable state: [`p4-s0-kit-vendored.v1.json`](p4-s0-kit-vendored.v1.json) (post-refill author `main` + merged re-vendor PR head for 10 repos, with sha256, bytes, tarball name and the files each repo carries the kit in; `history[]` keeps the pre-refill cuts). Tool: [`scripts/dsh-b0/cut-kit-artifact.mjs`](../../scripts/dsh-b0/cut-kit-artifact.mjs). Domain contradiction: [`p4-s0-domain-sha-reconciliation.md`](p4-s0-domain-sha-reconciliation.md).
+
+## 0. Execution status (2026-11-05)
+
+S0 is **executed**. All 10 author `main`s were re-vendored to kit `e2216168…` / 49,341 B: 10/10 `KIT-SHA256` equal the full digest and 10/10 `vendor/dsh-plugin-kit-0.1.1.tgz` are 49,341 B. The author `main` heads are the `author_main` rows in [`p4-s0-kit-vendored.v1.json`](p4-s0-kit-vendored.v1.json). Main re-pinned `config/shinemage-composition-packs.lock.json` to those mains (lock `81a10f70…`) and resealed artifact `13417537931` / run `42035243845` in #255 (`8bb713e8`).
+
+Evidence pointers: plan §5.5 (S0 execution record), author `push` runs workbench `42031523764`, crm `42031515425`, brand `42031506827`, board/domain `42030897866`, and [`config/shinemage-composition-artifact.lock.json`](../../config/shinemage-composition-artifact.lock.json). The sealed artifact expires 2027-02-03; author artifacts expire 2026-11-19.
 
 ## 1. Authoritative cut (proven)
 
@@ -10,14 +16,14 @@ Machine-readable state: [`p4-s0-kit-vendored.v1.json`](p4-s0-kit-vendored.v1.jso
 |---|---|---|---|---|
 | kit `0.1.0` | `251383e18a76fe345ac837d8767f6c325c4616c027e2ea250d2dcec45b22c901` | 43,944 | 17 | all 10 author `main`s, `vendor/dsh-plugin-kit-0.1.0.tgz` |
 | kit `0.1.1` (stale PR cut) | `a527b2a5ec54731c85930bd795a74ef8eab972731d4915dc3b01b318855f0e11` | 49,013 | 19 | all 10 open author PR heads, `vendor/dsh-plugin-kit-0.1.1.tgz` |
-| **kit `0.1.1` (authoritative)** | **`e22161688cbc7bc345e64264223c9aa367e859a8dccd000a65b91c6621559fdb`** | **49,341** | **19** | none yet — S0 must distribute it |
+| **kit `0.1.1` (authoritative)** | **`e22161688cbc7bc345e64264223c9aa367e859a8dccd000a65b91c6621559fdb`** | **49,341** | **19** | all 10 author `main`s, `vendor/dsh-plugin-kit-0.1.1.tgz` (distributed 2026-11-05) |
 
 Reproduction (the tool stages `dsh-plugins/plugin-kit` out of the commit with `git archive`, packs with the pinned pnpm and compares two independent packs):
 
 ```bash
 node scripts/dsh-b0/cut-kit-artifact.mjs --commit f8aa3fa --out /tmp/p4-s0-kit
 # sha256 e2216168… / 49,341 B / 19 members / reproducible: identical
-node scripts/dsh-b0/cut-kit-artifact.mjs --commit origin/main --check   # red until S0 lands: 20/20 DRIFT
+node scripts/dsh-b0/cut-kit-artifact.mjs --commit origin/main --check   # green after S0: 0 drift
 ```
 
 The runbook baseline `8da3c613`, `304abf9f` and current main `f8aa3fa` all cut to `e2216168…`/49,341 B byte-for-byte: main moved only by the docs-only `#245` and `#246` merges and `git diff 8da3c613 f8aa3fa -- dsh-plugins/plugin-kit` is empty, so the authoritative value does **not** change. The packer is deterministic because pnpm writes every member with mode `0644`, uid/gid `0`, empty owner names and the portable `1985-10-26` mtime; the tool asserts those headers and a byte-identical second cut.
@@ -32,15 +38,15 @@ The cut also asserts the surface that S0 needs: exports `./toolchain`, `./proven
 - its packed `package/package.json` still carries the dev-only `packageManager` and the pre-`fd6bc25` compact formatting with no trailing newline, while every `pnpm pack` of this kit (`251383e1…`, `e2216168…`) normalizes the manifest and drops `packageManager`;
 - only two of 19 members differ from `e2216168…`: `package/package.json` and `package/packaged-dependencies.mjs`.
 
-The `0.1.0` tarball is a different, older failure: 17 members with no `./provenance` or `./client-banner`, so no author `main` can build the rc.5 sources. The plan note `docs/plans/plugin-externalization-p0-p4-20261104.md` §2.1 item 6 (`03ca0fde…`/45,574 B) is not what the 10 `main`s carry today: every `KIT-SHA256` on `main` is `251383e1…` and every vendored tarball is 43,944 B. Correct the note when the plan is next appended; do not rewrite the historical evidence.
+The `0.1.0` tarball is a different, older failure: 17 members with no `./provenance` or `./client-banner`, so no author `main` can build the rc.5 sources. The plan note `docs/plans/plugin-externalization-p0-p4-20261104.md` §2.1 item 6 (`03ca0fde…`/45,574 B) was not what the 10 `main`s carried at preparation time: then every `KIT-SHA256` on `main` was `251383e1…` and every vendored tarball was 43,944 B. Correct the note when the plan is next appended; do not rewrite the historical evidence. **2026-11-05 S0 update:** every author `main` now carries `e2216168…` / 49,341 B, and the plan note was annotated in place on 2026-11-06 rather than rewritten.
 
 ### Version decision
 
 Keep `0.1.1`; do not bump for the re-cut. No author `main` ever carried `a527b2a5…` (that byte stream exists only on the open PR heads, which S0 overwrites), so `e2216168…` becomes the only `0.1.1` any `main` has ever vendored. The public surface did not change between the two `0.1.1` cuts, and main's in-repo consumers already pin `0.1.1` by `file:` path, so no main pin and no author lock specifier changes. A `0.1.2` bump would additionally require 10 in-repo `package.json` pins plus a new cut, with no identity benefit.
 
-## 2. Live author-vendor state (2026-11-05, read-only)
+## 2. Pre-refill author-vendor state (2026-11-05, read-only)
 
-All 10 author `main`s vendor `251383e1…` / 43,944 B as `vendor/dsh-plugin-kit-0.1.0.tgz`; all 10 open PR heads vendor `a527b2a5…` / 49,013 B as `vendor/dsh-plugin-kit-0.1.1.tgz`. Repo, head sha, PR number and carrier list are in the JSON manifest; the per-repo deltas are:
+Before S0, all 10 author `main`s vendored `251383e1…` / 43,944 B as `vendor/dsh-plugin-kit-0.1.0.tgz` and all 10 then-open PR heads vendored `a527b2a5…` / 49,013 B as `vendor/dsh-plugin-kit-0.1.1.tgz`. After S0 they vendor `e2216168…` / 49,341 B; the post-refill heads are in the JSON manifest `author_main` rows. Repo, pre-refill head sha, PR number and carrier list are below; the per-repo deltas are:
 
 | Repo | Author `main` | Open PR | `KIT-SHA256` format | Extra kit carriers |
 |---|---|---|---|---|
@@ -57,9 +63,9 @@ All 10 author `main`s vendor `251383e1…` / 43,944 B as `vendor/dsh-plugin-kit-
 
 `bare digest` is 64 hex + newline (65 B); `digest + filename` is `<sha>  dsh-plugin-kit-0.1.1.tgz` (91 B). Keep each repo's existing format: normalizing it is an unrelated diff, and each repo's `check-inputs`/`verify-pack` already accepts its own form. Every repo also carries the kit in `package.json` (exact devDependency) and `pnpm-lock.yaml` (`file:` specifier).
 
-## 3. S0 re-vendor checklist (not executed)
+## 3. S0 re-vendor checklist (executed 2026-11-05)
 
-Preconditions: owner authorization to write the 10 author repos; S0 has not started; main's `config/*lock*.json` and `dsh-plugins/plugin-kit/` are untouched by this preparation.
+Preconditions: owner authorization to write the 10 author repos. S0 executed on 2026-11-05 under that authorization; the checklist below is kept as the executed record, and main's lock re-pin plus reseal landed in #255 (`8bb713e8`).
 
 1. [ ] Cut the authoritative tarball from the merge commit on main: `node scripts/dsh-b0/cut-kit-artifact.mjs --commit origin/main --out /tmp/p4-s0-kit`; record `sha256=e2216168…`, `bytes=49341`, commit sha.
 2. [ ] For each author repo, rebase/merge its open PR branch onto the current author `main` (the PR must carry the new kit, not just main); merge the stacked parents first (workbench #15, crm #2–#5).
@@ -89,6 +95,6 @@ For board-components replace the identity step with the same `.kit` update in `v
 
 ## 4. What is still blocked
 
-- Writing any author repo, pushing branches and running author CI requires the owner authorization recorded in plan C02/C03; this preparation did not do it.
-- The 10 author artifacts pinned by main expire **2026-11-18/19**; if S0 runs after that, the author CI must be re-run before any re-pin.
+- Writing any author repo, pushing branches and running author CI required the owner authorization recorded in plan C02/C03; the 2026-11-05 S0 execution used it and is complete.
+- The 10 author artifacts pinned by main expire **2026-11-19**; if S1 or any later re-pin runs after that, the author CI must be re-run before pinning.
 - The new tarball must not be called published: distribution stays a private `file:` vendor, `release_ready=false`.

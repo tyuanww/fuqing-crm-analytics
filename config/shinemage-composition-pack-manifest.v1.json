@@ -123,7 +123,7 @@
   "deletion_gate": {
     "status": "BLOCKED",
     "blocking_reasons": [
-      "production_only_closure_not_recorded"
+      "real_host_acceptance_not_recorded"
     ]
   },
   "domains": [
