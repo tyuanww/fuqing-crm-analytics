@@ -2,6 +2,9 @@
  *  import its exports. Byte sync is fail-closed by re-running every generator in
  *  this repository (B0 also re-runs the 15 sealed public compiler contracts in
  *  an isolated stage); plugins must not regain generated copies.
+ *  The plugin-tree typecheck companions are not contract sources either: each
+ *  one may import only declared package exports or values from its own plugin
+ *  tree, so it can move with the plugin repository that owns it (P4 S2/S3/S5).
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -41,6 +44,8 @@ const TYPE_CHECK_CONSUMERS = [
 const sourceFile = /\.[cm]?[jt]sx?$/;
 const normalize = value => value.split(sep).join('/');
 const exists = path => { try { return lstatSync(path).isFile(); } catch { return false; } };
+const pluginOf = path => /^dsh-plugins\/([^/]+)\//.exec(path)?.[1] ?? null;
+const within = (child, parent) => child === parent || child.startsWith(`${parent}${sep}`);
 
 async function walk(directory, prefix = '') {
   const files = [];
@@ -138,6 +143,92 @@ test('plugin sources only consume generated contracts through package exports', 
   assert.deepEqual(problems, [], `CONTRACT_CONSUMER_IMPORT ${problems.join(', ')}`);
   const legacyConsumer = await readFile(join(repository, 'dsh-plugins/analytics-workbench/src/client/competition-board/types.ts'), 'utf8');
   assert.ok(legacyConsumer.includes("from '../../competition-c0-contract.generated.d.ts'"), 'CONTRACT_LEGACY_IMPORT_DRIFT');
+});
+
+test('typecheck consumers import the contracts package or their own plugin tree only', async () => {
+  // G4 boundary rule. These 11 companions type-check plugin code against the
+  // contracts SDK, so they belong to the plugin repos (9 workbench -> S5,
+  // crm-knowledge/knowledge -> S3), never to dsh-plugins/contracts.
+  assert.equal(TYPE_CHECK_CONSUMERS.length, 11, 'CONTRACT_TYPECHECK_CONSUMER_COUNT');
+  const tools = createRequire(join(repository, 'dsh-plugins/plugin-kit/build-tools/package.json'));
+  const ts = tools('typescript');
+  const exportedTargets = new Set(Object.values(exportsMap)
+    .filter(target => typeof target === 'string' && target.startsWith('./'))
+    .map(target => target.slice(2)));
+  const problems = [];
+
+  /** Every static or literal-dynamic import/export specifier in one file. */
+  async function specifiersOf(relative) {
+    const source = await readFile(join(repository, relative), 'utf8');
+    const ast = ts.createSourceFile(relative, source, ts.ScriptTarget.Latest, true);
+    const found = [];
+    function visit(node) {
+      if ((ts.isImportDeclaration(node) || ts.isExportDeclaration(node))
+        && node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)) found.push(node.moduleSpecifier.text);
+      else if (ts.isImportEqualsDeclaration(node) && ts.isExternalModuleReference(node.moduleReference)
+        && ts.isStringLiteral(node.moduleReference.expression)) found.push(node.moduleReference.expression.text);
+      else if (ts.isImportTypeNode(node) && ts.isLiteralTypeNode(node.argument)
+        && ts.isStringLiteral(node.argument.literal)) found.push(node.argument.literal.text);
+      else if (ts.isCallExpression(node)
+        && (node.expression.kind === ts.SyntaxKind.ImportKeyword
+          || (ts.isIdentifier(node.expression) && node.expression.text === 'require'))
+        && node.arguments.length === 1 && ts.isStringLiteralLike(node.arguments[0])) found.push(node.arguments[0].text);
+      ts.forEachChild(node, visit);
+    }
+    visit(ast);
+    return found;
+  }
+
+  for (const consumer of TYPE_CHECK_CONSUMERS) {
+    const ownRoot = join(repository, `dsh-plugins/${pluginOf(consumer)}`);
+    for (const specifier of await specifiersOf(consumer)) {
+      if (specifier === CONTRACT_NAME || specifier.startsWith(`${CONTRACT_NAME}/`)) {
+        const key = specifier === CONTRACT_NAME ? '.' : `.${specifier.slice(CONTRACT_NAME.length)}`;
+        // A bare package entry is allowed; every subpath must be a declared export.
+        if (key !== '.' && !(key in exportsMap)) {
+          problems.push(`CONTRACT_TYPECHECK_PRIVATE_SUBPATH ${consumer} -> ${specifier}`);
+        }
+        continue;
+      }
+      if (!specifier.startsWith('.')) {
+        problems.push(`CONTRACT_TYPECHECK_FOREIGN_PACKAGE ${consumer} -> ${specifier}`);
+        continue;
+      }
+      const target = normalize(resolve(join(repository, consumer), '..', specifier));
+      if (within(target, contractRoot)) {
+        const relative = target.slice(contractRoot.length + 1);
+        if (!exportedTargets.has(relative)) problems.push(`CONTRACT_TYPECHECK_PRIVATE_PATH ${consumer} -> ${specifier}`);
+      } else if (within(target, ownRoot)) {
+        // Plugin-local values are permitted only inside the consumer's own tree.
+      } else if (target.startsWith(`${repository}${sep}dsh-plugins${sep}`)) {
+        problems.push(`CONTRACT_TYPECHECK_CROSS_PLUGIN_IMPORT ${consumer} -> ${specifier} (${target.slice(repository.length + 1)})`);
+      } else {
+        problems.push(`CONTRACT_TYPECHECK_OUTSIDE_BOUNDARY ${consumer} -> ${specifier} (${target.slice(repository.length + 1)})`);
+      }
+    }
+  }
+  // The same rule over the resolved graph: one program per companion, so a file
+  // reachable only from another plugin cannot hide in the union of all 11.
+  const options = {
+    strict: true, noEmit: true,
+    target: ts.ScriptTarget.ES2023, module: ts.ModuleKind.ESNext,
+    moduleResolution: ts.ModuleResolutionKind.Bundler, allowImportingTsExtensions: true,
+    types: [], typeRoots: [],
+    paths: { [`${CONTRACT_NAME}/*`]: [join(repository, `${CONTRACT_PACKAGE}/*`)] },
+  };
+  const pluginPrefix = normalize(join(repository, 'dsh-plugins'));
+  for (const consumer of TYPE_CHECK_CONSUMERS) {
+    const ownRoot = normalize(join(repository, `dsh-plugins/${pluginOf(consumer)}`));
+    const program = ts.createProgram([join(repository, consumer)], options);
+    for (const file of program.getSourceFiles()) {
+      if (program.isSourceFileDefaultLibrary(file)) continue;
+      const reached = normalize(file.fileName);
+      if (reached.startsWith(pluginPrefix) && !within(reached, normalize(contractRoot)) && !within(reached, ownRoot)) {
+        problems.push(`CONTRACT_TYPECHECK_GRAPH_LEAK ${consumer} reaches ${reached.slice(repository.length + 1)}`);
+      }
+    }
+  }
+  assert.deepEqual(problems, [], `CONTRACT_TYPECHECK_CONSUMER_BOUNDARY ${problems.join(', ')}`);
 });
 
 test('plugin manifests declare the contract package as exact dev-only input', async () => {
