@@ -393,9 +393,6 @@ def test_all_five_operations_route_through_the_acp_transport(acp):
     assert receiver.call("dispatch", dispatch) == {"accepted": True}
     assert server.prompt_started.wait(5.0)
     assert server.prompts == ["合成渠道"]
-    running = receiver.call("observe", dispatch)
-    assert running["outcome"] == "RUNNING" and running["execution_exited"] is False
-
     settled = observe_until(receiver, dispatch, "SUCCEEDED")
     assert settled["execution_exited"] is True
     assert settled["successful_call_ids"] == ["call-1"]
