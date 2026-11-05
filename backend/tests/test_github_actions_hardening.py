@@ -483,3 +483,108 @@ def test_release_workflows_bind_the_runtime_pin_to_toolchain_json() -> None:
     assert publish_name_env_refs == 5
     assert publish_name_shell_refs == 2
     assert evidence_refs + publish_sha_refs + publish_name_env_refs + publish_name_shell_refs == 9
+
+
+# --- dispatch-only client title for the runtime rebuild ---------------------
+# The title-carrying runtime can only be produced by the release preflight, so
+# the switch lives on the dispatch surface. These assertions keep the input
+# empty by default, keep it unreachable from a pull_request, and exercise the
+# exact validation the workflow runs before it exports DSH_CLIENT_TITLE.
+
+
+def test_preflight_client_title_is_dispatch_only_and_fail_closed(tmp_path, monkeypatch):
+    import textwrap
+
+    import pytest
+
+    workflow = _load_workflow("dsh-release-preflight.yml")
+    events = _workflow_events(workflow)
+    assert set(events) == {"pull_request", "workflow_dispatch"}
+    assert "inputs" not in events["pull_request"]
+
+    inputs = events["workflow_dispatch"]["inputs"]
+    assert inputs["client_title"] == {
+        "description": (
+            "Optional build-time client title; empty keeps the pinned official "
+            "title. Dispatch only."
+        ),
+        "required": False,
+        "default": "",
+        "type": "string",
+    }
+    assert inputs["reviewed_sha"]["required"] is True
+    assert inputs["release_tag"]["required"] is True
+
+    steps = workflow["jobs"]["preflight"]["steps"]
+    resolver = _named_step(steps, "Resolve the optional dispatch-only client title")
+    build = _named_step(steps, "Build the exact pinned runtime before tag creation")
+
+    # Only a dispatch can reach the resolver, and only the resolver reads the
+    # dispatch input. The build step consumes the inherited environment.
+    assert resolver["if"] == "github.event_name == 'workflow_dispatch'"
+    assert resolver["env"] == {"CLIENT_TITLE_INPUT": "${{ inputs.client_title }}"}
+    assert "client_title" not in build.get("run", "")
+    assert "client_title" not in str(build.get("env", {}))
+    names = [step.get("name") for step in steps]
+    assert names.index(resolver["name"]) < names.index(build["name"])
+
+    # The runner-local provenance (it names client_title_build) is uploaded
+    # only for a real dispatch that carries a title.
+    provenance = _named_step(steps, "Upload the client-title runtime provenance")
+    assert provenance["if"] == (
+        "github.event_name == 'workflow_dispatch' && inputs.client_title != ''"
+    )
+    assert "*.provenance.json" in provenance["with"]["path"]
+    assert names.index(build["name"]) < names.index(provenance["name"])
+
+    # DSH_CLIENT_TITLE is never a static env entry: it exists only when the
+    # dispatch resolver accepts a non-empty title and appends it to GITHUB_ENV.
+    assert "DSH_CLIENT_TITLE" not in str(workflow["jobs"]["preflight"].get("env", {}))
+    assert all("DSH_CLIENT_TITLE" not in step.get("env", {}) for step in steps)
+    source = textwrap.dedent(resolver["run"]).split("<<'PYTHON'\n", 1)[1].rsplit(
+        "\nPYTHON", 1
+    )[0]
+
+    env_file = tmp_path / "client-title.env"
+    monkeypatch.setenv("GITHUB_ENV", str(env_file))
+
+    def export(raw: str | None) -> str:
+        env_file.write_text("", encoding="utf-8")
+        if raw is None:
+            monkeypatch.delenv("CLIENT_TITLE_INPUT", raising=False)
+        else:
+            monkeypatch.setenv("CLIENT_TITLE_INPUT", raw)
+        try:
+            exec(compile(source, "workflow-client-title", "exec"), {"__name__": "__main__"})
+        except SystemExit as error:
+            # The script exits 0 to mean "no title configured"; any other exit
+            # is a validation failure and must reach the caller.
+            if error.code not in (0, None):
+                raise
+        return env_file.read_text(encoding="utf-8")
+
+    # An empty input exports nothing, so the runtime build keeps the pinned
+    # official bytes.
+    assert export("") == ""
+    # A missing variable is a workflow defect, not an empty title: fail closed.
+    with pytest.raises(SystemExit):
+        export(None)
+    assert env_file.read_text(encoding="utf-8") == ""
+    # A valid title is trimmed and exported exactly once.
+    assert export("  伸美 AI 增长董事会  ") == (
+        "DSH_CLIENT_TITLE=伸美 AI 增长董事会\n"
+    )
+    for invalid in (
+        "   ",
+        "伸美\nAI",
+        "伸美\rAI",
+        "伸美\x01AI",
+        "\x1b[31m",
+        "x\x7fy",
+        "<b>",
+        "a" * 201,
+        "DeepSeek Harness",
+    ):
+        with pytest.raises(SystemExit):
+            export(invalid)
+        assert env_file.read_text(encoding="utf-8") == ""

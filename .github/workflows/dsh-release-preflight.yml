@@ -31,6 +31,11 @@ on:
         description: 'Reserved final tag name; preflight creates no Git tag'
         required: true
         type: string
+      client_title:
+        description: 'Optional build-time client title; empty keeps the pinned official title. Dispatch only.'
+        required: false
+        default: ''
+        type: string
 
 permissions:
   contents: read
@@ -177,6 +182,42 @@ jobs:
             --output "$RUNNER_TEMP/shinemage-composition-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" \
             --python "${{ steps.python.outputs.python-path }}" \
             --github-env "$GITHUB_ENV"
+      - name: Resolve the optional dispatch-only client title
+        # Only a workflow_dispatch may carry a title. The input context is
+        # empty for pull_request runs, but the explicit event gate keeps the
+        # title path impossible to reach from a PR or a push.
+        if: github.event_name == 'workflow_dispatch'
+        timeout-minutes: 1
+        env:
+          CLIENT_TITLE_INPUT: ${{ inputs.client_title }}
+        run: |
+          set -euo pipefail
+          "${{ steps.python.outputs.python-path }}" - <<'PYTHON'
+          import os
+          import sys
+
+          # Empty means "leave the pinned official bytes alone": write nothing,
+          # so DSH_CLIENT_TITLE is absent from the preflight environment exactly
+          # as before this input existed. Anything else must be valid or fail.
+          raw = os.environ.get('CLIENT_TITLE_INPUT')
+          if raw is None:
+              sys.exit('CLIENT_TITLE_INPUT_MISSING')
+          title = raw.strip()
+          if not title:
+              if raw:
+                  sys.exit('CLIENT_TITLE_INVALID')
+              raise SystemExit(0)
+          if len(title) > 200:
+              sys.exit('CLIENT_TITLE_INVALID')
+          if any(ord(character) < 0x20 or ord(character) == 0x7f for character in title):
+              sys.exit('CLIENT_TITLE_INVALID')
+          if any(character in title for character in '<>&'):
+              sys.exit('CLIENT_TITLE_HTML_UNSAFE')
+          if 'DeepSeek Harness' in title:
+              sys.exit('CLIENT_TITLE_UPSTREAM_CONFLICT')
+          with open(os.environ['GITHUB_ENV'], 'a', encoding='utf-8') as handle:
+              handle.write(f'DSH_CLIENT_TITLE={title}\n')
+          PYTHON
       - name: Build the exact pinned runtime before tag creation
         # Measured green wall time: 418s (run 41835511524). The two cancelled
         # runs spent 59m48s/59m58s here, so cap the step well below the job
@@ -196,6 +237,19 @@ jobs:
             --source-sha "$REVIEWED_SHA" \
             --tag "$RELEASE_TAG" \
             --output-dir "$RUNNER_TEMP/dsh-preflight"
+      - name: Upload the client-title runtime provenance
+        # The preflight bundle is contract-limited to the six release assets
+        # plus release-preflight.json, so the title build's provenance travels
+        # as its own artifact. It is produced only when a title was requested,
+        # which keeps the default/pull_request path unchanged.
+        if: github.event_name == 'workflow_dispatch' && inputs.client_title != ''
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: dsh-rc2-preflight-client-title-provenance-${{ inputs.reviewed_sha }}
+          path: ${{ github.workspace }}/.context/release-preflight-runs/*/*.provenance.json
+          # The retained run directory lives under the hidden `.context` tree.
+          include-hidden-files: true
+          if-no-files-found: error
       - name: Upload the preflight runtime and summary
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
