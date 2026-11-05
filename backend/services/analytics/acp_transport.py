@@ -113,6 +113,7 @@ from typing import Any, BinaryIO, Callable, Final, Mapping, Protocol
 
 from . import transport
 from .runtime_ports import loopback_origin, runtime_port_base
+from ...contracts.analytics_query_run import QUERY_RUN_FAMILY
 
 PROTOCOL_VERSION: Final[int] = 1
 DEFAULT_COMMAND: Final[str] = "dsh"
@@ -388,7 +389,9 @@ class AcpTransport:
         if type(write_ms) is not int or write_ms <= 0:
             raise ValueError("acp_write_timeout_ms must be a positive integer")
         family = config.get("family", "b0")
-        if family not in {"b0", "channel_followup", "first_purchase"}:
+        if family == QUERY_RUN_FAMILY:
+            raise ValueError("transport=acp must not serve the query family; it stays on bridge")
+        if family not in {"b0", "first_purchase"}:
             raise ValueError("transport=acp requires a supported family")
         # The child must call the kernel directly; the bridge is bridge-only.
         raw_base = extra.get("B0_ACP_BASE_URL", config.get("acp_base_url", config.get("base_url")))
