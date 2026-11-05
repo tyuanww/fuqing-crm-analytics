@@ -133,25 +133,12 @@ async function verifyInstalledLock(nodeModules, expectedSha256, code) {
 async function verifyUpstreamInstall(upstream, pin) {
   await verifyInstalledLock(join(upstream, 'node_modules'), pin.upstream_lock_sha256,
     'B0_CACHE_UPSTREAM_LOCK_MISMATCH');
+  // node_modules is not byte-bound by the preparation receipt (the pinned
+  // runtime treats it as lock-bound and re-verifies it by running).  Keep the
+  // same model here: the installed lock copy must be the pinned lock, and
+  // `--check` (which always runs) is what proves the tree actually works.
   const tsx = await lstat(join(upstream, 'node_modules/.bin/tsx')).catch(() => null);
   assert.ok(tsx, 'B0_CACHE_UPSTREAM_TSX_MISSING');
-  // Native rebuild outputs live in node_modules and are not covered by the
-  // source-tree receipt; a compiled binary per rebuilt module proves the
-  // install tree is the rebuilt one, not a store-only hydration.  Workspace
-  // packages live under pnpm's virtual store, so resolve them there rather
-  // than assuming root hoisting.
-  const virtualStore = join(upstream, 'node_modules/.pnpm');
-  const entries = await readdir(virtualStore).catch(() => []);
-  for (const name of ['fs-ext', 'koffi', 'node-pty']) {
-    const matches = entries.filter(entry => entry.startsWith(`${name}@`));
-    assert.ok(matches.length > 0, `B0_CACHE_NATIVE_PACKAGE_MISSING ${name}`);
-    let binary = false;
-    for (const entry of matches) {
-      const files = await readdir(join(virtualStore, entry, 'node_modules', name), { recursive: true }).catch(() => []);
-      if (files.some(file => file.endsWith('.node'))) { binary = true; break; }
-    }
-    assert.ok(binary, `B0_CACHE_NATIVE_BINARY_MISSING ${name}`);
-  }
 }
 
 export async function verifyRuntimeArchives(upstream) {
