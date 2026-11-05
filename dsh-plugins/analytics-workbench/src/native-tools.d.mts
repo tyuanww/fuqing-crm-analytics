@@ -2,6 +2,7 @@
 
 export type NativeFamily = 'b0' | 'channel_followup' | 'first_purchase' | 'competition_growth';
 export type NativeSide = 'kernel' | 'bridge';
+export type NativeTransport = 'gateway' | 'bridge' | 'acp';
 
 export interface NativeSurfaceTool {
   name: string;
@@ -20,6 +21,7 @@ export interface NativeSurfaceResponse {
 export interface NativeSurface {
   id: string;
   side: NativeSide;
+  transport: NativeTransport;
   families: readonly NativeFamily[];
   method: 'GET' | 'POST';
   path: string;

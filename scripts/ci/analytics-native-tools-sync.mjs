@@ -16,7 +16,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const repository = fileURLToPath(new URL('../..', import.meta.url));
 
-export const TABLE_SCHEMA = 'analytics-native-tools/v1';
+export const TABLE_SCHEMA = 'analytics-native-tools/v2';
+export const LEGACY_TABLE_SCHEMA = 'analytics-native-tools/v1';
 export const TABLE_PATH = 'config/analytics-native-tools.v1.json';
 export const PLUGIN_TABLE_PATH = 'dsh-plugins/analytics-workbench/src/native-tools.mjs';
 /** Kernel families own a FastAPI app; bridge rows cover every runtime family. */
@@ -24,6 +25,7 @@ export const KERNEL_FAMILIES = ['b0', 'channel_followup', 'first_purchase'];
 export const ALL_FAMILIES = [...KERNEL_FAMILIES, 'competition_growth'];
 const BRIDGE_PATHS = ['/health', '/identity', '/dispatch', '/observe', '/cancel'];
 const METHODS = ['GET', 'POST'];
+const KERNEL_TRANSPORTS = ['gateway', 'bridge', 'acp'];
 const SURFACE_ID = /^(kernel|bridge)\.[a-z][a-z0-9-]*$/;
 const TOOL_NAME = /^analytics_[a-z0-9_]+$/;
 
@@ -59,6 +61,9 @@ function checkedModels(models, families, where) {
 /** Fail closed on any table shape the backend route/model guard cannot read. */
 export function validateNativeTools(table) {
   if (!table || typeof table !== 'object' || Array.isArray(table)) throw fail('NATIVE_TOOLS_SHAPE', 'table must be an object');
+  if (table.schema_version === LEGACY_TABLE_SCHEMA) {
+    throw fail('NATIVE_TOOLS_SCHEMA_V1', 'transport is mandatory in v2; a v1 table is refused');
+  }
   if (table.schema_version !== TABLE_SCHEMA) throw fail('NATIVE_TOOLS_SCHEMA', String(table.schema_version));
   if (!Array.isArray(table.families) || table.families.join(',') !== ALL_FAMILIES.join(',')) {
     throw fail('NATIVE_TOOLS_FAMILY', `families must be ${ALL_FAMILIES.join(',')}`);
@@ -83,17 +88,22 @@ export function validateNativeTools(table) {
     ids.add(surface.id);
     if (surface.side !== surface.id.split('.')[0]) throw fail('NATIVE_TOOLS_SURFACE_SIDE', `${surface.id} side ${surface.side}`);
     if (!METHODS.includes(surface.method)) throw fail('NATIVE_TOOLS_SURFACE_METHOD', `${surface.id} ${surface.method}`);
+    if (!KERNEL_TRANSPORTS.includes(surface.transport)) {
+      throw fail('NATIVE_TOOLS_SURFACE_TRANSPORT', `${surface.id} ${surface.transport}`);
+    }
     checkedStringList(surface.families, `${surface.id}.families`);
     if (surface.families.some(family => !ALL_FAMILIES.includes(family))) {
       throw fail('NATIVE_TOOLS_FAMILY', `${surface.id} names an unknown family`);
     }
     if (surface.side === 'kernel') {
-      if (!surface.path.startsWith('/internal/native/')) throw fail('NATIVE_TOOLS_SURFACE_PATH', `${surface.id} ${surface.path}`);
+      const prefix = surface.transport === 'acp' ? '/internal/acp/' : '/internal/native/';
+      if (!surface.path.startsWith(prefix)) throw fail('NATIVE_TOOLS_SURFACE_PATH', `${surface.id} ${surface.path}`);
       if (surface.families.some(family => !KERNEL_FAMILIES.includes(family))) {
         throw fail('NATIVE_TOOLS_FAMILY', `${surface.id} kernel surfaces are limited to ${KERNEL_FAMILIES.join(',')}`);
       }
-    } else if (!BRIDGE_PATHS.includes(surface.path)) {
-      throw fail('NATIVE_TOOLS_SURFACE_PATH', `${surface.id} ${surface.path}`);
+    } else {
+      if (surface.transport !== 'bridge') throw fail('NATIVE_TOOLS_SURFACE_TRANSPORT', `${surface.id} bridge transport`);
+      if (!BRIDGE_PATHS.includes(surface.path)) throw fail('NATIVE_TOOLS_SURFACE_PATH', `${surface.id} ${surface.path}`);
     }
     const route = `${surface.method} ${surface.path}`;
     if (paths.has(route)) throw fail('NATIVE_TOOLS_DUPLICATE', route);

@@ -67,7 +67,9 @@ STATE_SCHEMA_VERSION = 2  # Existing v1 evidence is retained, never auto-migrate
 TERMINAL = frozenset({"SUCCEEDED", "FAILED", "CANCELLED", "NEEDS_INPUT"})
 TRANSPORT_BRIDGE = "bridge"
 TRANSPORT_ACP = "acp"
+TRANSPORT_CUTOVER = "cutover"
 TRANSPORTS = frozenset({TRANSPORT_BRIDGE, TRANSPORT_ACP})
+TRANSPORT_MODES = frozenset({TRANSPORT_BRIDGE, TRANSPORT_ACP, TRANSPORT_CUTOVER, "canary"})
 # H5 keeps the query family on the bridge: it is user-chat traffic, while ACP
 # serves kernel-owned automation only. The exclusion is named and applied before
 # every eligible family or percentage check, so configuration cannot widen it.
@@ -76,6 +78,13 @@ QUERY_FAMILIES = frozenset({QUERY_RUN_FAMILY})
 # A future non-synthetic family is deliberately absent: the selection checks this
 # set before any percentage, so it can never be selected by configuration alone.
 SYNTHETIC_FAMILIES = frozenset({"b0", "first_purchase"})
+# P3-3d cutover is a static split, not a percentage: the kernel-owned synthetic
+# automation families move to ACP while every other family (the query family and
+# any future non-synthetic family) stays on the bridge. It is deliberately a
+# subset of SYNTHETIC_FAMILIES so configuration alone can never widen it.
+CUTOVER_ACP_FAMILIES = frozenset({"b0", "first_purchase"})
+if not CUTOVER_ACP_FAMILIES <= SYNTHETIC_FAMILIES:
+    raise RuntimeError("cutover ACP families must be synthetic families")
 CANARY_BUCKETS = 100
 _LOGGER = logging.getLogger(__name__)
 ACP_BINDING_STATES = frozenset({"BOUND", "SETTLED", "LOST"})
@@ -187,8 +196,10 @@ class TransportPolicy:
     """Deterministic per-intent transport selection, bridge by default.
 
     ``transport=bridge`` and ``transport=acp`` keep their old whole-runtime
-    meaning. Only ``canary`` may mix paths, and only for an explicit list of
-    synthetic families and a stable hash of the request id. The query family is
+    meaning. ``canary`` may mix paths for an explicit list of synthetic families
+    and a stable hash of the request id. ``cutover`` is the static family split:
+    the kernel-owned synthetic automation families move to ACP and everything
+    else, including the query family, stays on the bridge. The query family is
     never ACP-eligible: a policy or configuration that names it refuses instead
     of silently filtering it. Every decision is returned with a reason so the
     accept path can log it, and the chosen value is persisted before any
@@ -201,7 +212,7 @@ class TransportPolicy:
     acp_available: bool = True
 
     def __post_init__(self):
-        if self.mode not in {"bridge", "acp", "canary"}:
+        if self.mode not in TRANSPORT_MODES:
             raise ValueError("unsupported transport policy mode")
         if type(self.canary_percent) is not int or not 0 <= self.canary_percent <= CANARY_BUCKETS:
             raise ValueError("canary_percent must be an integer between 0 and 100")
@@ -216,10 +227,10 @@ class TransportPolicy:
         """Parse the runtime ``transport`` switch; invalid wiring refuses startup."""
         raw = config.get("transport", TRANSPORT_BRIDGE)
         if not isinstance(raw, str) or not raw:
-            raise ValueError("transport must be bridge, acp or canary[:percent]")
+            raise ValueError("transport must be bridge, acp, cutover or canary[:percent]")
         family = config.get("family", "b0")
         percent = config.get("canary_percent", 0)
-        if raw in {TRANSPORT_BRIDGE, TRANSPORT_ACP} or raw == "canary":
+        if raw in {TRANSPORT_BRIDGE, TRANSPORT_ACP, TRANSPORT_CUTOVER} or raw == "canary":
             mode = raw
         elif raw.startswith("canary:"):
             mode, value = "canary", raw.split(":", 1)[1]
@@ -245,10 +256,41 @@ class TransportPolicy:
         return cls(mode=mode, canary_percent=percent, canary_families=frozenset(families),
                    acp_available=bool(acp_available))
 
-    def executes(self, transport: str) -> bool:
-        """Whether this runtime owns the path an intent was recorded for."""
+    def transports_for(self, family: str) -> frozenset[str]:
+        """Every path this runtime may execute for one family.
+
+        Cutover is a static family split, so exactly one path is owned per
+        family. Canary may own both because the request id decides after
+        acceptance which one a run uses. The query family is bridge-only in
+        every mode (H5).
+        """
+        if self.mode == TRANSPORT_BRIDGE or family in QUERY_FAMILIES:
+            return frozenset({TRANSPORT_BRIDGE})
+        if self.mode == TRANSPORT_ACP:
+            return frozenset({TRANSPORT_ACP})
+        if self.mode == TRANSPORT_CUTOVER:
+            path = TRANSPORT_ACP if family in CUTOVER_ACP_FAMILIES else TRANSPORT_BRIDGE
+            return frozenset({path})
+        paths = {TRANSPORT_BRIDGE}
+        if self.acp_available:
+            paths.add(TRANSPORT_ACP)
+        return frozenset(paths)
+
+    def executes(self, transport: str, family: str | None = None) -> bool:
+        """Whether this runtime owns the path an intent was recorded for.
+
+        A cutover policy is family-scoped, so it requires the run family: a
+        recorded ``acp`` intent for ``b0`` is owned, but the same value for the
+        query family is fenced instead of executed. Callers that already know
+        the store family pass it; the no-family form keeps the bridge/ACP/canary
+        semantics and refuses cutover rather than guessing.
+        """
         if transport not in TRANSPORTS:
             return False
+        if family is not None:
+            return transport in self.transports_for(family)
+        if self.mode == TRANSPORT_CUTOVER:
+            raise ValueError("cutover transport requires the run family")
         if self.mode == TRANSPORT_BRIDGE:
             return transport == TRANSPORT_BRIDGE
         if self.mode == TRANSPORT_ACP:
@@ -263,6 +305,9 @@ class TransportPolicy:
             return TRANSPORT_BRIDGE, "query_family_bridge_only"
         if self.mode == TRANSPORT_ACP:
             return TRANSPORT_ACP, "mode=acp"
+        if self.mode == TRANSPORT_CUTOVER:
+            transport = TRANSPORT_ACP if family in CUTOVER_ACP_FAMILIES else TRANSPORT_BRIDGE
+            return transport, "mode=cutover"
         if not self.acp_available:
             return TRANSPORT_BRIDGE, "acp_prerequisites_missing"
         if family not in SYNTHETIC_FAMILIES:
@@ -1518,7 +1563,7 @@ class RunStore:
                 dispatch_row = con.execute(
                     "SELECT transport FROM dispatch_intents WHERE run_id=?", (row["run_id"],)).fetchone()
                 transport = _intent_transport(dispatch_row)
-                if not self.transport_policy.executes(transport):
+                if not self.transport_policy.executes(transport, self.family):
                     _LOGGER.warning("dispatch transport %s for run %s is not served by this %s runtime; fencing",
                                     transport, row["run_id"], self.transport_policy.mode)
                     row = self._update(con, row, status="FAILED", error_code="RUNTIME_REJECTED")
@@ -1879,7 +1924,7 @@ class RunStore:
                     con.execute("UPDATE dispatch_intents SET state='EXITED' WHERE run_id=?", (row["run_id"],))
                     self._emit(con, row, "run.failed")
                     continue
-                if not self.transport_policy.executes(_intent_transport(dispatch)):
+                if not self.transport_policy.executes(_intent_transport(dispatch), self.family):
                     # The recorded path is not served by this process (a
                     # different transport was configured after the attempt
                     # left the kernel). It can never be observed here, so the
