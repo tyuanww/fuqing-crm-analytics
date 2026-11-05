@@ -652,7 +652,9 @@ class AcpTransport:
             kernel_id = self._kernel_by_acp.get(session_id)
             session = self._sessions.get(kernel_id) if kernel_id is not None else None
             prompt = session.prompt if session is not None else None
-            if prompt is None:
+            # Updates are ordered before the prompt response on the same stream;
+            # anything later cannot belong to a still-settling prompt.
+            if prompt is None or prompt.settled:
                 return
             kind = update.get("sessionUpdate")
             call_id = update.get("toolCallId")
