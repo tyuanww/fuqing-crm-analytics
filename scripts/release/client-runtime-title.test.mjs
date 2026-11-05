@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
-import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { access, cp, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join, relative, resolve } from 'node:path';
 import test from 'node:test';
 
 import {
@@ -101,6 +101,85 @@ async function snapshot(root) {
     [path, (await readFile(resolve(root, path))).toString('base64')])));
 }
 
+/**
+ * Deployed tree laid out the way a real rc.5 `pnpm deploy` lays it out.
+ *
+ * A 0.2.1-rc.5 runtime archive (upstream `b830ec95`) stores the client
+ * packages in the pnpm virtual store, never at the top level:
+ *
+ *   node_modules/.pnpm/node_modules/@deepseek-ai/dsh-web-frontend -> ../../<store>/...
+ *   node_modules/.pnpm/node_modules/@deepseek-ai/dsh-client-ui-layout -> ../../<store>/...
+ *   node_modules/.pnpm/node_modules/@deepseek-ai/dsh-web-app -> <web-app package>
+ *   node_modules/@deepseek-ai/dsh-web-app -> ../.pnpm/<store>/...
+ *   <web-app package>/node_modules/@deepseek-ai/dsh-web-frontend -> ...
+ *
+ * The store entries are real byte copies of the rewritten workspace, and the
+ * hoisted entries are relative symlinks into the store, exactly like pnpm.
+ */
+const PNPM_STORE = 'node_modules/.pnpm';
+const PNPM_FRONTEND_STORE = '@deepseek-ai+dsh-web-frontend@file+fixture/node_modules/@deepseek-ai/dsh-web-frontend';
+const PNPM_LAYOUT_STORE = '@deepseek-ai+dsh-client-ui-layout@file+fixture/node_modules/@deepseek-ai/dsh-client-ui-layout';
+const PNPM_WEB_APP_STORE = '@deepseek-ai+dsh-web-app@file+fixture/node_modules/@deepseek-ai/dsh-web-app';
+
+async function pnpmDeployedFixture(t, root, { hoisted = true, omit = null } = {}) {
+  const deployed = await mkdtemp(join(tmpdir(), 'client-title-deployed-pnpm-'));
+  t.after(() => rm(deployed, { recursive: true, force: true }));
+  const packageFiles = {
+    [`${PNPM_STORE}/${PNPM_WEB_APP_STORE}/package.json`]: JSON.stringify({ name: '@deepseek-ai/dsh-web-app' }),
+    [`${PNPM_STORE}/${PNPM_WEB_APP_STORE}/lib/index.js`]: 'export const app = true;\n',
+  };
+  if (omit !== '@deepseek-ai/dsh-web-frontend') {
+    packageFiles[`${PNPM_STORE}/${PNPM_FRONTEND_STORE}/package.json`] = JSON.stringify({
+      name: '@deepseek-ai/dsh-web-frontend',
+      exports: { './package.json': './package.json', './dist/*': './dist/*' },
+    });
+  }
+  if (omit !== '@deepseek-ai/dsh-client-ui-layout') {
+    packageFiles[`${PNPM_STORE}/${PNPM_LAYOUT_STORE}/package.json`] = JSON.stringify({
+      name: '@deepseek-ai/dsh-client-ui-layout',
+      exports: { './package.json': './package.json' },
+    });
+  }
+  await writeFiles(deployed, { ...packageFiles, 'lib/bin.js': '#!/usr/bin/env node\n' });
+
+  const webApp = resolve(deployed, PNPM_STORE, PNPM_WEB_APP_STORE);
+  const frontend = resolve(deployed, PNPM_STORE, PNPM_FRONTEND_STORE);
+  const layout = resolve(deployed, PNPM_STORE, PNPM_LAYOUT_STORE);
+  if (omit !== '@deepseek-ai/dsh-web-frontend') {
+    await cp(resolve(root, 'apps/web/dist'), resolve(frontend, 'dist'), { recursive: true });
+  }
+  if (omit !== '@deepseek-ai/dsh-client-ui-layout') {
+    await mkdir(resolve(layout, 'lib'), { recursive: true });
+    await cp(resolve(root, 'packages/client/ui-layout/lib/client.js'), resolve(layout, 'lib/client.js'));
+  }
+
+  const link = async (target, path) => {
+    await mkdir(dirname(path), { recursive: true });
+    await symlink(relative(dirname(path), target), path, 'dir');
+  };
+  // `dsh-web-app/node_modules`: how pnpm reaches a dependency it does not hoist.
+  if (omit === null) {
+    await link(frontend, resolve(webApp, 'node_modules/@deepseek-ai/dsh-web-frontend'));
+    await link(layout, resolve(webApp, 'node_modules/@deepseek-ai/dsh-client-ui-layout'));
+  }
+  await link(webApp, resolve(deployed, 'node_modules/@deepseek-ai/dsh-web-app'));
+  await link(webApp, resolve(deployed, PNPM_STORE, 'node_modules/@deepseek-ai/dsh-web-app'));
+  if (hoisted) {
+    // `node_modules/.pnpm/node_modules`: the pnpm virtual-store hoist root.
+    if (omit !== '@deepseek-ai/dsh-web-frontend') {
+      await link(frontend, resolve(deployed, PNPM_STORE, 'node_modules/@deepseek-ai/dsh-web-frontend'));
+    }
+    if (omit !== '@deepseek-ai/dsh-client-ui-layout') {
+      await link(layout, resolve(deployed, PNPM_STORE, 'node_modules/@deepseek-ai/dsh-client-ui-layout'));
+    }
+  }
+  return deployed;
+}
+
+function pnpmStorePath(deployed, path) {
+  return resolve(deployed, PNPM_STORE, path);
+}
+
 test('title configuration is opt-in, trimmed and validated', () => {
   assert.equal(clientTitleFromEnvironment({}), null);
   assert.equal(clientTitleFromEnvironment({ [CLIENT_TITLE_ENV]: '' }), null);
@@ -167,6 +246,78 @@ test('deployed output carries the rewritten title and build record', async (t) =
     await readFile(resolve(deployed, 'node_modules/@deepseek-ai/dsh-client-ui-layout/lib/client.js'), 'utf8'),
     new RegExp(UPSTREAM_TITLE),
   );
+});
+
+test('the real pnpm deploy layout ships the rewritten title, record and provenance', async (t) => {
+  const root = await fixture(t);
+  const preparedDigest = clientArtifactDigest(root);
+  const preparedSourceTree = await runtimeSourceTree(root);
+  const build = await rewriteClientRuntimeTitle(root, { title: TITLE });
+  const deployed = await pnpmDeployedFixture(t, root);
+  // Model the live rc.5 layout: neither package exists at the top level.
+  await assert.rejects(access(resolve(deployed, 'node_modules/@deepseek-ai/dsh-web-frontend')), /ENOENT/);
+  await assert.rejects(access(resolve(deployed, 'node_modules/@deepseek-ai/dsh-client-ui-layout')), /ENOENT/);
+
+  const installed = installClientRuntimeTitle(root, deployed, build);
+
+  assert.deepEqual(installed, [
+    '@deepseek-ai/dsh-web-frontend/dist/index.html',
+    '@deepseek-ai/dsh-client-ui-layout/lib/client.js',
+    BUILD_RECORD,
+  ]);
+
+  const indexBytes = await readFile(pnpmStorePath(deployed, `${PNPM_FRONTEND_STORE}/dist/index.html`), 'utf8');
+  assert.equal(indexBytes.split(`<title>${TITLE}</title>`).length - 1, 1);
+  assert.doesNotMatch(indexBytes, new RegExp(UPSTREAM_TITLE));
+  const layoutBytes = await readFile(pnpmStorePath(deployed, `${PNPM_LAYOUT_STORE}/lib/client.js`), 'utf8');
+  assert.equal(layoutBytes.split(`const productTitle = ${JSON.stringify(TITLE)};`).length - 1, 1);
+  assert.doesNotMatch(layoutBytes, new RegExp(UPSTREAM_TITLE));
+
+  const record = JSON.parse(await readFile(resolve(deployed, BUILD_RECORD), 'utf8'));
+  assert.equal(record.environment.DSH_CLIENT_TITLE, TITLE);
+  assert.deepEqual(record.artifacts, clientArtifactDigest(root));
+  assert.notEqual(record.artifacts.sha256, preparedDigest.sha256);
+  assert.deepEqual(await readFile(resolve(deployed, BUILD_RECORD)), await readFile(resolve(root, BUILD_RECORD)));
+
+  const shippedSourceTree = await runtimeSourceTree(root);
+  const { client_title_build: provenance } = {
+    client_title_build: clientTitleProvenance({ build, preparedSourceTree, shippedSourceTree, runtimePaths: installed }),
+  };
+  assert.equal(provenance.shipped_source_tree.sha256, shippedSourceTree.sha256);
+  assert.equal(provenance.shipped_source_tree.entries, shippedSourceTree.entries);
+  assert.notEqual(provenance.prepared_source_tree.sha256, provenance.shipped_source_tree.sha256);
+  assert.equal(provenance.build_record.environment.DSH_CLIENT_TITLE, TITLE);
+  assert.deepEqual(provenance.runtime_paths, installed);
+});
+
+test('the resolver follows dsh-web-app/node_modules when the store does not hoist the packages', async (t) => {
+  const root = await fixture(t);
+  const build = await rewriteClientRuntimeTitle(root, { title: TITLE });
+  const deployed = await pnpmDeployedFixture(t, root, { hoisted: false });
+  await assert.rejects(access(resolve(deployed, 'node_modules/.pnpm/node_modules/@deepseek-ai/dsh-web-frontend')), /ENOENT/);
+  await assert.rejects(access(resolve(deployed, 'node_modules/.pnpm/node_modules/@deepseek-ai/dsh-client-ui-layout')), /ENOENT/);
+
+  const installed = installClientRuntimeTitle(root, deployed, build);
+  assert.deepEqual(installed, [
+    '@deepseek-ai/dsh-web-frontend/dist/index.html',
+    '@deepseek-ai/dsh-client-ui-layout/lib/client.js',
+    BUILD_RECORD,
+  ]);
+  assert.match(await readFile(pnpmStorePath(deployed, `${PNPM_FRONTEND_STORE}/dist/index.html`), 'utf8'),
+    new RegExp(`<title>${TITLE}</title>`));
+});
+
+test('the pnpm deploy layout still fails closed when a package cannot be found', async (t) => {
+  const root = await fixture(t);
+  const build = await rewriteClientRuntimeTitle(root, { title: TITLE });
+  const deployed = await pnpmDeployedFixture(t, root, { omit: '@deepseek-ai/dsh-client-ui-layout' });
+
+  assert.throws(
+    () => installClientRuntimeTitle(root, deployed, build),
+    /CLIENT_TITLE_RUNTIME_PACKAGE_MISSING @deepseek-ai\/dsh-client-ui-layout/,
+  );
+  // Fail-closed: the missing package is reported before the build record ships.
+  await assert.rejects(access(resolve(deployed, BUILD_RECORD)), /ENOENT/);
 });
 
 test('a missing product-title literal fails closed before writing', async (t) => {
