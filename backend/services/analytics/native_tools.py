@@ -15,17 +15,32 @@ import json
 from functools import lru_cache
 from pathlib import Path
 
-TABLE_SCHEMA = "analytics-native-tools/v1"
+TABLE_SCHEMA = "analytics-native-tools/v2"
+LEGACY_TABLE_SCHEMA = "analytics-native-tools/v1"
 REPOSITORY = Path(__file__).resolve().parents[3]
 TABLE_PATH = REPOSITORY / "config" / "analytics-native-tools.v1.json"
 KERNEL_FAMILIES = ("b0", "channel_followup", "first_purchase")
 HTTP_METHODS = ("GET", "POST")
+# Every kernel surface names the path that serves it. ``transport`` is mandatory
+# in v2 because a surface without one cannot be route-checked against a cutover
+# or ACP runtime. Gateway and bridge surfaces stay under /internal/native/; ACP
+# callbacks live under /internal/acp/.
+KERNEL_TRANSPORTS = ("gateway", "bridge", "acp")
+DEFAULT_KERNEL_TRANSPORTS = frozenset({"gateway", "bridge"})
 
 
 def validate_native_tools(table):
     """Fail closed on anything the route guard or model check cannot read."""
-    if not isinstance(table, dict) or table.get("schema_version") != TABLE_SCHEMA:
-        raise ValueError("native tools table schema_version")
+    if not isinstance(table, dict):
+        raise ValueError("native tools table shape")
+    schema = table.get("schema_version")
+    if schema == LEGACY_TABLE_SCHEMA:
+        raise ValueError(
+            "NATIVE_TOOLS_SCHEMA_V1_REFUSED: transport is mandatory in "
+            f"{TABLE_SCHEMA}; a v1 table cannot name a cutover or ACP surface"
+        )
+    if schema != TABLE_SCHEMA:
+        raise ValueError(f"native tools table schema_version {schema!r}")
     families = table.get("families")
     if not isinstance(families, list) or not families:
         raise ValueError("native tools table families")
@@ -51,13 +66,18 @@ def validate_native_tools(table):
             raise ValueError(f"native tools table surface {surface.get('id')}")
         if not isinstance(surface.get("path"), str) or not surface["path"].startswith("/"):
             raise ValueError(f"native tools table surface path {surface.get('id')}")
+        transport = surface.get("transport")
+        if transport not in KERNEL_TRANSPORTS:
+            raise ValueError(f"native tools table surface transport {surface.get('id')}")
         known = surface.get("families")
         if not isinstance(known, list) or not known or set(known) - set(families):
             raise ValueError(f"native tools table surface families {surface.get('id')}")
-        if surface["side"] == "kernel" and (
-            not surface["path"].startswith("/internal/native/") or set(known) - set(KERNEL_FAMILIES)
-        ):
-            raise ValueError(f"native tools table kernel surface {surface['id']}")
+        if surface["side"] == "kernel":
+            prefix = "/internal/acp/" if transport == "acp" else "/internal/native/"
+            if not surface["path"].startswith(prefix) or set(known) - set(KERNEL_FAMILIES):
+                raise ValueError(f"native tools table kernel surface {surface['id']}")
+        elif transport != "bridge":
+            raise ValueError(f"native tools table bridge transport {surface['id']}")
         route = (surface["method"], surface["path"])
         if route in routes:
             raise ValueError(f"native tools table duplicate route {route}")
@@ -72,12 +92,17 @@ def load_native_tools(path=None):
     return validate_native_tools(json.loads(table_path.read_text(encoding="utf-8")))
 
 
-def kernel_surfaces(table, family):
-    """Documented (method, path) pairs for one kernel family."""
+def kernel_surfaces(table, family, transports=DEFAULT_KERNEL_TRANSPORTS):
+    """Documented (method, path) pairs for one kernel family and transport set."""
+    selected = frozenset(transports)
+    if selected - set(KERNEL_TRANSPORTS):
+        raise ValueError("native tools table unknown kernel transport")
     return tuple(sorted(
         (surface["method"], surface["path"])
         for surface in table["surfaces"]
-        if surface["side"] == "kernel" and family in surface["families"]
+        if surface["side"] == "kernel"
+        and surface["transport"] in selected
+        and family in surface["families"]
     ))
 
 
@@ -102,11 +127,11 @@ def surface_models(table, surface_id, family):
 
 
 def mounted_kernel_routes(app):
-    """GET/POST routes the app actually serves below /internal/native."""
+    """GET/POST routes the app actually serves below /internal/native or acp."""
     routes = set()
     for route in app.router.routes:
         path = getattr(route, "path", None)
-        if not isinstance(path, str) or not path.startswith("/internal/native/"):
+        if not isinstance(path, str) or not path.startswith(("/internal/native/", "/internal/acp/")):
             continue
         for method in getattr(route, "methods", None) or ():
             if method in HTTP_METHODS:
@@ -114,10 +139,10 @@ def mounted_kernel_routes(app):
     return routes
 
 
-def assert_native_routes(app, family, table=None):
+def assert_native_routes(app, family, table=None, transports=DEFAULT_KERNEL_TRANSPORTS):
     """Every mounted kernel route and nothing else must be in the binding table."""
     table = table if table is not None else load_native_tools()
-    expected = set(kernel_surfaces(table, family))
+    expected = set(kernel_surfaces(table, family, transports))
     actual = mounted_kernel_routes(app)
     if actual != expected:
         raise ValueError(

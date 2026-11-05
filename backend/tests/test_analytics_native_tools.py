@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import os
 from dataclasses import asdict
 
@@ -12,6 +13,8 @@ from backend.analytics_first_purchase_native import (
     FirstPurchaseNativeStep,
 )
 from backend.analytics_runtime import (
+    AcpContextRequest,
+    AcpToolCall,
     NativeContextRequest,
     NativePrompt,
     NativeStep,
@@ -31,6 +34,7 @@ from backend.services.analytics.native_tools import (
     load_native_tools,
     mounted_kernel_routes,
     surface_models,
+    validate_native_tools,
 )
 from backend.services.analytics.runtime import BRIDGE_OPERATIONS, HostBridge
 from backend.tests.analytics_run_support import synthetic_fixture
@@ -41,6 +45,8 @@ from backend.tests.test_analytics_query_runtime import query_config
 GATEWAY = "g" * 40
 RUNTIME = "r" * 40
 MODELS = {
+    "AcpContextRequest": AcpContextRequest,
+    "AcpToolCall": AcpToolCall,
     "NativeContextRequest": NativeContextRequest,
     "NativeStep": NativeStep,
     "NativePrompt": NativePrompt,
@@ -76,7 +82,7 @@ def family_apps(tmp_path):
 
 def test_table_is_valid_and_scoped(tmp_path):
     table = load_native_tools()
-    assert table["schema_version"] == "analytics-native-tools/v1"
+    assert table["schema_version"] == "analytics-native-tools/v2"
     assert set(KERNEL_FAMILIES) == {"b0", "channel_followup", "first_purchase"}
     assert [(method, path) for method, path in bridge_surfaces(table)] == [
         ("POST", "/cancel"), ("POST", "/dispatch"), ("POST", "/health"),
@@ -88,6 +94,39 @@ def test_table_is_valid_and_scoped(tmp_path):
         assert all(method in {"GET", "POST"} and path.startswith("/internal/native/") for method, path in routes)
     assert kernel_surfaces(table, "b0") == (("GET", "/internal/native/context"), ("POST", "/internal/native/fixture"),
                                              ("POST", "/internal/native/prompt"), ("POST", "/internal/native/run-context"))
+    assert kernel_surfaces(table, "b0", {"acp"}) == (
+        ("POST", "/internal/acp/run-context"),
+        ("POST", "/internal/acp/tool-call"),
+    )
+    assert kernel_surfaces(table, "b0", {"gateway"}) == (
+        ("GET", "/internal/native/context"),
+        ("POST", "/internal/native/prompt"),
+    )
+    assert kernel_surfaces(table, "channel_followup", {"acp"}) == ()
+
+
+def test_schema_v1_is_refused_because_transport_is_mandatory(tmp_path):
+    table = copy.deepcopy(load_native_tools())
+    table["schema_version"] = "analytics-native-tools/v1"
+    with pytest.raises(ValueError, match="NATIVE_TOOLS_SCHEMA_V1_REFUSED"):
+        validate_native_tools(table)
+
+
+def test_a_surface_without_a_transport_is_refused(tmp_path):
+    table = copy.deepcopy(load_native_tools())
+    del table["surfaces"][0]["transport"]
+    with pytest.raises(ValueError, match="surface transport"):
+        validate_native_tools(table)
+
+
+def test_an_acp_surface_must_live_under_the_acp_prefix(tmp_path):
+    table = copy.deepcopy(load_native_tools())
+    for surface in table["surfaces"]:
+        if surface["transport"] == "acp":
+            surface["path"] = "/internal/native/wrong"
+            break
+    with pytest.raises(ValueError, match="kernel surface"):
+        validate_native_tools(table)
 
 
 def test_every_family_mounts_exactly_the_documented_kernel_routes(tmp_path):

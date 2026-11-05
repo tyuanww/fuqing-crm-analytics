@@ -35,7 +35,13 @@ from backend.contracts.analytics_query_run import (
 )
 from backend.services.analytics.access import AnalyticsError, AnalyticsPrincipal, B0IdentityRegistry
 from backend.services.analytics.cockpit import CockpitStore
-from backend.services.analytics.jobs import RunStore, TransportPolicy
+from backend.services.analytics.cutover_acceptance import require_acceptance_evidence
+from backend.services.analytics.jobs import (
+    TRANSPORT_ACP,
+    TRANSPORT_BRIDGE,
+    RunStore,
+    TransportPolicy,
+)
 from backend.services.analytics.saved_analyses import SavedAnalysisStore
 from backend.services.analytics.resource_profile import B0ResourceProfile, B0_SMALL_FIXTURE_PROFILE
 from backend.services.analytics.runtime import (
@@ -136,15 +142,20 @@ def _attach_lifecycle(app, dispatcher):
     app.router.lifespan_context = lifecycle
 
 
-def _attach_acp_callback(app, host, config) -> None:
-    """Mount the binding-correlated ACP callbacks on an ACP runtime only.
+def _attach_acp_callback(app, host, config, policy=None) -> None:
+    """Mount the binding-correlated ACP callbacks only when ACP is selected.
 
     These are transport callbacks, not native tool surfaces: they exist only
-    when the host transport supplies a per-boot callback token, so the
-    family-based ``/internal/native`` route table stays transport-neutral and
-    the bridge default mounts nothing. The token is passed to the child through
-    its scoped environment and authorizes exactly these model-driven reads.
+    when the family's policy owns the ACP path and the host transport supplies
+    a per-boot callback token, so the family-based ``/internal/native`` route
+    table stays transport-neutral and bridge-only runtimes mount nothing. The
+    token is passed to the child through its scoped environment and authorizes
+    exactly these model-driven reads.
     """
+    family = config.get("family", "b0")
+    active = policy or TransportPolicy.from_config(config, acp_available=False)
+    if TRANSPORT_ACP not in active.transports_for(family):
+        return
     token = getattr(host, "callback_token", None)
     if not isinstance(token, str) or not token:
         return
@@ -153,7 +164,6 @@ def _attach_acp_callback(app, host, config) -> None:
     workers = getattr(app.state, "workers", None)
     if dispatcher is None or store is None:
         return
-    family = config.get("family", "b0")
 
     @app.post("/internal/acp/run-context", include_in_schema=False)
     def acp_run_context(payload: AcpContextRequest, request: Request):
@@ -271,8 +281,10 @@ def _query_runtime_app(config, *, bridge=None, transport_policy=None):
         except AnalyticsError:
             return None
 
+    policy = transport_policy or TransportPolicy()
+    bridge_callbacks = TRANSPORT_BRIDGE in policy.transports_for(QUERY_RUN_FAMILY)
     store = RunStore(Path(config["state_dir"]), B0ResourceProfile(**B0_SMALL_FIXTURE_PROFILE),
-                     family=QUERY_RUN_FAMILY, transport_policy=transport_policy)
+                     family=QUERY_RUN_FAMILY, transport_policy=policy)
     conversations = {}
     for index, session_id in enumerate(session_ids):
         conversations[session_id] = store.create_conversation(
@@ -295,28 +307,29 @@ def _query_runtime_app(config, *, bridge=None, transport_policy=None):
     def gateway_actor(request):
         return registry.resolve(_single_header(request, "authorization"))
 
-    def runtime_identity(request, requested_session):
-        credential = _single_header(request, "authorization")
-        if not credential or not secrets.compare_digest(credential, "Bearer " + runtime_token):
-            raise AnalyticsError(401, "UNAUTHENTICATED", "需要运行时能力。")
-        if requested_session not in conversations:
-            raise AnalyticsError(404, "NOT_FOUND", "原生会话不存在或不可见。")
+    if bridge_callbacks:
+        def runtime_identity(request, requested_session):
+            credential = _single_header(request, "authorization")
+            if not credential or not secrets.compare_digest(credential, "Bearer " + runtime_token):
+                raise AnalyticsError(401, "UNAUTHENTICATED", "需要运行时能力。")
+            if requested_session not in conversations:
+                raise AnalyticsError(404, "NOT_FOUND", "原生会话不存在或不可见。")
 
-    @app.post("/internal/native/run-context", include_in_schema=False)
-    def run_context(payload: NativeContextRequest, request: Request):
-        runtime_identity(request, payload.session_id)
-        if payload.package_digest != method_digest:
-            raise AnalyticsError(409, "METHOD_VERSION_MISMATCH", "方法包版本未绑定或发生变化。")
-        matches = store.runtime_work(session_id=payload.session_id, request_id=payload.request_id)
-        if len(matches) != 1:
-            raise AnalyticsError(409, "UNBOUND_NATIVE_REQUEST", "当前原生请求没有已登记的任务绑定。")
-        work = matches[0]
-        principal = resolve_actor(work["owner"])
-        if principal is None:
-            raise AnalyticsError(403, "FORBIDDEN", "当前任务身份已失效。")
-        state = store.rebuild_context(principal, work["intent"].run_id, work["intent"].attempt_id,
-                                      package_digest=method_digest, unit_id=payload.unit_id, resource=payload.resource)
-        return {**state, "session_id": payload.session_id, "request_id": payload.request_id}
+        @app.post("/internal/native/run-context", include_in_schema=False)
+        def run_context(payload: NativeContextRequest, request: Request):
+            runtime_identity(request, payload.session_id)
+            if payload.package_digest != method_digest:
+                raise AnalyticsError(409, "METHOD_VERSION_MISMATCH", "方法包版本未绑定或发生变化。")
+            matches = store.runtime_work(session_id=payload.session_id, request_id=payload.request_id)
+            if len(matches) != 1:
+                raise AnalyticsError(409, "UNBOUND_NATIVE_REQUEST", "当前原生请求没有已登记的任务绑定。")
+            work = matches[0]
+            principal = resolve_actor(work["owner"])
+            if principal is None:
+                raise AnalyticsError(403, "FORBIDDEN", "当前任务身份已失效。")
+            state = store.rebuild_context(principal, work["intent"].run_id, work["intent"].attempt_id,
+                                          package_digest=method_digest, unit_id=payload.unit_id, resource=payload.resource)
+            return {**state, "session_id": payload.session_id, "request_id": payload.request_id}
 
     @app.get("/internal/native/context", include_in_schema=False)
     def context(request: Request):
@@ -339,11 +352,12 @@ def _query_runtime_app(config, *, bridge=None, transport_policy=None):
                             allow_new=dispatcher.ready, native_request=payload.model_dump(mode="json"),
                             method_package_digest=method_digest, fixture_descriptor=descriptor)
 
-    @app.post("/internal/native/channel-followup", include_in_schema=False)
-    def channel_followup(payload: QueryNativeStep, request: Request):
-        runtime_identity(request, payload.session_id)
-        return execute_native_query(store, resolve_actor, payload.session_id, payload.request_id, payload.call_id,
-                                    payload.request, workers=workers)
+    if bridge_callbacks:
+        @app.post("/internal/native/channel-followup", include_in_schema=False)
+        def channel_followup(payload: QueryNativeStep, request: Request):
+            runtime_identity(request, payload.session_id)
+            return execute_native_query(store, resolve_actor, payload.session_id, payload.request_id,
+                                        payload.call_id, payload.request, workers=workers)
 
     if config.get("asset_capabilities") is not None:
         _attach_asset_http(app, config, store, registry)
@@ -361,12 +375,30 @@ def build_host_transport(config):
     this module (and the standalone first-purchase kernel that pins
     ``runtime.py``) keeps no ACP dependency.
     """
+    family = config.get("family", "b0")
     policy = TransportPolicy.from_config(config, acp_available=True)
     if policy.mode == "bridge":
         return HostBridge(bridge_origin(config), config["runtime_token"])
     if policy.mode == "acp":
+        require_acceptance_evidence(config)
         from backend.services.analytics.acp_transport import AcpTransport
         return AcpTransport.from_config(config)
+    if policy.mode == "cutover":
+        if TRANSPORT_ACP not in policy.transports_for(family):
+            # Cutover never moves the query family; this runtime owns the bridge.
+            return HostBridge(bridge_origin(config), config["runtime_token"])
+        require_acceptance_evidence(config)
+        from backend.services.analytics.acp_transport import AcpTransport
+        from backend.services.analytics.transport import RoutedTransport
+        bridge = None
+        if TRANSPORT_BRIDGE in policy.transports_for(family) or (
+                family == "first_purchase"
+                and config.get("identity_mode", "synthetic") == "crm-session"):
+            # CRM identity has no ACP operation; it keeps the bridge as an
+            # explicit, additive capability while automation moves to ACP.
+            bridge = HostBridge(bridge_origin(config), config["runtime_token"])
+        acp = AcpTransport.from_config({**config, "transport": "acp"})
+        return RoutedTransport(bridge, acp) if bridge is not None else acp
     from backend.services.analytics.acp_transport import AcpTransport
     from backend.services.analytics.transport import RoutedTransport
     bridge = HostBridge(bridge_origin(config), config["runtime_token"])
@@ -380,35 +412,65 @@ def build_host_transport(config):
         reason = f"acp_prerequisites_missing: {error}"
         logging.getLogger(__name__).warning("canary ACP path unavailable; every intent stays bridge: %s", error)
         acp = None
+    if acp is not None:
+        # Constructing the canary ACP path really enables ACP, so it carries
+        # the same acceptance-evidence gate as acp/cutover. A degraded canary
+        # (no ACP wiring) stays bridge-only and needs no evidence.
+        try:
+            require_acceptance_evidence(config)
+        except BaseException:
+            acp.close()
+            raise
     return RoutedTransport(bridge, acp, canary_reason=reason)
 
 
 def transport_policy(config, host=None) -> TransportPolicy:
-    """Build the accept-time policy from the same switch the transport used."""
+    """Build the accept-time policy from the same switch the transport used.
+
+    ``canary_available`` stays the explicit availability predicate: a cutover
+    policy is family-static and evidence-gated at startup, so it does not
+    overload this signal or replace it with a token-presence guess.
+    """
     available = bool(getattr(host, "canary_available", False))
     return TransportPolicy.from_config(config, acp_available=available)
+
+
+def _require_acceptance_if_acp_enabled(config, policy) -> None:
+    """Shared startup gate for callers that inject the host transport itself."""
+    if TRANSPORT_ACP in policy.transports_for(config.get("family", "b0")):
+        require_acceptance_evidence(config)
 
 
 def runtime_app(config, *, bridge=None):
     host = bridge if bridge is not None else build_host_transport(config)
     policy = transport_policy(config, host)
+    if bridge is not None:
+        # A caller that injects the host transport bypasses the factory's own
+        # gate, so the startup entry point re-applies it before mounting routes.
+        _require_acceptance_if_acp_enabled(config, policy)
     family = config.get("family", "b0")
     if family == QUERY_RUN_FAMILY:
         app = _query_runtime_app(config, bridge=host, transport_policy=policy)
-        _attach_acp_callback(app, host, config)
-        assert_native_routes(app, family)
+        _attach_acp_callback(app, host, config, policy)
+        assert_native_routes(app, family, transports={"gateway", *policy.transports_for(family)})
         return app
     if family == "first_purchase":
         from backend.analytics_first_purchase_native import create_first_purchase_native_app
         app = create_first_purchase_native_app(config, bridge=host, transport_policy=policy)
-        _attach_acp_callback(app, host, config)
-        assert_native_routes(app, family)
+        _attach_acp_callback(app, host, config, policy)
+        assert_native_routes(app, family, transports={"gateway", *policy.transports_for(family)})
         return app
     if family != "b0":
         raise ValueError("unsupported runtime family")
     session_id = config["session_id"]
-    runtime_token, gateway_token = config["runtime_token"], config["gateway_token"]
-    if len(runtime_token) < 32 or len(gateway_token) < 32 or runtime_token == gateway_token:
+    bridge_callbacks = TRANSPORT_BRIDGE in policy.transports_for("b0")
+    runtime_token, gateway_token = config.get("runtime_token"), config["gateway_token"]
+    if len(gateway_token) < 32 or (
+            bridge_callbacks and (
+                not isinstance(runtime_token, str) or len(runtime_token) < 32
+                or runtime_token == gateway_token
+            )
+    ):
         raise ValueError("separate explicit local capabilities required")
     registry = B0IdentityRegistry()
     actor = AnalyticsPrincipal("b0-synthetic-owner", frozenset({"run:create", "run:read", "run:cancel"}), frozenset({"b0-fixture"}))
@@ -457,29 +519,30 @@ def runtime_app(config, *, bridge=None):
     def gateway_actor(request):
         return registry.resolve(_single_header(request, "authorization"))
 
-    def runtime_identity(request, requested_session):
-        credential = _single_header(request, "authorization")
-        if not credential or not secrets.compare_digest(credential, "Bearer " + runtime_token):
-            raise AnalyticsError(401, "UNAUTHENTICATED", "需要运行时能力。")
-        if requested_session != session_id:
-            raise AnalyticsError(404, "NOT_FOUND", "原生会话不存在或不可见。")
+    if bridge_callbacks:
+        def runtime_identity(request, requested_session):
+            credential = _single_header(request, "authorization")
+            if not credential or not secrets.compare_digest(credential, "Bearer " + runtime_token):
+                raise AnalyticsError(401, "UNAUTHENTICATED", "需要运行时能力。")
+            if requested_session != session_id:
+                raise AnalyticsError(404, "NOT_FOUND", "原生会话不存在或不可见。")
 
-    @app.post("/internal/native/run-context", include_in_schema=False)
-    def run_context(payload: NativeContextRequest, request: Request):
-        runtime_identity(request, payload.session_id)
-        expected = config.get("method_package_digest")
-        if expected is None or payload.package_digest != expected:
-            raise AnalyticsError(409, "METHOD_VERSION_MISMATCH", "方法包版本未绑定或发生变化。")
-        matches = store.runtime_work(session_id=payload.session_id, request_id=payload.request_id)
-        if len(matches) != 1:
-            raise AnalyticsError(409, "UNBOUND_NATIVE_REQUEST", "当前原生请求没有已登记的任务绑定。")
-        work = matches[0]
-        principal = resolve_actor(work["owner"])
-        if principal is None:
-            raise AnalyticsError(403, "FORBIDDEN", "当前任务身份已失效。")
-        state = store.rebuild_context(principal, work["intent"].run_id, work["intent"].attempt_id,
-                                      package_digest=expected, unit_id=payload.unit_id, resource=payload.resource)
-        return {**state, "session_id": payload.session_id, "request_id": payload.request_id}
+        @app.post("/internal/native/run-context", include_in_schema=False)
+        def run_context(payload: NativeContextRequest, request: Request):
+            runtime_identity(request, payload.session_id)
+            expected = config.get("method_package_digest")
+            if expected is None or payload.package_digest != expected:
+                raise AnalyticsError(409, "METHOD_VERSION_MISMATCH", "方法包版本未绑定或发生变化。")
+            matches = store.runtime_work(session_id=payload.session_id, request_id=payload.request_id)
+            if len(matches) != 1:
+                raise AnalyticsError(409, "UNBOUND_NATIVE_REQUEST", "当前原生请求没有已登记的任务绑定。")
+            work = matches[0]
+            principal = resolve_actor(work["owner"])
+            if principal is None:
+                raise AnalyticsError(403, "FORBIDDEN", "当前任务身份已失效。")
+            state = store.rebuild_context(principal, work["intent"].run_id, work["intent"].attempt_id,
+                                          package_digest=expected, unit_id=payload.unit_id, resource=payload.resource)
+            return {**state, "session_id": payload.session_id, "request_id": payload.request_id}
 
     @app.get("/internal/native/context", include_in_schema=False)
     def context(request: Request):
@@ -497,13 +560,15 @@ def runtime_app(config, *, bridge=None):
                             allow_new=dispatcher.ready, native_request=payload.model_dump(),
                             method_package_digest=config.get("method_package_digest"))
 
-    @app.post("/internal/native/fixture", include_in_schema=False)
-    def fixture(payload: NativeStep, request: Request):
-        runtime_identity(request, payload.session_id)
-        return execute_native_fixture(store, resolve_actor, payload.session_id, payload.request_id, payload.call_id, payload.query, workers=workers)
+    if bridge_callbacks:
+        @app.post("/internal/native/fixture", include_in_schema=False)
+        def fixture(payload: NativeStep, request: Request):
+            runtime_identity(request, payload.session_id)
+            return execute_native_fixture(store, resolve_actor, payload.session_id, payload.request_id,
+                                          payload.call_id, payload.query, workers=workers)
 
-    _attach_acp_callback(app, host, config)
-    assert_native_routes(app, "b0")
+    _attach_acp_callback(app, host, config, policy)
+    assert_native_routes(app, "b0", transports={"gateway", *policy.transports_for("b0")})
     return app
 
 

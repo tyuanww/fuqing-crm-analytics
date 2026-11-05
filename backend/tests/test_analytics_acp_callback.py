@@ -11,6 +11,7 @@ from backend.analytics_runtime import runtime_app
 from backend.services.analytics.acp_transport import AcpTransport
 from backend.services.analytics.runtime import HostBridge
 from backend.tests.analytics_run_support import synthetic_fixture
+from backend.tests.cutover_evidence import evidence_config, write_acceptance_evidence
 
 GATEWAY = "g" * 32
 RUNTIME = "r" * 32
@@ -23,9 +24,13 @@ def b0_config(tmp_path, *, transport="acp"):
     state = tmp_path / "state"
     state.mkdir(mode=0o700)
     os.chmod(state, 0o700)
-    return {"state_dir": str(state), "session_id": SESSION, "gateway_token": GATEWAY,
-            "runtime_token": RUNTIME, "fixture": asdict(fixture),
-            "transport": transport, "method_package_digest": "a" * 64}
+    config = {"state_dir": str(state), "session_id": SESSION, "gateway_token": GATEWAY,
+              "runtime_token": RUNTIME, "fixture": asdict(fixture),
+              "transport": transport, "method_package_digest": "a" * 64}
+    if transport != "bridge":
+        root = write_acceptance_evidence(tmp_path / "evidence")
+        config.update(evidence_config(root))
+    return config
 
 
 def acp_transport(tmp_path):

@@ -52,6 +52,7 @@ from backend.services.analytics.transport import HostTransport
 from backend.tests.analytics_run_support import (
     actor, fixture_result, make_store, profile, sqlite_connection, successful_step, synthetic_fixture,
 )
+from backend.tests.cutover_evidence import evidence_config, write_acceptance_evidence
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 NATIVE_EVIDENCE = REPO_ROOT / "dsh-plugins" / "analytics-workbench" / "src" / "native-evidence.mjs"
@@ -920,9 +921,10 @@ def test_transport_config_defaults_to_bridge_and_selects_acp(tmp_path):
     legacy = build_host_transport({"port_base": 4315, "runtime_token": "x" * 32})
     assert isinstance(legacy, HostBridge) and legacy.origin == "http://127.0.0.1:4316"
 
+    evidence = evidence_config(write_acceptance_evidence(tmp_path / "evidence"))
     selected = build_host_transport({
         "transport": "acp", "acp_cwd": str(tmp_path), "state_dir": str(tmp_path / "state"),
-        "runtime_token": "x" * 32,
+        "runtime_token": "x" * 32, **evidence,
     })
     try:
         assert isinstance(selected, AcpTransport)
@@ -936,10 +938,10 @@ def test_transport_config_defaults_to_bridge_and_selects_acp(tmp_path):
     with pytest.raises(ValueError):
         build_host_transport({"transport": "carrier-pigeon", "runtime_token": "x" * 32})
     with pytest.raises(ValueError):
-        build_host_transport({"transport": "acp", "runtime_token": "x" * 32})
+        build_host_transport({"transport": "acp", "runtime_token": "x" * 32, **evidence})
     with pytest.raises(ValueError):
         build_host_transport({"transport": "acp", "acp_cwd": str(tmp_path), "state_dir": str(tmp_path),
-                              "runtime_token": "x" * 32, "acp_args": ["--profile", ""]})
+                              "runtime_token": "x" * 32, "acp_args": ["--profile", ""], **evidence})
 
 
 # ---------------------------------------------------------------------------
@@ -1378,7 +1380,8 @@ def test_from_config_passes_only_the_scoped_child_environment(tmp_path, monkeypa
     monkeypatch.setenv("PYTHONPATH", "/kernel/private")
     monkeypatch.setenv("PATH", "/usr/bin:/bin")
     config = {"transport": "acp", "acp_cwd": str(tmp_path), "state_dir": str(tmp_path / "state"),
-              "runtime_token": "r" * 32, "base_url": "http://127.0.0.1:5321", "family": "b0"}
+              "runtime_token": "r" * 32, "base_url": "http://127.0.0.1:5321", "family": "b0",
+              **evidence_config(write_acceptance_evidence(tmp_path / "evidence"))}
     receiver = build_host_transport(config)
     try:
         assert "AWS_SECRET_ACCESS_KEY" not in receiver.env
@@ -1404,7 +1407,8 @@ def test_from_config_passes_only_the_scoped_child_environment(tmp_path, monkeypa
 def test_from_config_rejects_an_unscoped_token_shape(tmp_path):
     config = {"transport": "acp", "acp_cwd": str(tmp_path), "state_dir": str(tmp_path / "state"),
               "runtime_token": "r" * 32, "base_url": "http://127.0.0.1:5321",
-              "acp_callback_token": "short"}
+              "acp_callback_token": "short",
+              **evidence_config(write_acceptance_evidence(tmp_path / "evidence"))}
     with pytest.raises(ValueError):
         build_host_transport(config)
 
@@ -1429,7 +1433,8 @@ def _write_generated_profile(home, *, patch_name="@shine-mage/dsh-analytics-work
 
 def test_health_verifies_the_generated_profile_before_spawning(tmp_path):
     config = {"transport": "acp", "acp_cwd": str(tmp_path), "state_dir": str(tmp_path / "state"),
-              "runtime_token": "r" * 32, "base_url": "http://127.0.0.1:5321"}
+              "runtime_token": "r" * 32, "base_url": "http://127.0.0.1:5321",
+              **evidence_config(write_acceptance_evidence(tmp_path / "evidence"))}
     receiver = build_host_transport(config)
     server = FakeAcpServer()
     receiver._spawn = server.spawn
@@ -1446,7 +1451,8 @@ def test_health_verifies_the_generated_profile_before_spawning(tmp_path):
 
 def test_health_rejects_a_business_or_bridge_profile(tmp_path):
     config = {"transport": "acp", "acp_cwd": str(tmp_path), "state_dir": str(tmp_path / "state"),
-              "runtime_token": "r" * 32, "base_url": "http://127.0.0.1:5321"}
+              "runtime_token": "r" * 32, "base_url": "http://127.0.0.1:5321",
+              **evidence_config(write_acceptance_evidence(tmp_path / "evidence"))}
     receiver = build_host_transport(config)
     server = FakeAcpServer()
     receiver._spawn = server.spawn
