@@ -3,6 +3,10 @@
  * These run without network, pnpm or a pinned upstream: fixtures build the
  * exact file shapes the guard inspects.  They are part of `pipeline.mjs --check`
  * so the CI job that uses the cache also proves the guard logic.
+ *
+ * The key pinned here is also published from `main` by
+ * `.github/workflows/b0-prepare-cache.yml`, which PRs restore: a producer that
+ * drifted from this module would silently leave every PR cold.
  */
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
