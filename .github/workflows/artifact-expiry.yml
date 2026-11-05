@@ -1,0 +1,55 @@
+name: Artifact Expiry Watch
+
+# Author evidence and the sealed composition artifact are retained by GitHub
+# and cannot be downloaded after they expire. Check the checked-in locks every
+# week so a red run is the reminder, instead of b0 or the release preflight
+# failing later at artifact fetch with an opaque 404.
+on:
+  schedule:
+    # Monday 01:00 UTC = 09:00 Asia/Shanghai
+    - cron: '0 1 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: artifact-expiry
+  cancel-in-progress: false
+
+jobs:
+  expiry:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24.19.0"
+          package-manager-cache: false
+
+      - name: Check tracked artifact expiry
+        env:
+          GH_TOKEN: ${{ secrets.SHINEMAGE_PLUGIN_READ_TOKEN }}
+        run: |
+          set -uo pipefail
+          report="$RUNNER_TEMP/artifact-expiry.txt"
+          set +e
+          node scripts/release/check-artifact-expiry.mjs | tee "$report"
+          status="${PIPESTATUS[0]}"
+          set -e
+          {
+            echo '## Tracked artifact expiry'
+            echo
+            if [ "$status" -eq 0 ]; then
+              echo 'All tracked artifacts are outside the 7-day warning window.'
+            else
+              echo "The expiry check exited $status. Refresh the author artifacts and reseal; see docs/operating/artifact-expiry.md."
+            fi
+            echo
+            cat "$report"
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit "$status"
