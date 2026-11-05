@@ -1,6 +1,6 @@
 # 插件外置 P0-P4 作战计划（2026-11-04 基线）
 
-> 本文件是当前计划，不是历史快照。状态事实以 `origin/main` = `e09ff4f`、PR #211/#216/#218/#222/#229/#230/#232/#234/#235/#236/#237 和本文引用的 CI run 为准；2026-11-04 的旧证据保留在 2.1、2.2 与附录 A。执行前先按第 6 节重新核对；状态变化时追加记录，不要改写已经发生的证据。2026-11-05 owner 已批准 D1–D4 与 P3-3 五项，执行依据见 5.1 与 5.1.1，切片状态见 C09。
+> 本文件是当前计划，不是历史快照。状态事实以 `origin/main` = `8bb713e86277dae0b800e2d86ab6eabb88386221`（2026-11-05 21:52 +08:00，#255）、PR #211/#216/#218/#222/#229/#230/#232/#234 与 #235–#255，以及本文引用的 CI run 为准；2026-11-04 与 2026-11-05 12:08 的旧快照保留在 2.1、2.2 与 2.3。执行前先按第 6 节重新核对；状态变化时追加记录，不要改写已经发生的证据。2026-11-05 owner 已批准 D1–D4 与 P3-3 五项，执行依据见 5.1 与 5.1.1，切片状态见 C09；S0 收口与 #240–#255 的实况见 5.5。
 
 ## 1 目标与执行规则
 
@@ -27,7 +27,7 @@ P0 到 P4 是同一件事的五个阶段，不是五个独立项目。
 
 ## 2 状态总表
 
-2026-11-05 12:08 刷新：`origin/main` = `e09ff4ffc28a697583c401deb81a068e2f5cfcd3`，第一父链为 `e09ff4f` → `b872288` → `d169809` → `60d7f4e`。下表状态按该快照与 #237 合并更新，明细见 2.3；2.1 与 2.2 是 2026-11-04 23:25 的旧快照，保持原样。
+2026-11-05 22:10 刷新：`origin/main` = `8bb713e86277dae0b800e2d86ab6eabb88386221`（#255），第一父链 `8bb713e8` → `5c4115c`（#254）→ `633c7bf`（#253）→ `bb8fb91`（#251）→ `60eee4c`（#252）→ `8291606`（#250）→ `e076d0f`（#248）→ `b97e8da`（#249）→ `d27b9f9`（#247）→ `f8aa3fa`（#246）→ `304abf9`（#245）→ `8da3c61`（#244）→ `4328a47`（#243）→ `5f03ea5`（#242）→ `e23b2d9`（#241）→ `3e55d8a`（#240）→ `e718b35`（#239）→ `373f6f2`（#238）。上一快照为 12:08 的 `e09ff4f`（#237）。下表状态按新快照与 #240–#255 更新，明细见 5.5；2.1 与 2.2 是 2026-11-04 23:25 的旧快照，保持原样。
 
 | 层 | 范围 | 状态 | 证据 |
 |---|---|---|---|
@@ -37,10 +37,10 @@ P0 到 P4 是同一件事的五个阶段，不是五个独立项目。
 | P2b | tool policy 单源与官方工具漂移门禁 | 已完成 | #214 merged，head `6849fc4c`，merge `432cc03a`；CI `41828359712` success；`dsh-plugins/query-agent/src/tool-policy.ts` 加 `dsh-plugins/query-agent/config/{query-agent-tool-policy,dsh-official-tools}.v1.json`，68 个官方工具名，25 项行为逐条等价 |
 | P2c | component catalog 移出插件源码 | 已完成 | #212 merged，head `ec83fe52`，merge `dc9b8fba`；CI `41823447654` success；`backend/contracts/component-catalog.json` 7014 bytes、sha256 `8e2161fa…`，`board_spec.py` 导入期不再读 `dsh-plugins/` |
 | P2d | 生成物收进独立 contracts 包 | 已完成 | #216 merged `36111a90`，head `107d2324`；CI `41874816482` success；110 files +1800/−687；b0 / test / merge-gate 绿 |
-| P3 | 换私有协议为 rc.5 公开面 | 部分完成：P3-0/P3-1/P3-2/P3-5 已合并；P3-3 的 3a/3b/3c/3d-prep 与 #237 回收/回调修复合入，cutover 待真机验收；P3-4 决策已定，按 C10 执行 | #218 merged `a2b9a546`，head `a823b0d9`，CI `41880532530` success（P3-0 影子门禁 + P3-1 disposer）；#222 merged `8da4b78e`，head `2df54efe`，CI `41895117591` success（P3-2 Config / typed tools + P3-5 TurnEndReason）；#237 merged `e09ff4f`，head `c85a988`（ACP C2 回调 + scoped env + lost-turn 回收 + 关停/profile 准入）；2026-11-05 owner 批准 D4 与 P3-3 五项，P3-4 按 D1–D3 执行；P3-3 切片见 C09 |
-| P3-3 | 外部半换 ACP，`query` 家族留在 bridge | 3a/3b/3c/3d-prep 与 #237 已合并（#230/#232/#229/#234/#237）；cutover 仍待真机验收；作者仓 workbench repack 已随 #235 回填；3e 可选未立项 | #230 merge `72239df2`（transport seam）、#232 merge `0eeb8faa`（ACP stdio transport）、#229 merge `4a926836`（offline shadow compare）、#234 merge `60d7f4e8`（profile generator + `acp_bindings` + cancel-aware settlement + deadline strategy）、#235 merge `d169809`（回填作者 pack、锁链与 sealed artifact）、#237 merge `e09ff4f`（binding-based C2 callback、scoped child env、lost/no-tool reclaim + slot release、dispatcher-owned shutdown、profile health）。真机验收清单见 [acp-cutover-acceptance.md](../operating/acp-cutover-acceptance.md)；默认 transport 仍 `bridge`，剩余构建项见该清单第 9 节 |
-| P3-4 | 品牌与账号收口 | 部分完成：D2 hero/徽章与 D3 设置入口按现状接受，不再列为可完成项；D1 构建期标题代码侧已落地且默认不启用，rollout 待品牌包重建与 reseal | 2026-11-05 决策见 5.1；C10 收口现状，C15 记录已落地的代码路径与剩余 rollout |
-| P4 | 最后拆仓并删除主仓插件源码 | 未开工 | 无分支、无 PR；`deletion_gate=BLOCKED`，原因为 `remote_main_not_verified` 与 `production_only_closure_not_recorded`；硬依赖 P3-3/P3-4 完成、10 作者仓迁移和删除门禁 |
+| P3 | 换私有协议为 rc.5 公开面 | 部分完成：P3-0/P3-1/P3-2/P3-5 已合并；P3-3 的 3a/3b/3c/3d-prep 与 #237 已合并，#249 把 `query` 家族钉在 bridge（G2 PASS）、#250 把 `rc5-shadow` 转 blocking、#251 加家族级 `cutover` 与真机证据启动门，cutover 仍待真机验收；P3-4 只剩 C15 的步骤 2–4 | #218 merged `a2b9a546`，head `a823b0d9`，CI `41880532530` success（P3-0 影子门禁 + P3-1 disposer）；#222 merged `8da4b78e`，head `2df54efe`，CI `41895117591` success（P3-2 Config / typed tools + P3-5 TurnEndReason）；#237 merged `e09ff4f`，head `c85a988`（ACP C2 回调 + scoped env + lost-turn 回收 + 关停/profile 准入）；2026-11-05 owner 批准 D4 与 P3-3 五项，P3-4 按 D1–D3 执行；P3-3 切片见 C09；#249 merged `b97e8da0`、#250 merged `82916068`、#251 merged `bb8fb912`、#252 merged `60eee4cf`（G4） |
+| P3-3 | 外部半换 ACP，`query` 家族留在 bridge | 3a/3b/3c/3d-prep 与 #237 已合并（#230/#232/#229/#234/#237）；#249 钉住 `query` 家族、#250 shadow 门禁 blocking、#251 家族级 cutover + 证据门；cutover 仍待真机验收；作者仓 workbench 已由 #17 一次性 land（`eef9e9e0`）并被 #255 重 pin；3e 可选未立项 | #230 merge `72239df2`（transport seam）、#232 merge `0eeb8faa`（ACP stdio transport）、#229 merge `4a926836`（offline shadow compare）、#234 merge `60d7f4e8`（profile generator + `acp_bindings` + cancel-aware settlement + deadline strategy）、#235 merge `d169809`（回填作者 pack、锁链与 sealed artifact）、#237 merge `e09ff4f`（binding-based C2 callback、scoped child env、lost/no-tool reclaim + slot release、dispatcher-owned shutdown、profile health）。真机验收清单见 [acp-cutover-acceptance.md](../operating/acp-cutover-acceptance.md)；默认 transport 仍 `bridge`，剩余构建项见该清单第 9 节；#251 新增 `cutover_acceptance` 启动门（`MANIFEST.sha256` 全量重算 + settle 回执 + 时效窗口，无 env 绕过），仓库内仍无真机证据根与 receipt |
+| P3-4 | 品牌与账号收口 | 部分完成：D2 hero/徽章与 D3 设置入口按现状接受，不再列为可完成项；D1 构建期标题代码侧已落地（#253），品牌包侧步骤 1 已由 `dsh-shine-brand` main `6aa335d2` 删除运行期 `document.title` 赋值完成；剩 runtime 重建、reseal 与真机视觉验收 | 2026-11-05 决策见 5.1；C10 收口现状，C15 记录已落地的代码路径与剩余 rollout；步骤 1 回执与剩余项见 5.5 |
+| P4 | 最后拆仓并删除主仓插件源码 | 部分完成：S0 已完成（kit 重 vendor、作者 main 归一、锁重 pin、reseal），S1–S5 未开工 | 无 S1–S5 分支、无 PR；S0 证据见 #248/#255 与 5.5；`deletion_gate=BLOCKED`，原因为 `remote_main_not_verified` 与 `production_only_closure_not_recorded`；硬依赖 P3-3 cutover 真机验收、C15 步骤 2–4 与删除门禁（G0/G6 已 PASS，G1 进行中，G3 FAIL，G7 BLOCKED） |
 
 ### 2.1 写作时校正的六处事实
 
@@ -151,6 +151,8 @@ node scripts/dsh-b0/plugin-boundaries.mjs --check
 
 **目标** 产出含 `./provenance` 与 `./client-banner` 的 kit tarball，确定版本策略，并把同一 tarball 分发到 10 个作者仓。
 
+**状态（2026-11-05 晚，已完成）** kit 权威切出 `e2216168…`（49,341 B，19 成员，含 `./provenance`、`./client-banner` 与 `CONTRACT_PACKAGE_NAME`）；10 个作者仓 `vendor/dsh-plugin-kit-0.1.1.tgz` 均为 49,341 B，10 个 `vendor/KIT-SHA256` 全部等于 `e22161688cbc7bc345e64264223c9aa367e859a8dccd000a65b91c6621559fdb`；版本策略按 D11-A 保持 `0.1.1`。原“阻塞/授权”已解除。
+
 **输入** 主仓 kit 为 `@shine-mage/dsh-plugin-kit` `0.1.0`、`private: true`。作者仓 vendored 的 `vendor/dsh-plugin-kit-0.1.0.tgz` 为 45574 bytes、sha256 `03ca0fde…`，解包 16 个文件，不含 P2a 新增的 `provenance.mjs` 与 `client-banner.mjs`，所以作者仓当前无法按 rc.5 重建。
 
 **入口**
@@ -171,6 +173,8 @@ sha256sum "$KIT_OUT"/*.tgz
 ### C03 十个作者仓按 rc.5 重建（P0-1）
 
 **目标** 每个作者仓在 `codex/rc5-rebuild-20261104`（或复用现有 rc3 分支）产出 rc.5 的 content pack、formal pack、public contracts 三类证据。
+
+**状态（2026-11-05 晚，已完成）** 10 个作者仓在各自 `main` 上重 vendor 并重跑 CI：workbench `ae922fa3`、crm `86ff10b9`、knowledge `902a1b41`、board `97885dfd`、crowd `dc6f0d2c`、query `7202f182`、funnel `c3dd9d3c`、waterfall `d5d2c6fc`、brand `6aa335d2`、board-components `4245aa81`。证据改为各仓 `main` 的 `push` run：workbench `42031523764`、crm `42031515425`、brand `42031506827`、board-components `42030897866`，三份作者证据锁记 `event: push` / `head_branch: main`（#254）。workbench 栈由 #17 一次性 land（`eef9e9e0`），作者 PR #16 仍开着但不再是前置。
 
 **输入** 新 kit tarball、rc.5 upstream `b830ec95`、build-tools、Python 3.14.4、pnpm 11.28.2，funnel 与 waterfall 另需 board tgz。
 
@@ -209,6 +213,8 @@ board-components 走自己的 author 七步，不需要 DSH checkout。
 ### C04 主仓锁链回填与 artifact 密封（P0-2）
 
 **目标** 用 C03 的新证据重算所有组合锁，重新密封 20 文件 artifact，使主仓组合身份指向 rc.5 作者 pack。
+
+**状态（2026-11-05 晚，已完成）** 9 个插件行与 domain 行均为 `ref: main`，manifest `lock.sha256` = `81a10f70…`；`respin-composition-artifact.mjs`（#244）串起重建与重签，首次无人工 `.ci` 编辑跑通（#255）：artifact `13417537931`、sha256 `b1fb2976c6299136224240422f5f64a701e36100ecd73ef40b234a235b358589`、838,651 B、20 成员无符号链接、run `42035243845`、head `b29a84f3…`、2027-02-03 过期。`consumer.reviewed_sha` 仍 `60d7f4e8…`，是本变更唯一未决人工 pin。
 
 **输入** 10 个作者仓的新 `source_sha`、formal manifest sha、pack sha、CI run 与 artifact id、workbench core 计数、domain pack 摘要。
 
@@ -327,6 +333,8 @@ node scripts/dsh-b0/pipeline.mjs --check
 
 **目标** 让 FastAPI run kernel 通过 `dsh --profile acp` 子进程驱动 kernel 拥有的自动化 run，删除自建 HTTP、bearer token 和固定端口的外部半；用户聊天与 `query` 家族留在现有 bridge，不在本卡迁移。
 
+**状态（2026-11-05 晚）** 3a（#230）/3b（#232）/3c（#229）/3d-prep（#234）与 #237 已合并；#249 让 `channel_followup` 只走 bridge 并在配置期拒绝 `acp`/`canary`（G2 PASS），#250 把 `rc5-shadow` 转为 blocking，#251 增加家族级 `cutover` 传输与 `cutover_acceptance` 启动门（`MANIFEST.sha256` 全量重算 + settle 回执 + 时效窗口，无 env 绕过）。3d cutover 仍 `FAIL`：仓库内无真机证据根与 receipt；3e 可选未立项；starlette rollout 的依赖锁与重签路径由 #240/#244 收口，隔离实例回执仍缺。
+
 **决策** 2026-11-05 owner 批准五项，全文见 5.1.1：
 
 1. P3-3-H5：自动化回答暂不需要进入用户聊天会话；`query` 家族继续走 bridge；ACP 只服务 kernel-owned automation run；用户聊天行为不变。
@@ -408,6 +416,8 @@ rg -n "evidenceFor|TurnEndReason|forked" dsh-plugins/analytics-workbench/src/nat
 
 **目标** 按依赖顺序把插件源码移出主仓，最后删除 `dsh-plugins/` 源码副本，主仓只保留 pack reader、锁和组合测试。
 
+**状态（2026-11-05 晚）** S0 已完成（kit 重 vendor、作者 main 归一、锁重 pin、首次带新工具 reseal，见 C02/C03/C04 与 5.5）；S1–S5 未开工，顺序不变。`deletion_gate` 仍 `BLOCKED`（`remote_main_not_verified`、`production_only_closure_not_recorded`）；G0/G6 已随作者 main 归一与重 vendor 转 PASS，G1 回填进行中，G3 真机验收仍 FAIL，G7 仍 BLOCKED。
+
 **输入** P3 完成；10 个作者仓迁移完成；`deletion_gate` 清零；恢复 bundle。
 
 **顺序** `plugin-kit` → `contracts` 与 `board-components` → 5 个 shine 壳 → `knowledge` 与 `crm-knowledge` → `query-agent`（配置型 bundle）→ `analytics-workbench` 最后。
@@ -462,6 +472,8 @@ node --test scripts/ci/composition-pack-inputs.test.mjs
 **目标** 用构建期 `DSH_CLIENT_TITLE` 把浏览器标题固定为业务品牌，替代运行期 `document.title` 赋值；不新增 runtime plugin hook。
 
 **决策** 2026-11-05 owner 接受 build-time `DSH_CLIENT_TITLE`，不采用运行期插件 hook。
+
+**状态（2026-11-05 晚）** 步骤 1 已完成：`tyuanww/dsh-shine-brand` main `6aa335d2`（PR #3，author commit `ff866cfc`）删除 `brand-surface.mjs` 的运行期 `document.title` 赋值，函数只读 `doc.title`；hero 标题、预览徽章与 icon 处理保留。主仓 `scripts/dsh-b0/leaf-pack-composition.integration.mjs` 随 #255 改为断言“不写标题”，标题写入计数仍保留。步骤 2–4（带 `DSH_CLIENT_TITLE` 重建 runtime、reseal、真机视觉）未做。本段不改变下文 2026-11-05 早间的核验与 rollout 清单。
 
 **核验（2026-11-05，rc.5 `b830ec95`）** `DSH_CLIENT_TITLE` 是构建期值：`apps/web/vite.config.ts` 的 `clientDocumentTitle()` 把它写进初始 `<title>`，`packages/client/ui-layout/src/client/AppFrame.tsx` 把它作为 `productTitle` 传给 `DocumentTitle`（导航时重写 `document.title`）。官方构建经 `scripts/build.ts` 的 `official` profile 调 `scripts/client-build-environment.ts`，其中 `OFFICIAL_CLIENT_BUILD_ENVIRONMENT` 把 `DSH_CLIENT_TITLE` 固定为 `DeepSeek Harness`，且 `resolveClientBuildEnvironment` 对 `official` 之外的 profile 直接抛错。本仓 `scripts/dsh-b0/pipeline.mjs` 在固定 SHA 的干净 checkout 上跑 `pnpm run build:official`，`verifySource()` 拒绝本地改动。因此需要受控的 bundle-time 重写，而不是在 build env 里加变量。
 
@@ -535,6 +547,79 @@ PR #215 已经修掉机械项（test 四片、pip 不触发 b0、path matrix 补
 | D14 | `FQ_PRE_PUSH_SKIP=1` 本机例外 | 接受或要求本机补齐 7 个固定输入 | 接受则本机 push 绕过 B0，依赖 CI 兜底；不接受则本机无法完整跑 pre-push |
 | D15 | 3 份 profile 仍叫 `*.rc3.json` | 本批重命名或保留 | 重命名会动 `validateProfile`、CI 与锁；保留则命名债继续存在。建议保留到 P4 拆仓时一起改 |
 
+### 5.5 2026-11-05 晚间决策记录（S0 收口，#240–#255）
+
+结论。S0 完成：10 个作者仓统一 re-vendor 到 kit `e2216168…`，作者 `main` 归一为锁与证据的唯一来源，主仓锁链重 pin 并用新工具首次现场 reseal；`origin/main` = `8bb713e8`（#255）。P4 的阻塞从“作者仓未迁移 + 密封工具只能复制 `.ci`”变为“S1–S5 未开工 + G3 真机验收 + G7 机器门”。本记录只追加事实，不改任何锁、证据或已发生的结论；本记录本身是 docs-only 变更，删除 `dsh-plugins/`、重建 runtime、真机验收、部署与切公网仍各自单独授权。
+
+**执行序列（`8bb713e8` 的第一父链，全部已落地）**
+
+| PR | 落地 commit | 作用 |
+|---|---|---|
+| #238 | `373f6f2` | ACP cutover runbook 与 reclaim/callback 修复对齐 |
+| #239 | `e718b35` | 记录 dispatch transport，加默认关闭的 canary |
+| #240 | `3e55d8a` | packed-service pin 单源 |
+| #241 | `e23b2d9` | B0 prepare 缓存 + 校验恢复 |
+| #242 | `5f03ea5` | 从 main 预热 B0 prepare 缓存 |
+| #243 | `4328a47` | B0 缓存 key 测试说明 |
+| #244 | `8da3c61` | 依赖锁变更重回 B0 scope + `respin-composition-artifact.mjs` |
+| #245 / #246 | `304abf9` / `f8aa3fa` | P4 拆仓 runbook 及其删除门禁/切片更正 |
+| #247 | `d27b9f9` | `rebuild-seal-members.mjs` 从当前锁重建 20 个 `.ci` 成员 |
+| #248 | `e076d0f` | S0 准备：`cut-kit-artifact.mjs`、drift manifest、domain sha 对账 |
+| #249 | `b97e8da` | `query` 家族钉在 bridge（G2 PASS）、G5 路径清除、boundary 仓库映射 |
+| #250 | `8291606` | `rc5-shadow` 转 blocking |
+| #251 | `bb8fb91` | 家族级 `cutover` 传输 + 真机证据启动门 |
+| #252 | `60eee4c` | G4 typecheck-consumer 导入边界 |
+| #253 | `633c7bf` | 构建期 `DSH_CLIENT_TITLE` 受控重写与 shipped-byte provenance |
+| #254 | `5c4115c` | 作者证据接收器接受 main `push` run |
+| #255 | `8bb713e` | 作者 main 重 pin、三份作者证据锁回填、domain pack 重建与 reseal |
+
+**S0：kit 重 vendor 与作者 main 归一**
+
+- 权威 kit 为 `e2216168…` / 49,341 B / 19 成员，含 `./provenance`、`./client-banner` 与 `CONTRACT_PACKAGE_NAME`；10 个作者仓的 `vendor/dsh-plugin-kit-0.1.1.tgz` 与 `vendor/KIT-SHA256` 全部一致。旧 `0.1.0` `251383e1…`（43,944 B）与 rc.5 PR head 的 `a527b2a5…`（49,013 B，缺 `CONTRACT_PACKAGE_NAME`）都不再是输入（#248 记录）。
+- 10 个作者仓在 `codex/kit-0.1.1-revendor-20261105` 上 re-vendor 并合入各自 `main`：workbench `ae922fa3`、crm `86ff10b9`、knowledge `902a1b41`、board `97885dfd`、crowd `dc6f0d2c`、query `7202f182`、funnel `c3dd9d3c`、waterfall `d5d2c6fc`、brand `6aa335d2`、board-components `4245aa81`。
+- workbench 的 14-PR 栈没有逐支合并：`#17`（`eef9e9e0`）把 sealed rc.5 树一次性 land 到 `main`；`#16` 仍开着，但不再是锁链前置。
+
+**首次带新工具的现场 reseal**
+
+- `scripts/release/rebuild-seal-members.mjs`（#247）从当前锁派生 20 个 `.ci` 成员；`respin-composition-artifact.mjs`（#244）串起“clean commit 校验 → service pin → 重建 sealing 分支 → 等 push workflow → 下载校验 → 写 artifact lock 与 `RUNTIME_HOST_SOURCE`”。
+- #255 第一次无需人工编辑 `.ci` 就跑通：sealed head `5e4510b3…` → `b29a84f3…`；artifact `13385901661` → `13417537931`，sha256 `b1fb2976…`，838,651 B，run `42035243845` success，20 成员无符号链接，2027-02-03 过期。
+- 首次 b0 run `42035571708` 只红了 brand 集成断言（作者已按 C15 步骤 1 删除标题写回）；`leaf-pack-composition.integration.mjs` 改为断言“不写标题”并保留写入计数，未改 sealed 字节或任何锁。
+
+**push-run 证据接收器（#254）**
+
+`domain-author-evidence.mjs`、`workbench-author-evidence.mjs`、`public-contract-inputs.mjs` 接受 `archive.event ∈ {pull_request, push}`；`push` 锁必须带 `archive.head_branch: main`，并校验仓库默认分支与 run 的 `head_branch`；`run.head_sha == source_sha` 对两种 event 都不放松。作者 main 的 `push` run 因此成为唯一合法证据：workbench `42031523764`、crm `42031515425`、brand `42031506827`、board-components `42030897866`。作者 artifact 14 天有效，**2026-11-19 到期**。
+
+**C15 步骤 1（品牌包侧）**
+
+`dsh-shine-brand` main `6aa335d2`（PR #3，author `ff866cfc`）删除 `plugin/src/brand-surface.mjs` 的运行期 `document.title = PRODUCT_NAME`，函数只读 `doc.title`；hero 标题、预览徽章与 icon 处理保留。C15 的步骤 2–4（重建 runtime、reseal、真机视觉）仍未做（见 C15 状态段）。
+
+**门禁状态（2026-11-05 22:10 采集）**
+
+| 门 | 状态 | 依据 |
+|---|---|---|
+| G0 | PASS | 10× `KIT-SHA256` = `e2216168…`，10× tarball 49,341 B |
+| G1 | 进行中 | 9 sources + domain `PASS`，`lock.sha256` = `81a10f70…`；manifest `bundle.status` 仍 `NOT_RUN`，preflight run `42041726655` 在 `8bb713e8` 上重跑（采集时 in progress），回填由并行 writer 负责 |
+| G2 | PASS | #249；`pytest backend/tests/test_analytics_transport_canary.py` 15 passed（本轮复跑） |
+| G3 | FAIL | 无真机证据根与 receipt；#251 的 `cutover_acceptance` 只定义门，不产生证据 |
+| G4 | PASS | #252；11 个 typecheck-consumer 只导入已声明 contracts 导出或自身插件树 |
+| G5 | PASS | 导入门 0 行；`pytest backend/tests/test_p4_backend_source_paths.py` 2 passed（本轮复跑） |
+| G6 | PASS | 9 行 `ref: main` 且 sha 等于各作者 main；domain `ref: main` / `4245aa81` |
+| G7 | BLOCKED | `deletion_gate` = `remote_main_not_verified` + `production_only_closure_not_recorded` |
+
+**仍然未做**
+
+- `consumer.reviewed_sha` 仍为 `60d7f4e8…`，是本轮唯一未决人工 pin；G7 不会因此自动转 `READY`。
+- C15 步骤 2–4：带 `DSH_CLIENT_TITLE` 重建 runtime、reseal、真机/真实 host 视觉验收。
+- G3 真机 ACP 验收，P3-3 3d cutover 的唯一前置。
+- P4 S1–S5（contracts+board → 5 个 shine 壳 → knowledge/crm-knowledge → query-agent 决策 → analytics-workbench 最后）。
+- C13 交付层 T02/T03/T06/T07/T09/E1。
+- 有效期：作者 artifact **2026-11-19**；sealed artifact 2027-02-03。到期后不能只靠旧 artifact 复验，必须重跑作者 CI 或重新密封。
+
+**本轮学到的两个 GitHub 行为**
+
+1. 栈式 PR 的 base 不会自动重定向到 `main`。workbench 的 14-PR 栈（含 11 个 draft、一个未合 #3、以及承载 16 个无 PR commit 的 base 分支）不能按支合并；`#17` 用一次 land 把同一 tree 变成 `main` 祖先，`#16` 至今仍指向 `codex/workbench-ai-preview-overlays-20261028`。后续栈式作者 PR 必须显式重定 base 或一次性 land。
+2. draft PR 必须先 Mark ready for review 才能 merge。栈里仍开着的 draft（workbench #11–#14）不能作为可合并输入；本轮主仓 PR 均以 ready 状态开出再等 CI。
+
 ## 6 如何接续
 
 1. 先读 `AGENTS.md`、本文件、`STATUS.md`、`docs/operating/verification.md`，再读 #211/#216/#218/#222 的 body（均已合并）。不要只读会话摘要。
@@ -583,4 +668,8 @@ git log --oneline origin/main -12
 | CI 精简 | #215，`c2f627cb` |
 | rc.5 | `b830ec95`，Cordis `4.0.5`，lock `911b0499…` |
 | kit | `0.1.1`，已用于 10 作者仓 rc.5 重建 |
-| 作者 artifact | 14 天有效，2026-11-18 到期 |
+| 作者 artifact | 14 天有效，2026-11-18 到期（2026-11-04 的 rc.5 重建批次） |
+| main（2026-11-05 晚，#255） | `8bb713e86277dae0b800e2d86ab6eabb88386221` |
+| S0 kit（2026-11-05） | `e2216168…` / 49,341 B / 19 成员；10× `KIT-SHA256` 一致；替代 `251383e1…`（43,944 B）与 `a527b2a5…`（49,013 B） |
+| sealed artifact（2026-11-05 晚） | `13417537931`（`b1fb2976…`，838,651 B，20 成员，run `42035243845`，head `b29a84f3…`，2027-02-03 过期） |
+| 作者 artifact（2026-11-05 re-vendor 后） | 14 天有效，**2026-11-19 到期**（workbench `42031523764` 等四个 push run） |
