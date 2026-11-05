@@ -35,10 +35,16 @@ B0_SCOPE_PREFIXES = (
     'frontend-vue3/src/assets/brand/',
 )
 B0_SCOPE_EXACT = frozenset({
-    # dependency locks that pin the B0 toolchain and its package managers.
-    # Root requirements*.txt only pin the backend venv; the B0 job builds its
-    # own venv from scripts/dsh-b0/requirements.lock, so a backend dependency
-    # bump does not need the sealed B0 build (the test job still runs it).
+    # Dependency locks that can invalidate the sealed composition artifact.
+    # The B0 job builds its own venv from scripts/dsh-b0/requirements.lock, but
+    # the sealed source-target evidence reads the repository's
+    # requirements-lock.txt at RUNTIME_HOST_SOURCE. PR #215 removed the root
+    # requirements*.txt from this scope to speed up pip Dependabot PRs; #228
+    # then moved starlette 1.10.0 while B0 was skipped, main merged green, and
+    # the seal kept starlette==1.6.0 until #233 rebuilt it. A dependency-lock
+    # change must therefore be able to run B0 and reseal before merge.
+    'requirements.txt',
+    'requirements-lock.txt',
     'pyproject.toml',
     'uv.lock',
     'pnpm-lock.yaml',
