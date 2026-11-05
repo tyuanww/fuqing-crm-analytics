@@ -1,9 +1,15 @@
 import assert from 'node:assert/strict';
+import { fileURLToPath } from 'node:url';
+import {
+  readProductionOnlyClosureReceipt,
+  validateProductionOnlyClosureReceipt,
+} from './production-only-closure-receipt.mjs';
 
 export const SOURCE_MANIFEST_SCHEMA = 'shinemage-composition-pack-manifest/v1';
 export const SOURCE_STATUSES = new Set(['PASS', 'NOT_RUN']);
 export const BUNDLE_STATUSES = new Set(['PASS', 'NOT_RUN']);
 export const GATE_STATUSES = new Set(['READY', 'BLOCKED']);
+export const DEFAULT_PRODUCTION_ONLY_CLOSURE_RECEIPT = fileURLToPath(new URL('../../docs/operating/production-only-closure-receipt.md', import.meta.url));
 
 const SHA1 = /^[a-f0-9]{40}$/;
 const SHA256 = /^[a-f0-9]{64}$/;
@@ -112,7 +118,8 @@ function validateGate(value, sources, bundle) {
   }
 }
 
-export function validateSourceManifest(manifest, { lockSha256 = null, expectedIds = null } = {}) {
+export function validateSourceManifest(manifest, { lockSha256 = null, expectedIds = null,
+  productionOnlyClosurePath = DEFAULT_PRODUCTION_ONLY_CLOSURE_RECEIPT } = {}) {
   exact(manifest, ['schema_version', 'lock', 'consumer', 'bundle', 'toolchain', 'sources', 'domains', 'deletion_gate'], 'SOURCE_MANIFEST_SHAPE');
   assert.equal(manifest.schema_version, SOURCE_MANIFEST_SCHEMA, 'SOURCE_MANIFEST_SCHEMA');
   exact(manifest.lock, ['path', 'sha256'], 'SOURCE_MANIFEST_LOCK_SHAPE');
@@ -144,6 +151,20 @@ export function validateSourceManifest(manifest, { lockSha256 = null, expectedId
     domainDirectories.add(domain.directory);
   }
   validateGate(manifest.deletion_gate, [...manifest.sources, ...manifest.domains.map(domain => ({ ...domain, id: domain.package }))], manifest.bundle);
+  // A READY gate removes `production_only_closure_not_recorded`, so it must
+  // point at a receipt that binds the same lock, sources and domains. This is
+  // the machine check that prevents a hand-edited READY from skipping the
+  // provenance-only closure evidence.
+  if (manifest.deletion_gate.status === 'READY') {
+    assert.ok(typeof productionOnlyClosurePath === 'string' && productionOnlyClosurePath.length > 0,
+      'SOURCE_MANIFEST_PRODUCTION_ONLY_CLOSURE_RECEIPT_REQUIRED');
+    const { receipt } = readProductionOnlyClosureReceipt(productionOnlyClosurePath);
+    validateProductionOnlyClosureReceipt(receipt, {
+      lockSha256: manifest.lock.sha256,
+      sources: manifest.sources,
+      domains: manifest.domains,
+    });
+  }
   return manifest;
 }
 

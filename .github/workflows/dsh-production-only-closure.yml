@@ -1,0 +1,88 @@
+name: Production-only closure rehearsal
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/dsh-production-only-closure.yml'
+      - 'scripts/release/production-only-closure*.mjs'
+      - 'scripts/release/plugin-source-manifest*.mjs'
+      - 'scripts/release/release-profile-packs.mjs'
+      - 'scripts/ci/composition-pack-inputs*.mjs'
+      - 'scripts/ci/unpack-composition-inputs.py'
+      - 'docs/operating/production-only-closure-receipt.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: production-only-closure-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rehearsal:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '24.19.0'
+          package-manager-cache: false
+      - name: Activate the pinned package manager
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack install
+          test "$(pnpm --version)" = "11.28.2"
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        id: python
+        with:
+          python-version: '3.14'
+      - name: Unit tests for the deterministic receipt parts
+        run: |
+          set -euo pipefail
+          node --test scripts/release/production-only-closure.test.mjs scripts/release/plugin-source-manifest.test.mjs
+      - name: Install the locked production Python closure
+        # requirements-lock.txt is the documented CI/production venv. Drop the
+        # test/lint tools so the import closure runs against production-only
+        # packages, mirroring the pnpm --prod assertion.
+        run: |
+          set -euo pipefail
+          grep -vE '^(pytest|pytest-xdist|black|ruff|iniconfig|pluggy|pygments|execnet)==' requirements-lock.txt > "$RUNNER_TEMP/runtime-requirements.txt"
+          python -m pip install --quiet --disable-pip-version-check -r "$RUNNER_TEMP/runtime-requirements.txt"
+      - name: Download the locked sealed composition artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          artifact_id="$(node --input-type=module -e "import { readFileSync } from 'node:fs'; console.log(JSON.parse(readFileSync('config/shinemage-composition-artifact.lock.json', 'utf8')).id)")"
+          gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts/${artifact_id}/zip" > "$RUNNER_TEMP/sealed-composition.zip"
+      - name: Rehearse production-only closure on origin/main
+        env:
+          PYTHON: ${{ steps.python.outputs.python-path }}
+        run: |
+          set -euo pipefail
+          node scripts/release/production-only-closure.mjs \
+            --ref origin/main \
+            --artifact "$RUNNER_TEMP/sealed-composition.zip" \
+            --python "$PYTHON" \
+            --receipt "$RUNNER_TEMP/production-only-closure-receipt.md"
+      - name: Machine-check the generated receipt
+        env:
+          PYTHON: ${{ steps.python.outputs.python-path }}
+        run: |
+          set -euo pipefail
+          node scripts/release/production-only-closure.mjs \
+            --check-receipt \
+            --receipt "$RUNNER_TEMP/production-only-closure-receipt.md"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: production-only-closure-${{ github.run_id }}
+          path: ${{ runner.temp }}/production-only-closure-receipt.md
+          if-no-files-found: error
+          retention-days: 14
