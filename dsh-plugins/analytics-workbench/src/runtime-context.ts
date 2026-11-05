@@ -1,4 +1,5 @@
 import { NATIVE_BOUNDS, kernelUrl, type NativeRuntime } from './runtime-endpoints.ts';
+import { acpCallbackEnabled, acpContextUrl } from './acp-callback.mjs';
 import type { Agent } from '@deepseek-ai/dsh-agent';
 import { FIRST_PURCHASE_FAMILY, QUERY_FAMILY, isRegisteredSession } from './runtime-family.mjs';
 
@@ -8,12 +9,19 @@ export async function loadRunContext(runtime: NativeRuntime, agent: Agent | unde
   const token = runtime.runtimeToken;
   const family = runtime.family;
   const queryMode = family === QUERY_FAMILY || family === FIRST_PURCHASE_FAMILY;
-  if (!token || !agent || !isRegisteredSession(agent.id) || !requestId) {
+  const acp = acpCallbackEnabled();
+  // In the ACP child the kernel session identity is the ACP session id; the
+  // journal request id does not exist there. The binding resolver derives the
+  // registered session/request pair from this id.
+  const expectedRequestId = acp ? agent?.id : requestId;
+  if (!token || !agent || (!acp && !isRegisteredSession(agent.id)) || !expectedRequestId) {
     throw new Error(queryMode ? 'query context has no bound native request' : 'B0 context has no bound native request');
   }
-  const response = await fetch(kernelUrl(runtime, 'kernel.run-context'), {
+  const response = await fetch(acp ? acpContextUrl(runtime.kernelOrigin) : kernelUrl(runtime, 'kernel.run-context'), {
     method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
-    body: JSON.stringify({ session_id: agent.id, request_id: requestId, unit_id: unitId, package_digest: packageDigest, resource }),
+    body: JSON.stringify(acp
+      ? { acp_session_id: agent.id, unit_id: unitId, package_digest: packageDigest, resource }
+      : { session_id: agent.id, request_id: requestId, unit_id: unitId, package_digest: packageDigest, resource }),
     signal: AbortSignal.any([signal, AbortSignal.timeout(NATIVE_BOUNDS.contextTimeoutMs)]), redirect: 'error',
   });
   if (!response.ok) { await response.body?.cancel(); throw new Error(queryMode ? 'query kernel refused current context or budget' : 'B0 kernel refused current context or budget'); }
@@ -36,7 +44,7 @@ export async function loadRunContext(runtime: NativeRuntime, agent: Agent | unde
     : family === QUERY_FAMILY ? 'analytics-channel-followup-runtime-context/v1' : 'analytics-b0-runtime-context/v1';
   const approval = queryMode ? 'NOT_AVAILABLE_IN_QUERY_RUN' : 'NOT_AVAILABLE_IN_B0';
   if (context.schema_version !== schema || context.session_id !== agent.id
-    || context.request_id !== requestId || context.versions?.method_package_digest !== packageDigest
+    || context.request_id !== expectedRequestId || context.versions?.method_package_digest !== packageDigest
     || !(context.run_status === 'RUNNING' || (family === FIRST_PURCHASE_FAMILY
       && resource === null && context.run_status === 'SUCCEEDED')) || context.contains_real_data !== false
     || context.approval_state !== approval || context.memory_authority !== 'NONE') {

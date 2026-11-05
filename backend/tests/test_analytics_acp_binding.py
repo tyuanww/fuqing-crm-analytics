@@ -83,7 +83,7 @@ def test_binding_requires_a_live_attempt_and_valid_correlation(tmp_path):
         store.bind_acp_attempt(intent.run_id, intent.attempt_id, SESSION, "acp-session", "1", True)
 
 
-def test_kernel_restart_fences_unsettled_bindings_as_lost_and_keeps_the_slot(tmp_path):
+def test_kernel_restart_fences_unsettled_bindings_as_lost_and_releases_the_slot(tmp_path):
     store, _run = bound_run(tmp_path)
     intent = store.claim_next(lambda _owner: actor())
     assert bind(store, intent) is True
@@ -92,12 +92,23 @@ def test_kernel_restart_fences_unsettled_bindings_as_lost_and_keeps_the_slot(tmp
     # sees; its recover() must fence the unsettled binding, not forget it.
     fresh = make_store(tmp_path / "state")
     recovered = fresh.recover()
-    assert [row.attempt_id for row in recovered] == [intent.attempt_id]
+    # An ACP-bound attempt cannot settle in the new process, so it is fenced
+    # rather than returned as a bridge intent to reconcile.
+    assert recovered == []
     binding = fresh.acp_binding(intent.run_id, intent.attempt_id)
     assert binding.state == "LOST"
-    # The unique active slot is retained; the old attempt is never claimed again.
-    assert fresh.claim_next(lambda _owner: actor()) is None
-    assert bind(fresh, intent, acp_session="acp-session-2") is False
+    snapshot = fresh.get(actor(), intent.run_id)
+    assert (snapshot.status, snapshot.diagnostics.error_code) == ("FAILED", "EXECUTION_UNKNOWN")
+    assert snapshot.diagnostics.execution_active is False
+    # The unique active slot is released, so the next queued run progresses;
+    # the old attempt is never re-prompted.
+    second = fresh.accept(actor(), snapshot.conversation_id, "native-2",
+                          AnalyticsRunRequest(question="合成渠道"), native_request=native_request("native-2"))
+    claimed = fresh.claim_next(lambda _owner: actor())
+    assert claimed is not None and claimed.run_id == second.run_id
+    assert bind(fresh, claimed, acp_session="acp-session-2") is True
+    with pytest.raises(ValueError):
+        bind(fresh, intent, acp_session="acp-session-3")
 
 
 def test_terminal_observe_settles_the_binding_and_unknown_keeps_it_bound(tmp_path):
@@ -130,6 +141,7 @@ def test_a_persisted_binding_blocks_redispatch_even_if_the_run_is_queued(tmp_pat
     snapshot = store.get(actor(), run.run_id)
     assert (snapshot.status, snapshot.diagnostics.error_code) == ("FAILED", "EXECUTION_UNKNOWN")
     assert snapshot.diagnostics.execution_active is False
+    assert store.acp_binding(run.run_id, attempt_id).state == "LOST"
 
 
 def test_the_binding_table_is_additive_on_an_existing_v2_state_file(tmp_path):

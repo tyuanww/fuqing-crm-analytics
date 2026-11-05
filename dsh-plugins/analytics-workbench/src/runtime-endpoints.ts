@@ -10,7 +10,8 @@
  * This module is the only Host module that reads those deployment values, and
  * it must never be imported by the browser bundle.
  */
-import { parseNativeConfig } from './config.mjs';
+import { parseLoopbackOrigin, parseNativeConfig } from './config.mjs';
+import { acpCallbackEnabled } from './acp-callback.mjs';
 import {
   NATIVE_BASE_URL_SOURCES, NATIVE_BOUNDS, kernelSurface, bridgeSurface,
   type NativeFamily,
@@ -22,7 +23,7 @@ export { NATIVE_BASE_URL_SOURCES, NATIVE_BOUNDS };
 /** Transitional isolated port blocks. `Config.baseUrl` replaces them per deployment. */
 export const LEGACY_PORT_BASES = Object.freeze([4315, 4325, 4335]);
 
-export type NativeOriginSource = 'config' | 'legacy-env' | 'legacy-default' | 'legacy-derived';
+export type NativeOriginSource = 'config' | 'acp-env' | 'legacy-env' | 'legacy-default' | 'legacy-derived';
 
 export interface NativeRuntime {
   family: NativeFamily;
@@ -47,11 +48,17 @@ function portOf(origin: string): number {
 /** Resolve both origins and both capabilities. Config wins over the legacy environment. */
 export function resolveNativeRuntime(config: unknown = {}, family: NativeFamily = runtimeFamily()): NativeRuntime {
   const parsed = parseNativeConfig(config);
+  const acp = acpCallbackEnabled();
   let kernelOrigin: string;
   let kernelSource: NativeOriginSource;
   if (parsed.baseUrl !== undefined) {
     kernelOrigin = parsed.baseUrl;
     kernelSource = 'config';
+  } else if (acp) {
+    // The kernel appends this scoped origin when it spawns the ACP child. It is
+    // never inherited from the kernel's ambient environment.
+    kernelOrigin = parseLoopbackOrigin(process.env.B0_ACP_BASE_URL, 'B0_ACP_BASE_URL');
+    kernelSource = 'acp-env';
   } else {
     kernelOrigin = `http://127.0.0.1:${runtimePortBase()}`;
     kernelSource = process.env.B0_PORT_BASE === undefined ? 'legacy-default' : 'legacy-env';
@@ -61,6 +68,11 @@ export function resolveNativeRuntime(config: unknown = {}, family: NativeFamily 
   if (parsed.bridgeUrl !== undefined) {
     bridgeOrigin = parsed.bridgeUrl;
     bridgeSource = 'config';
+  } else if (acp) {
+    // The tools-only ACP child never calls the Host bridge. Keep the field
+    // well-formed without deriving a port the deployment does not own.
+    bridgeOrigin = kernelOrigin;
+    bridgeSource = 'acp-env';
   } else {
     bridgeOrigin = `http://127.0.0.1:${portOf(kernelOrigin) + NATIVE_BASE_URL_SOURCES.bridge.legacyPortOffset}`;
     bridgeSource = 'legacy-derived';
@@ -71,7 +83,8 @@ export function resolveNativeRuntime(config: unknown = {}, family: NativeFamily 
     bridgeOrigin,
     kernelSource,
     bridgeSource,
-    runtimeToken: parsed.runtimeToken ?? (process.env.B0_RUNTIME_TOKEN || undefined),
+    runtimeToken: parsed.runtimeToken
+      ?? (acp ? process.env.B0_ACP_RUNTIME_TOKEN || undefined : process.env.B0_RUNTIME_TOKEN || undefined),
     gatewayToken: parsed.gatewayToken ?? (process.env.B0_GATEWAY_TOKEN || undefined),
   };
 }

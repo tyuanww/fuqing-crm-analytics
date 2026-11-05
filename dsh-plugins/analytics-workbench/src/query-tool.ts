@@ -1,4 +1,5 @@
 import { NATIVE_BOUNDS, kernelUrl, resolveNativeRuntime } from './runtime-endpoints.ts';
+import { acpCallbackEnabled, acpCallbackPayload, acpCallbackUrl } from './acp-callback.mjs';
 import { toolSurface } from './native-tools.mjs';
 import type { Context } from '@deepseek-ai/cordis';
 import { defineTool } from '@deepseek-ai/dsh-tools';
@@ -140,14 +141,26 @@ export function apply(ctx: Context, config: unknown = {}): void {
       exec.signal.throwIfAborted();
       const token = runtime.runtimeToken;
       const agent = exec.agent;
-      if (!token || !agent || !isRegisteredSession(agent.id)) throw new Error('query tool has no bound execution context');
+      if (!token || !agent) throw new Error('query tool has no bound execution context');
       const request = decodeQueryRequest(args);
       if (!request) throw new Error('query tool rejected invalid parameters');
-      const requestId = requestForToolIn(await nativeJournal(ctx).ready(agent.session), exec.callId);
-      if (!requestId) throw new Error('query tool has no journal-correlated native request');
-      const response = await fetch(kernelUrl(runtime, surface.id), {
+      let url: string;
+      let body: Record<string, unknown>;
+      if (acpCallbackEnabled()) {
+        // ACP C2: binding-correlated by the child's ACP session id; the kernel
+        // derives the registered session/request pair itself.
+        url = acpCallbackUrl(runtime.kernelOrigin);
+        body = acpCallbackPayload(agent, exec.callId, { request });
+      } else {
+        if (!isRegisteredSession(agent.id)) throw new Error('query tool has no bound execution context');
+        const requestId = requestForToolIn(await nativeJournal(ctx).ready(agent.session), exec.callId);
+        if (!requestId) throw new Error('query tool has no journal-correlated native request');
+        url = kernelUrl(runtime, surface.id);
+        body = { session_id: agent.id, request_id: requestId, call_id: exec.callId, request };
+      }
+      const response = await fetch(url, {
         method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
-        body: JSON.stringify({ session_id: agent.id, request_id: requestId, call_id: exec.callId, request }),
+        body: JSON.stringify(body),
         signal: AbortSignal.any([exec.signal, AbortSignal.timeout(NATIVE_BOUNDS.toolTimeoutMs)]), redirect: 'error',
       });
       if (!response.ok) { await response.body?.cancel(); throw new Error('query run kernel refused tool execution'); }

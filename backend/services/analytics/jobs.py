@@ -1349,7 +1349,9 @@ class RunStore:
                     # A persisted ACP binding proves this attempt already left
                     # the kernel. Never re-prompt it; fence it without a slot so
                     # the evidence stays inspectable and no second side effect
-                    # can start.
+                    # can start. The binding itself is history: mark it LOST so
+                    # no state cell keeps claiming a live turn.
+                    self._cas_acp_binding(con, row["run_id"], row["attempt_id"], "LOST", self.clock())
                     row = self._update(con, row, status="FAILED", error_code="EXECUTION_UNKNOWN")
                     con.execute("UPDATE dispatch_intents SET state='EXITED' WHERE run_id=?", (row["run_id"],))
                     self._emit(con, row, "run.failed")
@@ -1674,14 +1676,14 @@ class RunStore:
         """Record uncertainty, retain reservations and return original identities.
 
         No PID probing, process killing, new attempt, new request or transport.
-        The adapter must independently reconcile each returned intent.
+        The adapter must independently reconcile each returned intent. An
+        ACP-bound attempt is the exception: the child died with this kernel
+        process, so its prompt can never settle again. It is fenced terminally
+        (FAILED/EXECUTION_UNKNOWN, binding LOST) and its unique active slot is
+        released; otherwise one lost turn would stop every later run.
         """
         pending = []
         with self._transaction() as con:
-            # A kernel restart is a new process with no live ACP child. Every
-            # unsettled binding is fenced as LOST; it can never be resumed or
-            # prompted again as the same attempt (design §3 invariant 2).
-            con.execute("UPDATE acp_bindings SET state='LOST', updated_ms=? WHERE state='BOUND'", (self.clock(),))
             rows = con.execute("SELECT * FROM runs WHERE active_slot=1").fetchall()
             for row in rows:
                 if self.is_query:
@@ -1691,6 +1693,21 @@ class RunStore:
                 elif self._request_schema(row) == QUERY_RUN_SCHEMA:
                     raise AnalyticsError(409, "FAMILY_MISMATCH", "任务合同与当前实例不一致。")
                 dispatch = con.execute("SELECT * FROM dispatch_intents WHERE run_id=?", (row["run_id"],)).fetchone()
+                acp_binding = con.execute(
+                    "SELECT state FROM acp_bindings WHERE run_id=? AND attempt_id=?",
+                    (row["run_id"], row["attempt_id"])).fetchone()
+                if acp_binding is not None:
+                    # A new kernel process owns no child, so an ACP-bound
+                    # attempt cannot settle. CAS BOUND -> LOST (a SETTLED row
+                    # keeps its true history) and fence terminally with the
+                    # slot released. Never CANCELLED/SUCCEEDED without a
+                    # settlement, and never a silently re-prompted attempt.
+                    self._cas_acp_binding(con, row["run_id"], row["attempt_id"], "LOST", self.clock())
+                    row = self._update(con, row, status="FAILED", phase="FINALIZING",
+                                       active_slot=None, error_code="EXECUTION_UNKNOWN")
+                    con.execute("UPDATE dispatch_intents SET state='EXITED' WHERE run_id=?", (row["run_id"],))
+                    self._emit(con, row, "run.failed")
+                    continue
                 target = "CANCELLING" if row["cancel_reason"] else "UNKNOWN"
                 if row["status"] != target or dispatch["state"] != "UNKNOWN":
                     row = self._update(con, row, status=target, error_code="EXECUTION_UNKNOWN")
@@ -1775,6 +1792,65 @@ class RunStore:
             if row["state"] != "BOUND":
                 return False
             return self._cas_acp_binding(con, run_id, attempt_id, state, self.clock())
+
+    def acp_correlation(self, acp_session_id: str) -> tuple[str, str]:
+        """Resolve one live ACP session to the kernel dispatch it is bound to.
+
+        The child never sees the kernel's registered session id or request id.
+        ``acp_bindings`` is the C2 join: exactly one BOUND row for the ACP
+        session, its run still RUNNING with the unique active slot, and its
+        dispatch intent supplies the kernel ``session_id``/``request_id``. Any
+        other shape fails closed as an unbound native request.
+        """
+        self._binding_text(acp_session_id, "acp_session_id")
+        with self._connection(readonly=True) as con:
+            rows = con.execute("""SELECT b.run_id, b.attempt_id, b.session_id AS binding_session_id,
+                    d.session_id AS dispatch_session_id, d.request_id,
+                    r.status, r.active_slot, r.cancel_reason, r.deadline_ms
+                FROM acp_bindings b
+                JOIN runs r ON r.run_id=b.run_id AND r.attempt_id=b.attempt_id
+                JOIN dispatch_intents d ON d.run_id=r.run_id
+                WHERE b.acp_session_id=? AND b.state='BOUND'""", (acp_session_id,)).fetchall()
+        if len(rows) != 1:
+            raise AnalyticsError(409, "UNBOUND_NATIVE_REQUEST", "当前原生请求没有已登记的任务绑定。")
+        row = rows[0]
+        if (row["binding_session_id"] != row["dispatch_session_id"]
+                or row["active_slot"] is None
+                or row["status"] != "RUNNING"
+                or row["cancel_reason"] is not None
+                or row["deadline_ms"] <= self.clock()):
+            raise AnalyticsError(409, "UNBOUND_NATIVE_REQUEST", "当前原生请求没有已登记的任务绑定。")
+        return row["dispatch_session_id"], row["request_id"]
+
+    def fence_acp_attempt(self, run_id: str, attempt_id: str,
+                          *, error_code: str = "EXECUTION_UNKNOWN") -> bool:
+        """Fence a settled-lost or settlement-unproductive ACP attempt terminally.
+
+        Only a binding already CASed to SETTLED/LOST can reach here: a BOUND row
+        still has a live prompt and must not be fenced. Releasing the unique
+        active slot is the point; CANCELLED/SUCCEEDED are never written without
+        their own settlement evidence.
+        """
+        if error_code not in SAFE_ERRORS:
+            raise ValueError("unsupported ACP fence error")
+        self._binding_text(run_id, "run_id")
+        self._binding_text(attempt_id, "attempt_id")
+        with self._transaction() as con:
+            row = con.execute("SELECT * FROM runs WHERE run_id=? AND attempt_id=?",
+                              (run_id, attempt_id)).fetchone()
+            if row is None:
+                raise _conflict()
+            if row["status"] in TERMINAL or row["active_slot"] is None:
+                return False
+            binding = con.execute("SELECT state FROM acp_bindings WHERE run_id=? AND attempt_id=?",
+                                  (run_id, attempt_id)).fetchone()
+            if binding is None or binding["state"] == "BOUND":
+                return False
+            row = self._update(con, row, status="FAILED", phase="FINALIZING",
+                               active_slot=None, error_code=error_code)
+            con.execute("UPDATE dispatch_intents SET state='EXITED' WHERE run_id=?", (run_id,))
+            self._emit(con, row, "run.failed")
+        return True
 
     def enforce_deadlines(self) -> list[str]:
         """Request stop for active timeouts, never release an unconfirmed slot."""
