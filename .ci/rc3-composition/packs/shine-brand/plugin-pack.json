@@ -1,0 +1,71 @@
+{
+  "schema_version": "dsh-plugin-pack/v1",
+  "package_name": "@shine-mage/dsh-shine-brand",
+  "package_version": "0.0.0-b0",
+  "dsh_pin": "0.2.1-rc.5",
+  "source_sha": "6aa335d29d59c21034b41103ed7858b5b912aca7",
+  "source_dirty": false,
+  "tarball": {
+    "name": "shine-mage-dsh-shine-brand-0.0.0-b0.tgz",
+    "bytes": 2147,
+    "sha256": "47a6450505b7b9148de735481483d66a4278e59696549bdc505465a6a5fad8a8"
+  },
+  "entries": [
+    "cordis.patch.yml",
+    "lib/client.js",
+    "lib/index.js",
+    "package.json"
+  ],
+  "activation": "NOT_RUN",
+  "state_path": "NOT_APPLICABLE_PLUGIN_PACK_ONLY",
+  "generated_bytes_provenance": {
+    "schema_version": "dsh-generated-bytes/v1",
+    "status": "PASS",
+    "source": {
+      "git_sha": "6aa335d29d59c21034b41103ed7858b5b912aca7",
+      "tree_sha256": "81ba49ffc596f95e1a5027ba04f89ad1ebc529ccd0fa246b3fb40c3def568eb8",
+      "entries": 13,
+      "bytes": 15786,
+      "sha256": "81ba49ffc596f95e1a5027ba04f89ad1ebc529ccd0fa246b3fb40c3def568eb8"
+    },
+    "generated_tree": {
+      "sha256": "ed077aec3357f5f0a3b84f1fda836e939702a772de0d1ffded909a846ab5bc27",
+      "entries": 3,
+      "bytes": 2576
+    },
+    "generated_files": [
+      {
+        "path": "lib/client.js",
+        "type": "file",
+        "mode": 420,
+        "bytes": 2457,
+        "sha256": "e388265fb4a991126ac523794169958e099f2ea3b43820c212ea1b72c46712bb"
+      },
+      {
+        "path": "lib/index.js",
+        "type": "file",
+        "mode": 420,
+        "bytes": 119,
+        "sha256": "8b1f89bd6318f9a27bb0e34ae68fa3626496a7b02dedabf6bdfd2f0c2dab70f0"
+      }
+    ],
+    "builder": {
+      "status": "PASS",
+      "clean": true,
+      "isolated": true,
+      "node": "v24.19.0",
+      "pnpm": "11.28.2",
+      "platform": "linux",
+      "arch": "x64",
+      "command": "node npm-author/build.mjs",
+      "network_mode": "offline"
+    },
+    "builder_receipt_schema_version": "dsh-plugin-build/v1",
+    "builder_receipt_sha256": "4529371e3df50536bd2c660f45d9cb1b093c5aa135b90c6a8e1dc2820a9a084c",
+    "tarball": {
+      "name": "shine-mage-dsh-shine-brand-0.0.0-b0.tgz",
+      "bytes": 2147,
+      "sha256": "47a6450505b7b9148de735481483d66a4278e59696549bdc505465a6a5fad8a8"
+    }
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "schema_version": "dsh-plugin-pack/v1",
+  "package_name": "@shine-mage/dsh-shine-board",
+  "package_version": "0.0.0-b0",
+  "dsh_pin": "0.2.1-rc.5",
+  "source_dsh_pin": "0.2.1-rc.5",
+  "source_sha": "97885ddfdfca8efa779c06b00e9ee61d0d05dbf9",
+  "source_dirty": false,
+  "tarball": {
+    "name": "shine-mage-dsh-shine-board-0.0.0-b0.tgz",
+    "bytes": 1076,
+    "sha256": "a6133269183215f7bb32f40f81e7e42f65e2b0f31c9536bef7f06673215ca38c"
+  },
+  "generated_bytes_provenance": {
+    "schema_version": "dsh-generated-bytes/v1",
+    "status": "PASS",
+    "source": {
+      "git_sha": "97885ddfdfca8efa779c06b00e9ee61d0d05dbf9",
+      "tree_sha256": "2fe580df4a6a200a9f1017fcd4556f443b0bb762027fd29c709b5e87cd94889a",
+      "entries": 8,
+      "bytes": 6633,
+      "sha256": "2fe580df4a6a200a9f1017fcd4556f443b0bb762027fd29c709b5e87cd94889a"
+    },
+    "generated_tree": {
+      "sha256": "fb18cfda27ec46f3cb4779c37a7de11cc4fb73ed3913f8c49913e4df2372b517",
+      "entries": 3,
+      "bytes": 838
+    },
+    "generated_files": [
+      {
+        "path": "lib/client.js",
+        "type": "file",
+        "mode": 420,
+        "bytes": 719,
+        "sha256": "983851980fab7951da805ebb77106af2b38ffc3045330bb18799bc0283946323"
+      },
+      {
+        "path": "lib/index.js",
+        "type": "file",
+        "mode": 420,
+        "bytes": 119,
+        "sha256": "b5706ed0b58c023d6f207ce92d1cf3ad157c599b75a65d6c45380cbd193559ae"
+      }
+    ],
+    "builder": {
+      "status": "PASS",
+      "clean": true,
+      "isolated": true,
+      "node": "v24.19.0",
+      "pnpm": "11.28.2",
+      "platform": "linux",
+      "arch": "x64",
+      "command": "plugin/build.mjs",
+      "network_mode": "offline"
+    },
+    "builder_receipt_schema_version": "dsh-plugin-build/v1",
+    "builder_receipt_sha256": "20f7020c1b9f0de1351f11de67dc7ef092ee3206611e2c58e9962f5e8e4381a0",
+    "tarball": {
+      "name": "shine-mage-dsh-shine-board-0.0.0-b0.tgz",
+      "bytes": 1076,
+      "sha256": "a6133269183215f7bb32f40f81e7e42f65e2b0f31c9536bef7f06673215ca38c"
+    }
+  },
+  "entries": [
+    "cordis.patch.yml",
+    "lib/client.js",
+    "lib/index.js",
+    "package.json"
+  ],
+  "activation": "NOT_RUN",
+  "state_path": "NOT_APPLICABLE_PLUGIN_PACK_ONLY"
+}

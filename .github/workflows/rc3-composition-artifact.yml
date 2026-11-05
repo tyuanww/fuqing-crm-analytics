@@ -1,0 +1,42 @@
+name: sealed rc3 composition artifact
+
+on:
+  push:
+    branches:
+      - codex/rc3-composition-artifact-20261024
+
+permissions:
+  contents: read
+
+jobs:
+  upload:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Verify the sealed plugin and domain inventory
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(find .ci/rc3-composition -type f | wc -l | tr -d ' ')" = 20
+          test "$(find .ci/rc3-composition -type l | wc -l | tr -d ' ')" = 0
+          sha256sum --check .ci/rc3-composition.sha256
+          jq -r '.plugins[] | [.directory, .manifest_sha256] | @tsv' config/shinemage-composition-packs.lock.json |
+            while IFS=$'\t' read -r directory expected; do
+              actual="$(sha256sum ".ci/rc3-composition/packs/${directory}/plugin-pack.json" | cut -d' ' -f1)"
+              test "$actual" = "$expected"
+            done
+          jq -r '.domains[] | [.manifest, .manifest_sha256] | @tsv' config/shinemage-composition-pack-manifest.v1.json |
+            while IFS=$'\t' read -r manifest expected; do
+              actual="$(sha256sum ".ci/rc3-composition/${manifest}" | cut -d' ' -f1)"
+              test "$actual" = "$expected"
+            done
+      - name: Retain the exact sealed composition bytes
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: shinemage-sealed-composition-rc3-${{ github.sha }}
+          path: .ci/rc3-composition/
+          if-no-files-found: error
+          retention-days: 90
