@@ -28,6 +28,7 @@ from backend.services.analytics.jobs import (
 from backend.services.analytics.runtime import RunDispatcher
 from backend.services.analytics.transport import HostTransport, RoutedTransport
 from backend.tests.analytics_run_support import actor, make_store, sqlite_connection
+from backend.tests.cutover_evidence import evidence_config, write_acceptance_evidence
 
 SESSION = "native-session"
 
@@ -286,7 +287,8 @@ def test_canary_without_acp_wiring_degrades_to_a_bridge_only_canary(tmp_path):
 def test_canary_with_acp_wiring_selects_acp_and_exposes_its_callback_token(tmp_path):
     config = {"transport": "canary:100", "runtime_token": "x" * 32,
               "bridge_url": "http://127.0.0.1:5001", "acp_cwd": str(tmp_path),
-              "state_dir": str(tmp_path / "state"), "family": "b0"}
+              "state_dir": str(tmp_path / "state"), "family": "b0",
+              **evidence_config(write_acceptance_evidence(tmp_path / "evidence"))}
     host = build_host_transport(config)
     try:
         assert isinstance(host, RoutedTransport) and host.canary_available is True

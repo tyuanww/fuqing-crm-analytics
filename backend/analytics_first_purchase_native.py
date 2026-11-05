@@ -32,7 +32,7 @@ from backend.services.analytics.first_purchase.cockpit import FirstPurchaseCockp
 from backend.services.analytics.first_purchase.native_identity import NativeSessionIdentityResolver, QUERY_CAPABILITIES
 from backend.services.analytics.first_purchase.runtime import FirstPurchaseRuntime
 from backend.services.analytics.first_purchase.saved import FirstPurchaseSavedAnalysisStore
-from backend.services.analytics.jobs import RunStore, validate_key
+from backend.services.analytics.jobs import TRANSPORT_BRIDGE, RunStore, TransportPolicy, validate_key
 from backend.services.analytics.resource_profile import B0ResourceProfile, B0_SMALL_FIXTURE_PROFILE
 from backend.services.analytics.runtime import HostBridge, RunDispatcher, execute_native_first_purchase
 from backend.services.analytics.worker import WorkerManager
@@ -114,8 +114,20 @@ def _attach_first_purchase_assets(app, config, run_store, registry) -> None:
 
 def create_first_purchase_native_app(config, *, bridge=None, source_identities=None,
                                       transport_policy=None):
-    runtime_token, gateway_token = config["runtime_token"], config["gateway_token"]
-    if len(runtime_token) < 32 or len(gateway_token) < 32 or runtime_token == gateway_token:
+    policy = transport_policy or TransportPolicy.from_config(config)
+    bridge_callbacks = TRANSPORT_BRIDGE in policy.transports_for("first_purchase")
+    identity_mode = config.get("identity_mode", "synthetic")
+    if identity_mode not in {"synthetic", "crm-session"}:
+        raise ValueError("explicit supported first-purchase identity mode required")
+    bridge_identity = identity_mode == "crm-session"
+    gateway_token = config["gateway_token"]
+    runtime_token = config.get("runtime_token")
+    if len(gateway_token) < 32 or (
+            (bridge_callbacks or bridge_identity) and (
+                not isinstance(runtime_token, str) or len(runtime_token) < 32
+                or runtime_token == gateway_token
+            )
+    ):
         raise ValueError("separate explicit local capabilities required")
     session_id = config["session_id"]
     snapshot = config.get("snapshot")
@@ -125,10 +137,12 @@ def create_first_purchase_native_app(config, *, bridge=None, source_identities=N
     if not isinstance(method_digest, str) or len(method_digest) != 64:
         raise ValueError("explicit method package digest required")
     state_dir = Path(config["state_dir"])
-    host_bridge = bridge if bridge is not None else HostBridge(bridge_origin(config), runtime_token)
-    identity_mode = config.get("identity_mode", "synthetic")
-    if identity_mode not in {"synthetic", "crm-session"}:
-        raise ValueError("explicit supported first-purchase identity mode required")
+    host_bridge = bridge if bridge is not None else (
+        HostBridge(bridge_origin(config), runtime_token)
+        if bridge_callbacks or bridge_identity else None
+    )
+    if host_bridge is None:
+        raise ValueError("first-purchase runtime requires a transport")
     if identity_mode == "crm-session":
         if config.get("asset_capabilities") is not None:
             raise ValueError("CRM mode uses the separate public save service, never legacy assets")
@@ -151,7 +165,7 @@ def create_first_purchase_native_app(config, *, bridge=None, source_identities=N
 
     fixture = create_first_purchase_fixture(snapshot)
     store = RunStore(state_dir, B0ResourceProfile(**B0_SMALL_FIXTURE_PROFILE), family="first_purchase",
-                     transport_policy=transport_policy)
+                     transport_policy=policy)
     def conversation(principal):
         return store.create_conversation(
             principal, "native-first-purchase", FirstPurchaseConversationRequest(),
@@ -179,30 +193,31 @@ def create_first_purchase_native_app(config, *, bridge=None, source_identities=N
     def gateway_actor(request: Request):
         return registry.resolve(_single_header(request, "authorization"))
 
-    def runtime_identity(request: Request, requested: str) -> None:
-        credential = _single_header(request, "authorization")
-        if not credential or not secrets.compare_digest(credential, "Bearer " + runtime_token):
-            raise AnalyticsError(401, "UNAUTHENTICATED", "需要运行时能力。")
-        if requested != session_id:
-            raise AnalyticsError(404, "NOT_FOUND", "原生会话不存在或不可见。")
+    if bridge_callbacks:
+        def runtime_identity(request: Request, requested: str) -> None:
+            credential = _single_header(request, "authorization")
+            if not credential or not secrets.compare_digest(credential, "Bearer " + runtime_token):
+                raise AnalyticsError(401, "UNAUTHENTICATED", "需要运行时能力。")
+            if requested != session_id:
+                raise AnalyticsError(404, "NOT_FOUND", "原生会话不存在或不可见。")
 
-    @app.post("/internal/native/run-context", include_in_schema=False)
-    def run_context(payload: FirstPurchaseNativeContextRequest, request: Request):
-        runtime_identity(request, payload.session_id)
-        if payload.package_digest != method_digest:
-            raise AnalyticsError(409, "METHOD_VERSION_MISMATCH", "方法包版本未绑定或发生变化。")
-        matches = store.runtime_work(session_id=payload.session_id, request_id=payload.request_id)
-        if len(matches) != 1:
-            raise AnalyticsError(409, "UNBOUND_NATIVE_REQUEST", "当前原生请求没有已登记的任务绑定。")
-        work = matches[0]
-        principal = resolve_actor(work["owner"])
-        if principal is None:
-            raise AnalyticsError(403, "FORBIDDEN", "当前任务身份已失效。")
-        state = store.rebuild_context(
-            principal, work["intent"].run_id, work["intent"].attempt_id,
-            package_digest=method_digest, unit_id=payload.unit_id, resource=payload.resource,
-        )
-        return {**state, "session_id": payload.session_id, "request_id": payload.request_id}
+        @app.post("/internal/native/run-context", include_in_schema=False)
+        def run_context(payload: FirstPurchaseNativeContextRequest, request: Request):
+            runtime_identity(request, payload.session_id)
+            if payload.package_digest != method_digest:
+                raise AnalyticsError(409, "METHOD_VERSION_MISMATCH", "方法包版本未绑定或发生变化。")
+            matches = store.runtime_work(session_id=payload.session_id, request_id=payload.request_id)
+            if len(matches) != 1:
+                raise AnalyticsError(409, "UNBOUND_NATIVE_REQUEST", "当前原生请求没有已登记的任务绑定。")
+            work = matches[0]
+            principal = resolve_actor(work["owner"])
+            if principal is None:
+                raise AnalyticsError(403, "FORBIDDEN", "当前任务身份已失效。")
+            state = store.rebuild_context(
+                principal, work["intent"].run_id, work["intent"].attempt_id,
+                package_digest=method_digest, unit_id=payload.unit_id, resource=payload.resource,
+            )
+            return {**state, "session_id": payload.session_id, "request_id": payload.request_id}
 
     @app.get("/internal/native/context", include_in_schema=False)
     def context(request: Request):
@@ -228,18 +243,19 @@ def create_first_purchase_native_app(config, *, bridge=None, source_identities=N
             method_package_digest=method_digest, fixture_descriptor=descriptor,
         )
 
-    @app.post("/internal/native/first-purchase", include_in_schema=False)
-    def native_step(payload: FirstPurchaseNativeStep, request: Request):
-        runtime_identity(request, payload.session_id)
-        dumped = payload.model_dump(mode="json")
-        for banned in ("owner", "permission_scope", "result", "facts", "actor_id"):
-            if banned in dumped:
-                raise AnalyticsError(422, "INVALID_REQUEST", "请求与当前查询合同不匹配，请检查版本、字段和取值。")
-        status, receipt = execute_native_first_purchase(
-            store, resolve_actor, payload.session_id, payload.request_id, payload.call_id,
-            payload.request, workers=workers,
-        )
-        return JSONResponse(status_code=status, content=receipt)
+    if bridge_callbacks:
+        @app.post("/internal/native/first-purchase", include_in_schema=False)
+        def native_step(payload: FirstPurchaseNativeStep, request: Request):
+            runtime_identity(request, payload.session_id)
+            dumped = payload.model_dump(mode="json")
+            for banned in ("owner", "permission_scope", "result", "facts", "actor_id"):
+                if banned in dumped:
+                    raise AnalyticsError(422, "INVALID_REQUEST", "请求与当前查询合同不匹配，请检查版本、字段和取值。")
+            status, receipt = execute_native_first_purchase(
+                store, resolve_actor, payload.session_id, payload.request_id, payload.call_id,
+                payload.request, workers=workers,
+            )
+            return JSONResponse(status_code=status, content=receipt)
 
     @app.post("/internal/native/first-purchase/cancel", include_in_schema=False)
     def native_cancel(payload: dict, request: Request):

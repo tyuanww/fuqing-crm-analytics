@@ -17,7 +17,7 @@
  * verbatim.
  */
 
-export const NATIVE_TOOLS_SCHEMA = 'analytics-native-tools/v1';
+export const NATIVE_TOOLS_SCHEMA = 'analytics-native-tools/v2';
 
 export const NATIVE_FAMILIES = Object.freeze(['b0', 'channel_followup', 'first_purchase', 'competition_growth']);
 
@@ -45,6 +45,7 @@ export const NATIVE_BOUNDS = Object.freeze({
 
 const ALL = NATIVE_FAMILIES;
 const KERNEL_ALL = Object.freeze(['b0', 'channel_followup', 'first_purchase']);
+const CUTOVER_ACP = Object.freeze(['b0', 'first_purchase']);
 const B0 = Object.freeze(['b0']);
 const QUERY = Object.freeze(['channel_followup']);
 const FIRST_PURCHASE = Object.freeze(['first_purchase']);
@@ -53,6 +54,7 @@ const NATIVE_SURFACES = [
   {
     id: 'kernel.run-context',
     side: 'kernel',
+    transport: 'bridge',
     families: KERNEL_ALL,
     method: 'POST',
     path: '/internal/native/run-context',
@@ -70,6 +72,7 @@ const NATIVE_SURFACES = [
   {
     id: 'kernel.context',
     side: 'kernel',
+    transport: 'gateway',
     families: KERNEL_ALL,
     method: 'GET',
     path: '/internal/native/context',
@@ -80,6 +83,7 @@ const NATIVE_SURFACES = [
   {
     id: 'kernel.prompt',
     side: 'kernel',
+    transport: 'gateway',
     families: KERNEL_ALL,
     method: 'POST',
     path: '/internal/native/prompt',
@@ -95,8 +99,43 @@ const NATIVE_SURFACES = [
     response: null,
   },
   {
+    id: 'kernel.acp-run-context',
+    side: 'kernel',
+    transport: 'acp',
+    families: CUTOVER_ACP,
+    method: 'POST',
+    path: '/internal/acp/run-context',
+    tool: null,
+    request: {
+      models: {
+        b0: 'AcpContextRequest',
+        first_purchase: 'AcpContextRequest',
+      },
+      fields: ['acp_session_id', 'unit_id', 'package_digest', 'resource'],
+    },
+    response: null,
+  },
+  {
+    id: 'kernel.acp-tool-call',
+    side: 'kernel',
+    transport: 'acp',
+    families: CUTOVER_ACP,
+    method: 'POST',
+    path: '/internal/acp/tool-call',
+    tool: null,
+    request: {
+      models: {
+        b0: 'AcpToolCall',
+        first_purchase: 'AcpToolCall',
+      },
+      fields: ['acp_session_id', 'call_id', 'query', 'request'],
+    },
+    response: null,
+  },
+  {
     id: 'kernel.b0-fixture',
     side: 'kernel',
+    transport: 'bridge',
     families: B0,
     method: 'POST',
     path: '/internal/native/fixture',
@@ -107,6 +146,7 @@ const NATIVE_SURFACES = [
   {
     id: 'kernel.channel-followup',
     side: 'kernel',
+    transport: 'bridge',
     families: QUERY,
     method: 'POST',
     path: '/internal/native/channel-followup',
@@ -120,6 +160,7 @@ const NATIVE_SURFACES = [
   {
     id: 'kernel.first-purchase',
     side: 'kernel',
+    transport: 'bridge',
     families: FIRST_PURCHASE,
     method: 'POST',
     path: '/internal/native/first-purchase',
@@ -133,6 +174,7 @@ const NATIVE_SURFACES = [
   {
     id: 'kernel.first-purchase-cancel',
     side: 'kernel',
+    transport: 'gateway',
     families: FIRST_PURCHASE,
     method: 'POST',
     path: '/internal/native/first-purchase/cancel',
@@ -143,6 +185,7 @@ const NATIVE_SURFACES = [
   {
     id: 'bridge.health',
     side: 'bridge',
+    transport: 'bridge',
     families: ALL,
     method: 'POST',
     path: '/health',
@@ -153,6 +196,7 @@ const NATIVE_SURFACES = [
   {
     id: 'bridge.identity',
     side: 'bridge',
+    transport: 'bridge',
     families: ALL,
     method: 'POST',
     path: '/identity',
@@ -163,6 +207,7 @@ const NATIVE_SURFACES = [
   {
     id: 'bridge.dispatch',
     side: 'bridge',
+    transport: 'bridge',
     families: ALL,
     method: 'POST',
     path: '/dispatch',
@@ -176,6 +221,7 @@ const NATIVE_SURFACES = [
   {
     id: 'bridge.observe',
     side: 'bridge',
+    transport: 'bridge',
     families: ALL,
     method: 'POST',
     path: '/observe',
@@ -189,6 +235,7 @@ const NATIVE_SURFACES = [
   {
     id: 'bridge.cancel',
     side: 'bridge',
+    transport: 'bridge',
     families: ALL,
     method: 'POST',
     path: '/cancel',

@@ -13,7 +13,7 @@ import { kernelUrl, resolveNativeRuntime } from '../src/runtime-endpoints.ts';
 import { TOOL_NAME } from '../src/model.mjs';
 import { QUERY_TOOL_NAME } from '../src/query-model.mjs';
 import { FIRST_PURCHASE_TOOL_NAME } from '../src/first-purchase-query-model.mjs';
-import { checkNativeTools } from '../../../scripts/ci/analytics-native-tools-sync.mjs';
+import { checkNativeTools, validateNativeTools } from '../../../scripts/ci/analytics-native-tools-sync.mjs';
 
 const plugin = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const TOKEN = 'c'.repeat(40);
@@ -23,6 +23,22 @@ test('the deployment projection is byte-identical to the reviewed table', async 
   assert.equal(table.schema_version, NATIVE_TOOLS_SCHEMA);
   const raw = await readFile(join(plugin, '../../config/analytics-native-tools.v1.json'), 'utf8');
   assert.equal(raw, `${JSON.stringify(NATIVE_TOOLS, null, 2)}\n`);
+});
+
+test('transport is mandatory and a v1 table is refused', () => {
+  const table = structuredClone(NATIVE_TOOLS);
+  assert.equal(table.schema_version, 'analytics-native-tools/v2');
+  assert.ok(table.surfaces.every(row => ['gateway', 'bridge', 'acp'].includes(row.transport)));
+  const acp = table.surfaces.filter(row => row.transport === 'acp').map(row => row.id).sort();
+  assert.deepEqual(acp, ['kernel.acp-run-context', 'kernel.acp-tool-call']);
+  for (const row of table.surfaces.filter(row => row.transport === 'acp')) {
+    assert.deepEqual([...row.families].sort(), ['b0', 'first_purchase']);
+  }
+  assert.throws(() => validateNativeTools({ ...table, schema_version: 'analytics-native-tools/v1' }),
+    /NATIVE_TOOLS_SCHEMA_V1/);
+  const missing = structuredClone(table);
+  delete missing.surfaces[0].transport;
+  assert.throws(() => validateNativeTools(missing), /NATIVE_TOOLS_SURFACE_TRANSPORT/);
 });
 
 test('every model-facing tool binds exactly one kernel surface and one family', () => {
