@@ -46,7 +46,7 @@ from backend.services.analytics.acp_transport import (
 from backend.services.analytics.first_purchase.native_identity import NativeSessionIdentityResolver
 from backend.services.analytics.runtime import HostBridge, RunDispatcher
 from backend.services.analytics.transport import HostTransport
-from backend.tests.analytics_run_support import actor, make_store, successful_step
+from backend.tests.analytics_run_support import actor, make_store, profile, successful_step
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 NATIVE_EVIDENCE = REPO_ROOT / "dsh-plugins" / "analytics-workbench" / "src" / "native-evidence.mjs"
@@ -74,12 +74,13 @@ def native_request(key="native-1", text="合成渠道", session=SESSION):
             "content": [{"type": "text", "text": text}], "clientTimeZone": "Asia/Shanghai"}
 
 
-def dispatch_payload(key="native-1", *, attempt="attempt-1", text="合成渠道", with_native=True):
+def dispatch_payload(key="native-1", *, attempt="attempt-1", text="合成渠道", with_native=True,
+                     deadline_ms=0):
     inner = {"question": text}
     if with_native:
         inner["native_request"] = native_request(key, text)
     return {"run_id": "run-1", "attempt_id": attempt, "session_id": SESSION, "request_id": key,
-            "payload": inner, "payload_hash": "h" * 64, "deadline_ms": 0}
+            "payload": inner, "payload_hash": "h" * 64, "deadline_ms": deadline_ms}
 
 
 def identity_payload():
@@ -107,6 +108,8 @@ class FakeAcpServer:
         self.contaminate_stdout = False
         self.contaminate_on_list = False
         self.cancel_delay = 0.05
+        self.close_calls = 0
+        self.close_mode = "error"
         self.prompt_started = threading.Event()
         self._inflight = None
         self._lock = threading.Lock()
@@ -291,6 +294,19 @@ class FakeAcpChild:
             self._respond(message["id"], {"configOptions": []})
         elif method == "session/prompt":
             self._prompt(message, params)
+        elif method == "session/close":
+            self.server.close_calls += 1
+            if self.server.close_mode == "settle":
+                with self.server._lock:
+                    inflight = self.server._inflight
+                    self.server._inflight = None
+                if inflight is not None:
+                    inflight["respond"]("cancelled")
+                self._respond(message["id"], {})
+            elif self.server.close_mode == "hang":
+                return
+            else:
+                self._respond_error(message["id"], -32603, "close failed")
         else:
             self._respond_error(message["id"], -32601, f"method not found: {method}")
 
@@ -649,6 +665,119 @@ def test_a_normal_success_is_not_misclassified_by_a_previous_cancel(tmp_path):
         assert evidence["successful_call_ids"] == ["call-1"]
         assert server.cancels == 1
     finally:
+        receiver.close()
+
+
+# ---------------------------------------------------------------------------
+# Deadline passed with a prompt in flight: bounded close, then restart
+# ---------------------------------------------------------------------------
+
+
+def expired_deadline():
+    return int(time.time() * 1000) - 1000
+
+
+def test_expired_prompt_closes_the_session_and_accepts_a_real_settlement(tmp_path):
+    server = FakeAcpServer()
+    server.prompt_mode = "hang_ignore_cancel"
+    server.close_mode = "settle"
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0,
+                            cancel_grace=0.0, close_timeout=1.0)
+    try:
+        receiver.call("health", {})
+        payload = dispatch_payload(deadline_ms=expired_deadline())
+        receiver.call("dispatch", payload)
+        assert server.prompt_started.wait(5.0)
+        assert receiver.call("cancel", payload)["accepted"] is True
+        evidence = observe_until(receiver, payload, "CANCELLED")
+        # The close caused a real prompt response; CANCELLED is settlement-backed.
+        assert evidence["execution_exited"] is True
+        assert server.close_calls == 1
+    finally:
+        receiver.close()
+
+
+def test_expired_prompt_without_settlement_restarts_the_child_and_stays_unknown(tmp_path):
+    server = FakeAcpServer()
+    server.prompt_mode = "hang_ignore_cancel"
+    server.close_mode = "hang"
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0,
+                            cancel_grace=0.0, close_timeout=0.2)
+    try:
+        receiver.call("health", {})
+        payload = dispatch_payload(deadline_ms=expired_deadline())
+        receiver.call("dispatch", payload)
+        assert server.prompt_started.wait(5.0)
+        assert receiver.call("cancel", payload)["accepted"] is True
+        child = server.child
+        with pytest.raises(AcpTransportError) as error:
+            receiver.call("observe", payload)
+        assert "deadline expired without settlement" in str(error.value)
+        assert server.close_calls == 1
+        assert wait_until(lambda: child.poll() is not None)
+        # The lost settlement is never rewritten as CANCELLED; the attempt
+        # stays unresolved and a later call starts a fresh child.
+        with pytest.raises(AcpTransportError):
+            receiver.call("observe", payload)
+        assert receiver.call("health", {}) == {"ready": True}
+        assert len(server.children) == 2
+    finally:
+        receiver.close()
+
+
+def test_deadline_expiry_does_not_fire_before_a_cancel_request(tmp_path):
+    # A past deadline alone is not a stop request: the kernel owns deadlines
+    # and only an in-flight cancel makes the transport escalate.
+    server = FakeAcpServer()
+    server.prompt_mode = "hang_ignore_cancel"
+    server.close_mode = "settle"
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0,
+                            cancel_grace=0.0, close_timeout=1.0)
+    try:
+        receiver.call("health", {})
+        payload = dispatch_payload(deadline_ms=expired_deadline())
+        receiver.call("dispatch", payload)
+        assert server.prompt_started.wait(5.0)
+        assert receiver.call("observe", payload)["outcome"] == "RUNNING"
+        assert server.close_calls == 0
+    finally:
+        receiver.close()
+
+
+def test_dispatcher_deadline_expiry_keeps_cancelling_and_never_writes_cancelled(tmp_path):
+    server = FakeAcpServer()
+    server.prompt_mode = "hang_ignore_cancel"
+    server.close_mode = "hang"
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0,
+                            cancel_grace=0.0, close_timeout=0.2)
+    store = make_store(tmp_path / "state", resource_profile=profile(run_timeout_ms=500, query_timeout_ms=100))
+    conversation = store.create_conversation(
+        actor(), "native", AnalyticsConversationRequest(), runtime_session_id=SESSION)
+    run = store.accept(actor(), conversation.conversation_id, "native-1",
+                       AnalyticsRunRequest(question="合成渠道"), native_request=native_request())
+    dispatcher = RunDispatcher(store, lambda _: actor(), receiver)
+    dispatcher.start()
+    try:
+        dispatcher.tick()  # claim + dispatch before the 500ms deadline
+        intent = store.runtime_work()[0]["intent"]
+        assert store.acp_binding(intent.run_id, intent.attempt_id).state == "BOUND"
+        time.sleep(0.7)
+        for _ in range(200):
+            dispatcher.tick()
+            snapshot = store.get(actor(), run.run_id)
+            if server.close_calls:
+                break
+            time.sleep(0.01)
+        assert server.close_calls == 1
+        assert wait_until(lambda: server.child.poll() is not None)
+        snapshot = store.get(actor(), run.run_id)
+        # The deadline expired and the settlement is lost: the run must stay
+        # CANCELLING with the slot held, never become CANCELLED or SUCCEEDED.
+        assert snapshot.status == "CANCELLING"
+        assert snapshot.diagnostics.execution_active is True
+        assert store.acp_binding(intent.run_id, intent.attempt_id).state == "BOUND"
+    finally:
+        dispatcher.close()
         receiver.close()
 
 
