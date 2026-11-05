@@ -381,7 +381,13 @@ def _b0_scope(paths):
 
 
 class TestB0ReleaseScope:
-    """#228 moved starlette 1.10.0 in the kernel recipe while b0 was skipped."""
+    """#228 moved starlette 1.10.0 in the kernel recipe while b0 was skipped.
+
+    #215 narrowed the B0 job to its own inputs for speed, but the sealed
+    source-target evidence reads requirements-lock.txt at RUNTIME_HOST_SOURCE.
+    A dependency-lock-only change must now run B0 (and reseal) instead of
+    merging a stale artifact; backend/services code stays outside that scope.
+    """
 
     def test_kernel_service_manifest_requires_b0(self):
         plan = _b0_scope(["services/analytics-first-purchase-kernel/package.json"])
@@ -399,16 +405,31 @@ class TestB0ReleaseScope:
         assert plan["b0"] is True
         assert plan["b0_required"] is True
 
-    def test_backend_service_code_stays_out_of_sealed_b0_scope(self):
-        plan = _b0_scope(["backend/services/analytics/analytics_service.py"])
-        assert plan["b0"] is True
+    @pytest.mark.parametrize("path", [
+        "backend/services/analytics/analytics_service.py",
+        "backend/services/churn.py",
+    ])
+    def test_backend_service_code_stays_out_of_sealed_b0_scope(self, path):
+        # The requirements lock now runs B0, but backend product code still
+        # belongs to the backend axis (b0_required stays false).
+        plan = _b0_scope([path])
         assert plan["b0_required"] is False
+        assert plan["backend"] == "full"
 
-    def test_root_requirements_lock_stays_out_of_sealed_b0_scope(self):
-        # The kernel recipe is derived from the service manifests, not the root lock.
-        plan = _b0_scope(["requirements-lock.txt"])
+    @pytest.mark.parametrize("path", ["requirements.txt", "requirements-lock.txt"])
+    def test_dependency_lock_only_change_runs_b0(self, path):
+        # A requirements-only change must run the sealed build: the seal reads
+        # requirements-lock.txt at its own head (the starlette/#228 incident).
+        plan = _b0_scope([path])
         assert plan["b0"] is True
-        assert plan["b0_required"] is False
+        assert plan["b0_required"] is True
+        assert plan["backend"] == "full"
+
+    def test_dependency_lock_and_backend_service_code_union_to_b0(self):
+        plan = _b0_scope(["requirements-lock.txt", "backend/services/analytics/analytics_service.py"])
+        assert plan["b0"] is True
+        assert plan["b0_required"] is True
+        assert plan["backend"] == "full"
 
 
 def test_dsh_dev_changes_select_b0_pipeline(path_class):
