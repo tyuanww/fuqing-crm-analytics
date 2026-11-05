@@ -39,7 +39,7 @@ P0 到 P4 是同一件事的五个阶段，不是五个独立项目。
 | P2d | 生成物收进独立 contracts 包 | 已完成 | #216 merged `36111a90`，head `107d2324`；CI `41874816482` success；110 files +1800/−687；b0 / test / merge-gate 绿 |
 | P3 | 换私有协议为 rc.5 公开面 | 部分完成：P3-0/P3-1/P3-2/P3-5 已合并；P3-3 的 3a/3b/3c/3d-prep 与 #237 回收/回调修复合入，cutover 待真机验收；P3-4 决策已定，按 C10 执行 | #218 merged `a2b9a546`，head `a823b0d9`，CI `41880532530` success（P3-0 影子门禁 + P3-1 disposer）；#222 merged `8da4b78e`，head `2df54efe`，CI `41895117591` success（P3-2 Config / typed tools + P3-5 TurnEndReason）；#237 merged `e09ff4f`，head `c85a988`（ACP C2 回调 + scoped env + lost-turn 回收 + 关停/profile 准入）；2026-11-05 owner 批准 D4 与 P3-3 五项，P3-4 按 D1–D3 执行；P3-3 切片见 C09 |
 | P3-3 | 外部半换 ACP，`query` 家族留在 bridge | 3a/3b/3c/3d-prep 与 #237 已合并（#230/#232/#229/#234/#237）；cutover 仍待真机验收；作者仓 workbench repack 已随 #235 回填；3e 可选未立项 | #230 merge `72239df2`（transport seam）、#232 merge `0eeb8faa`（ACP stdio transport）、#229 merge `4a926836`（offline shadow compare）、#234 merge `60d7f4e8`（profile generator + `acp_bindings` + cancel-aware settlement + deadline strategy）、#235 merge `d169809`（回填作者 pack、锁链与 sealed artifact）、#237 merge `e09ff4f`（binding-based C2 callback、scoped child env、lost/no-tool reclaim + slot release、dispatcher-owned shutdown、profile health）。真机验收清单见 [acp-cutover-acceptance.md](../operating/acp-cutover-acceptance.md)；默认 transport 仍 `bridge`，剩余构建项见该清单第 9 节 |
-| P3-4 | 品牌与账号收口 | 部分完成：D2 hero/徽章与 D3 设置入口按现状接受，不再列为可完成项；D1 构建期标题只留卡片，未实现 | 2026-11-05 决策见 5.1；C10 收口现状，C15 记录标题构建路径与阻塞 |
+| P3-4 | 品牌与账号收口 | 部分完成：D2 hero/徽章与 D3 设置入口按现状接受，不再列为可完成项；D1 构建期标题代码侧已落地且默认不启用，rollout 待品牌包重建与 reseal | 2026-11-05 决策见 5.1；C10 收口现状，C15 记录已落地的代码路径与剩余 rollout |
 | P4 | 最后拆仓并删除主仓插件源码 | 未开工 | 无分支、无 PR；`deletion_gate=BLOCKED`，原因为 `remote_main_not_verified` 与 `production_only_closure_not_recorded`；硬依赖 P3-3/P3-4 完成、10 作者仓迁移和删除门禁 |
 
 ### 2.1 写作时校正的六处事实
@@ -75,7 +75,7 @@ P2d #216、P0 #211、P3-0/P3-1 #218、P3-2/P3-5 #222 已依次合并，§3.1 的
 
 - 作者 artifact 有效期 14 天，**2026-11-18 到期**（CHANGELOG 与 STATUS 同口径）。到期后 sealed 组合不能只靠旧 artifact 复验，必须重跑作者 CI 或重新密封；主仓 sealed artifact `13348198215` 本身是 2027-02-02 过期，两个日期不要混用。
 - P3-3 曾等 D4（ACP 主线 vs SDK 主线）；P3-4 曾等 D1/D2/D3（标题、hero 徽章、设置入口）。四项已于 2026-11-05 由 owner 决定，见 5.1 与 5.1.1；代码侧没有新增阻塞。
-- 2026-11-05 决策回填：owner 批准 D1–D4 与 P3-3 五项（5.1/5.1.1）。P3-3 拆为 3a–3e 与 starlette rollout，C09 记录每项 owner-facing 下一步；3a/3c/starlette rollout 记为进行中，3b/3d 未开工，3e 可选。P3-4 的 D2/D3 接受现状，D1 的构建期标题见 C15（未实现）。本轮基于 `e6074d7`（#225/#226 dependabot 合并）的 main 复核，未刷新第 2 节的时间快照。
+- 2026-11-05 决策回填：owner 批准 D1–D4 与 P3-3 五项（5.1/5.1.1）。P3-3 拆为 3a–3e 与 starlette rollout，C09 记录每项 owner-facing 下一步；3a/3c/starlette rollout 记为进行中，3b/3d 未开工，3e 可选。P3-4 的 D2/D3 接受现状，D1 的构建期标题代码侧已落地且默认不启用（C15），rollout 待品牌包重建、带配置重建 runtime、reseal 与真机视觉验收。本轮基于 `e6074d7`（#225/#226 dependabot 合并）的 main 复核，未刷新第 2 节的时间快照。
 - 2026-11-05 P3-3 切片回读，#230 merge `72239df2`（3a transport seam）、#232 merge `0eeb8faa`（3b ACP stdio transport）、#229 merge `4a926836`（3c offline shadow compare）、#234 merge `60d7f4e8`（3d-prep profile generator + `acp_bindings` + cancel-aware settlement + deadline strategy）。cutover 待 pinned rc.5 真机验收，清单见 [acp-cutover-acceptance.md](../operating/acp-cutover-acceptance.md)；作者仓 workbench repack 已随 #235 回填，作者 PR #16 仍未合；默认 transport 仍 `bridge`。
 - 2026-11-05 #237 merge `e09ff4f`（head `c85a988`）修掉 P3-3 cutover 的回收与回调阻塞：settled no-tool、丢失结算和重启中的 ACP attempt 统一 CAS binding `LOST`、run `FAILED`/`EXECUTION_UNKNOWN`、释放 active slot；子进程改 scoped env allowlist + per-boot ACP callback token；C2 改 `/internal/acp/tool-call` 由 `acp_bindings` join；dispatcher 关停回收 child；health 先验证 tools-only profile。cutover 仍待 pinned rc.5 真机验收，剩余构建项（`dispatch_intents.transport` 列与 canary、bridge 删除范围、identity 归属、门禁转 blocking、默认翻 acp、作者 PR #16/C0）见验收清单第 9 节。
 - B0 flake 跟进见 C14：`test_native_success_save_cockpit_roundtrip_and_negatives` 在 run `41871881222` / job `126720993582` attempt 1 记 `1 failed, 1048 passed`，同分支后续 head `107d2324` 的 run `41874816482` 通过。**未修**，精确诊断与剩余风险写在该卡片。
@@ -97,7 +97,7 @@ kit 0.1.1 → 10 个作者仓按 rc.5 重建 → 主仓锁链回填 + sealed art
 P3-0/P3-1 (#218) 与 P3-2/P3-5 (#222) 已合并
       |
       v
-P3-3（3a/3b/3c/3d-prep 与 #237 已合并，cutover 待真机验收；3e 可选）/ P3-4（D2/D3 接受现状，D1 见 C15）→ P4 拆仓
+P3-3（3a/3b/3c/3d-prep 与 #237 已合并，cutover 待真机验收；3e 可选）/ P3-4（D2/D3 接受现状，D1 代码侧已落地、rollout 待品牌包与 reseal）→ P4 拆仓
 ```
 
 ### 3.2 四个拒绝点
@@ -118,13 +118,13 @@ P3-3（3a/3b/3c/3d-prep 与 #237 已合并，cutover 待真机验收；3e 可选
 | W5 | 主仓锁链回填与 artifact 密封 | 主仓 `config/` 与 sealing 分支 | 已完成（artifact `13348198215`） | 共享热点，只能单 writer |
 | W6 | 交付层真实演练 T02/T03/T06/T07/T09/E1 | 隔离实例与文档 | 需授权或人工窗口 | 与插件代码无文件冲突 |
 
-结论。W1 到 W5 已随 P0 完成，W6 仍可并行。D1–D4 与 P3-3 五项已由 owner 决定（5.1/5.1.1）；P3-3 按 C09 的 3a–3d 主链推进，3a/3b/3c/3d-prep 与 #237 已合并，cutover 待真机验收，3e 可选；P3-4 只剩 C15 的标题构建选择。P4 在 P3 与 10 作者仓迁移完成后启动。
+结论。W1 到 W5 已随 P0 完成，W6 仍可并行。D1–D4 与 P3-3 五项已由 owner 决定（5.1/5.1.1）；P3-3 按 C09 的 3a–3d 主链推进，3a/3b/3c/3d-prep 与 #237 已合并，cutover 待真机验收，3e 可选；P3-4 只剩 C15 的 rollout（品牌包重建、带配置重建 runtime、reseal、真机视觉验收）。P4 在 P3 与 10 作者仓迁移完成后启动。
 
 ## 4 任务卡
 
 每张卡包含目标、输入、入口、验收、阻塞和授权。授权只写“需要人做什么”，不代表本计划已经授权。
 
-2026-11-05：C01–C08、C11 已完成（merge `36111a90` / `9f6c06db` / `a2b9a546` / `8da4b78e`）；D1–D4 与 P3-3 五项已由 owner 批准（5.1/5.1.1），C09 拆 3a–3e 与 starlette rollout，C10 按 D2/D3 接受现状；C15 是 D1 标题的构建期卡片（暂不实现）；C12 等 P3 完成；C13、C14 为跟进（C14 已按文档接受）。
+2026-11-05：C01–C08、C11 已完成（merge `36111a90` / `9f6c06db` / `a2b9a546` / `8da4b78e`）；D1–D4 与 P3-3 五项已由 owner 批准（5.1/5.1.1），C09 拆 3a–3e 与 starlette rollout，C10 按 D2/D3 接受现状；C15 是 D1 标题的构建期路径，代码侧已落地、默认不启用，rollout 待品牌包与 reseal；C12 等 P3 完成；C13、C14 为跟进（C14 已按文档接受）。
 
 ### C01 P2d #216 收口
 
@@ -365,7 +365,7 @@ dsh --profile sdk
 
 ### C10 P3-4 品牌与账号收口（决策已定）
 
-**目标** 按 2026-11-05 决策收口品牌与账号：D2 保留现有 hero 标题与“预览版”徽章的 DOM 处理，D3 保留现有设置/账号入口实现并承认没有公共 API，D1 的浏览器标题改由构建期 `DSH_CLIENT_TITLE` 承担（实现见 C15，本卡不新增 runtime hook）。
+**目标** 按 2026-11-05 决策收口品牌与账号：D2 保留现有 hero 标题与“预览版”徽章的 DOM 处理，D3 保留现有设置/账号入口实现并承认没有公共 API，D1 的浏览器标题改由构建期 `DSH_CLIENT_TITLE` 承担（代码侧见 C15，默认不启用；本卡不新增 runtime hook）。
 
 **输入** `shine-brand/src/brand-surface.mjs` 的 `document.title`、headline、previewBadge 替换；`analytics-workbench/src/client/account-chrome.tsx` 与 `analytics-workbench/src/client/native-account-settings.mjs` 的 `aria-label` 选择器；rc.5 brand slot / theme token / `sidebar.footer.action` / `settings.section`。
 
@@ -376,12 +376,12 @@ shine-brand 品牌 token 与 mark/name slot 保留
 账号菜单保持当前实现（sidebar.footer.action 自绘 + aria-label 兜底）
 设置页保持当前实现（settings.section 可用，程序化打开无公共 API）
 hero 标题与预览徽章保留现有 DOM 处理，不列为完成项
-标题按 D1 走 C15 的构建期方案；落地前保留 document.title 赋值
+标题按 D1 走 C15 的构建期方案；C15 代码侧已落地但默认不启用，品牌包重建的 rollout 前保留 document.title 赋值
 ```
 
-**验收** D2/D3 在文档中明确为“接受现状”，不再以删除 DOM 选择器作为完成条件；D1 落地前 `document.title` 不被导航抢回，C15 落地后删除该赋值；rc.5 真实 shell 下品牌展示、账号菜单、设置页维持可用。
+**验收** D2/D3 在文档中明确为“接受现状”，不再以删除 DOM 选择器作为完成条件；C15 默认不启用阶段 `document.title` 仍不被导航抢回，rollout 完成后再删除该赋值；rc.5 真实 shell 下品牌展示、账号菜单、设置页维持可用。
 
-**阻塞** D1 的构建期路径（C15）；D2/D3 无阻塞。
+**阻塞** D1 的 rollout（品牌作者包重建、带配置 runtime、sealed artifact）；D2/D3 无阻塞。
 
 **授权** 业务接受品牌与账号能力降级；新增 shell 构建面需单独授权（C15）。
 
@@ -457,21 +457,32 @@ node --test scripts/ci/composition-pack-inputs.test.mjs
 
 **授权** 无产品决策；改生产锁语义前单独评审。
 
-### C15 构建期品牌标题（D1 已决，暂不实现）
+### C15 构建期品牌标题（代码侧已落地，默认不启用）
 
 **目标** 用构建期 `DSH_CLIENT_TITLE` 把浏览器标题固定为业务品牌，替代运行期 `document.title` 赋值；不新增 runtime plugin hook。
 
 **决策** 2026-11-05 owner 接受 build-time `DSH_CLIENT_TITLE`，不采用运行期插件 hook。
 
-**核验（2026-11-05，rc.5 `b830ec95`）** `DSH_CLIENT_TITLE` 是构建期值：`apps/web/vite.config.ts` 的 `clientDocumentTitle()` 把它写进初始 `<title>`，`packages/client/ui-layout/src/client/AppFrame.tsx` 把它作为 `productTitle` 传给 `DocumentTitle`（导航时重写 `document.title`）。官方构建经 `scripts/build.ts` 的 `official` profile 调 `scripts/client-build-environment.ts`，其中 `OFFICIAL_CLIENT_BUILD_ENVIRONMENT` 把 `DSH_CLIENT_TITLE` 固定为 `DeepSeek Harness`，且 `resolveClientBuildEnvironment` 对 `official` 之外的 profile 直接抛错。本仓 `scripts/dsh-b0/pipeline.mjs` 在固定 SHA 的干净 checkout 上跑 `pnpm run build:official`，`verifySource()` 拒绝本地改动。因此在本仓 build env 里加 `DSH_CLIENT_TITLE` 不会生效。
+**核验（2026-11-05，rc.5 `b830ec95`）** `DSH_CLIENT_TITLE` 是构建期值：`apps/web/vite.config.ts` 的 `clientDocumentTitle()` 把它写进初始 `<title>`，`packages/client/ui-layout/src/client/AppFrame.tsx` 把它作为 `productTitle` 传给 `DocumentTitle`（导航时重写 `document.title`）。官方构建经 `scripts/build.ts` 的 `official` profile 调 `scripts/client-build-environment.ts`，其中 `OFFICIAL_CLIENT_BUILD_ENVIRONMENT` 把 `DSH_CLIENT_TITLE` 固定为 `DeepSeek Harness`，且 `resolveClientBuildEnvironment` 对 `official` 之外的 profile 直接抛错。本仓 `scripts/dsh-b0/pipeline.mjs` 在固定 SHA 的干净 checkout 上跑 `pnpm run build:official`，`verifySource()` 拒绝本地改动。因此需要受控的 bundle-time 重写，而不是在 build env 里加变量。
 
-**为什么不实现** 三条可选路径都不是“build define/env 加一个测试”：改上游源码违反硬规则 2；只在 `runtime-bundle` 后处理 `apps/web/dist/index.html` 不够，因为 bundle 内的 `productTitle` 仍会把导航标题抢回 `DeepSeek Harness`，要同时改产物 JS 并同步 `.dsh-build/client-build-environment.json` 与运行时 source-tree/provenance 摘要；改用非 official profile 会改变固定准备与官方 artifact 合同。按本轮边界只留卡片。
+**代码侧（2026-11-05，#253）** `scripts/release/client-runtime-title.mjs` 接入 `scripts/release/runtime-bundle.mjs`，配置面只有 `DSH_CLIENT_TITLE`；未设置或空值时不重写，bundle 字节与 provenance 字段与今天一致。显式设置后：
 
-**owner-facing 下一步** owner 在两条中选一：(a) 在 `runtime-bundle` 增加受控 post-build 标题重写（`index.html` 与 client bundle 的 `productTitle`）并同步 client build record / runtime provenance，单独 PR、单独授权；(b) 等上游提供支持自定义标题的 official profile 或新 env 合同，本仓只升级 pin。选定前保留现有 `document.title` 运行时赋值，避免导航后被官方 `DocumentTitle` 抢回。
+- 精确校验 `apps/web/dist/index.html` 的 `<title>DeepSeek Harness</title>` 与 `packages/client/ui-layout/lib/client.js` 的 `const productTitle = "DeepSeek Harness";` 各出现一次，其余 client artifact 的 `DeepSeek Harness` 字节替换为新标题。任一 literal 缺失、重复或变形都会在写盘前以 `CLIENT_TITLE_*` 失败关闭，不会静默发出默认标题。
+- 重写发生在 `pnpm deploy` 之前，deployed 的 web/client 副本都由已重写 bytes 派生；`.dsh-build/client-build-environment.json` 同步 `DSH_CLIENT_TITLE` 并按新产物重算 `artifacts` 摘要。
+- deployed 根安装重写后的 build record（`pnpm deploy` 不携带它），并复核 `@deepseek-ai/dsh-web-frontend/dist/index.html` 与 `@deepseek-ai/dsh-client-ui-layout/lib/client.js`。
+- runtime provenance 的 `source_tree` 改为 post-rewrite/shipped tree；`client_title_build` 同时命名 `prepared_source_tree` 与 `shipped_source_tree`、build record 和 deployed paths。
+- `scripts/release/client-runtime-title.test.mjs` 已注册进 `scripts/dsh-b0/pipeline.mjs` 的 node test 列表，覆盖默认无变化、配置重写、literal 缺失/重复失败关闭、shipped tree 命名和 deployed build record。
 
-**验收** 二选一落地后：构建产物 `index.html` 的 `<title>` 为业务品牌；`.dsh-build` 记录与产物摘要一致；导航后标题不再被抢回；删除 `shine-brand` 的 `document.title` 赋值不导致回归。
+**剩余 rollout（#253 之外）**
 
-**阻塞** 需要新增构建步骤或等待上游合同；本计划不授权。**授权** 新增 shell 构建/后处理面、修改 runtime provenance 需单独授权。
+1. `tyuanww/dsh-shine-brand` 作者包重建：删除 `brand-surface.mjs` 的运行期 `document.title = PRODUCT_NAME` 赋值，重新发布 pack 与 provenance。
+2. 在固定 rc.5 checkout 上用 `DSH_CLIENT_TITLE="伸美 AI 增长董事会"` 重建 runtime bundle，确认 deployed `<title>`、`productTitle`、`.dsh-build` record 与 provenance。
+3. 重新 seal 并回填 sealed artifact 与 config lock（由后续授权流程执行）。
+4. 真机/真实 host 视觉验收：导航到会话后标题仍为业务品牌，且 `shine-brand` 不再抢回。
+
+**验收** rollout 完成后：构建产物 `index.html` 的 `<title>` 为业务品牌；`.dsh-build` 记录与产物摘要一致；导航后标题不再被抢回；删除 `shine-brand` 的 `document.title` 赋值不导致回归。#253 只证明代码路径与默认不启用。
+
+**阻塞** #253 不做 repack/reseal；品牌作者包、带配置的 runtime 重建与 sealed artifact 重新 pin 需后续授权。**授权** 品牌作者仓、runtime 重建、sealed artifact 由后续流程批准；#253 只改主仓 release 脚本、测试与计划文档。
 
 ## 5 决策与授权记录
 
@@ -481,7 +492,7 @@ D1–D4 已由 owner 批准；“决定”列是执行依据，“选项”与�
 
 | 编号 | 决策 | 选项 | 后果与建议 | 决定（2026-11-05） |
 |---|---|---|---|---|
-| D1 | 产品标题如何替换 | A 自建 web client 构建并带自己的 `DSH_CLIENT_TITLE`；B 保留 `document.title` 赋值，接受导航时被 `DocumentTitle` 抢回 | A 成本高，新增 shell 构建与维护面；B 零成本但有已知缺陷。建议 P3 先按 B 标记 LATER，把 A 单独立项 | 接受构建期 `DSH_CLIENT_TITLE`，不加运行期插件 hook；本仓注入受阻的原因与二选一见 C15 |
+| D1 | 产品标题如何替换 | A 自建 web client 构建并带自己的 `DSH_CLIENT_TITLE`；B 保留 `document.title` 赋值，接受导航时被 `DocumentTitle` 抢回 | A 成本高，新增 shell 构建与维护面；B 零成本但有已知缺陷。建议 P3 先按 B 标记 LATER，把 A 单独立项 | 接受构建期 `DSH_CLIENT_TITLE`，不加运行期插件 hook；代码侧受控重写与默认不启用见 C15 |
 | D2 | hero 标题与“预览版”徽章 | A 保留 DOM MutationObserver；B 接受文案不动；C 向上游提 slot 需求 | rc.5 无 slot、locale 不可覆盖、无 token；C 违反“不改上游”的当前约束。建议 B，A 作为过渡但记录脆弱性 | 保留现有 DOM 处理，不列为可完成项；C10 按现状收口 |
 | D3 | 程序化打开官方设置面板 | A 占用 `settings.launcher`（会顶掉官方账号菜单）；B 自绘菜单不提供“打开设置”；C 保留一次 DOM 兜底 | A 会丢官方账号与配额条目；B 能力降级；C 保留脆弱选择器。建议 B 加 C 的短期兜底，并在文档标 LATER | 保留当前实现，承认没有公共 API；不占用 `settings.launcher`，C10 记录能力边界 |
 | D4 | 外部 kernel 走 ACP 还是 SDK | A ACP 主线，SDK 仅作证据增强；B SDK 主线，另用 ACP 或宿主插件补 cancel | A 有 `session/cancel` 与 tool_call id，推荐；B 需要重键 requestId 且 cancel 缺口要另补 | ACP 主线，SDK 仅作证据；C09 按 3a–3d 推进，3e 可选 |
@@ -535,7 +546,7 @@ gh pr checks <n> -R tyuanww/fuqing-crm-analytics
 git log --oneline origin/main -12
 ```
 
-3. 判断入口。P0、P2d、P3-0、P3-1、P3-2、P3-5 已完成；D1–D4 与 P3-3 五项已于 2026-11-05 决定，3a/3b/3c/3d-prep 与 #237 已合并，下一步按 C09 在 pinned rc.5 真机执行 [ACP 验收清单](../operating/acp-cutover-acceptance.md)，通过后再发起 cutover PR；P3-4 只剩 C15 的标题构建选择，然后 P4。不要重开 #211/#216。
+3. 判断入口。P0、P2d、P3-0、P3-1、P3-2、P3-5 已完成；D1–D4 与 P3-3 五项已于 2026-11-05 决定，3a/3b/3c/3d-prep 与 #237 已合并，下一步按 C09 在 pinned rc.5 真机执行 [ACP 验收清单](../operating/acp-cutover-acceptance.md)，通过后再发起 cutover PR；P3-4 只剩 C15 的 rollout（品牌包、带配置 runtime、reseal、真机视觉），然后 P4。不要重开 #211/#216。
 4. 需要并行时按 3.3 选通道。W1–W5 已完成，3.3 表里只剩 W6；C09 的 3a/3c/starlette rollout 是另外的并行切片，不占 W 通道。P3-3 与 P3-4 会改 `dsh-plugins/*/package.json` 与 profile，同一时刻只让一个 writer 动这些热点。
 5. 只写 `/tmp` 的准备工作已完成；后续写作者仓、主仓 `config/`、sealing 分支或删 `dsh-plugins/` 仍需单独授权。
 6. 每完成一张卡，把 PR 号、run id、artifact、摘要写回本文件的对应卡片或追加“执行记录”，不要覆盖旧证据。
