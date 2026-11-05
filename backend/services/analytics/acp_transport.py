@@ -35,18 +35,23 @@ Termination mapping (rc.5 ``turnEndToStopReason``, ``acp/src/codec.ts:14-35``)
 ------------------------------------------------------------------------------
 ``end_turn`` with at least one observed tool call -> ``SUCCEEDED``; the
 dispatcher still decides whether a *successful* step backs it. ``end_turn``
-with no tool call -> ``UNKNOWN``: rc.5 collapses ``blocked`` (which the bridge
-maps to ``NEEDS_INPUT``) and ``aborted`` into the same ``end_turn``, so the
-only fail-closed reading for a no-tool turn is "cannot prove success". Every
-automation family in scope calls a server-side tool, so a text-only turn is not
-a valid completion. ``cancelled`` -> ``CANCELLED`` (rc.5 also collapses
-``interrupted`` and explicit cancellation here). ``max_tokens``,
-``max_turn_requests``, ``refusal`` and a JSON-RPC prompt error -> ``FAILED``.
-Any other reason -> ``UNKNOWN``. Only a settled prompt response proves exit:
-a cancel receipt, a write success or a process signal never does. If the child
-dies, the prompt's settlement is lost and ``observe`` raises, so the
-dispatcher records one ``UNKNOWN`` and keeps the slot; it never fabricates an
-outcome from process exit.
+after this transport wrote a ``session/cancel`` notification for the same
+prompt -> ``CANCELLED``, never ``SUCCEEDED``: rc.5 reports an aborted turn as
+``end_turn`` and the request record is the only evidence that distinguishes it
+from a completed one, including the cancel-then-tool-call-then-end_turn case.
+``end_turn`` with no tool call and no cancel request -> ``UNKNOWN``: rc.5
+collapses ``blocked`` (which the bridge maps to ``NEEDS_INPUT``) and ``aborted``
+into the same ``end_turn``, so the only fail-closed reading for a no-tool turn
+is "cannot prove success". Every automation family in scope calls a server-side
+tool, so a text-only turn is not a valid completion. ``cancelled`` ->
+``CANCELLED`` (rc.5 also collapses ``interrupted`` and explicit cancellation
+here). ``max_tokens``, ``max_turn_requests``, ``refusal`` and a JSON-RPC prompt
+error -> ``FAILED``; a cancel request never rewrites a real failure. Any other
+reason -> ``UNKNOWN``. Only a settled prompt response proves exit: a cancel
+receipt, a write success or a process signal never does. If the child dies, the
+prompt's settlement is lost and ``observe`` raises, so the dispatcher records
+one ``UNKNOWN`` and keeps the slot; it never fabricates an outcome from process
+exit.
 
 Correlation
 -----------
@@ -163,6 +168,11 @@ class _Prompt:
     error: str | None = None
     settled: bool = False
     settlement_lost: bool = False
+    # A cancel notification was written for this prompt. rc.5 collapses an
+    # aborted turn into ``end_turn``, so this is the only evidence that lets the
+    # settlement be read as CANCELLED instead of SUCCEEDED.
+    cancel_requested: bool = False
+    cancel_requested_at: float | None = None
 
     def successful_call_ids(self) -> list[str]:
         return [call_id for call_id, status in self.tool_calls.items() if status == "completed"]
@@ -405,11 +415,19 @@ class AcpTransport:
             if session is None or session.acp_session_id is None:
                 raise AcpTransportError("no ACP session to cancel")
             prompt = session.prompt
-        if (prompt is not None and not prompt.settled
+        if (prompt is not None
                 and (prompt.attempt_id != attempt_id or prompt.request_id != request_id)):
+            # A stale cancel must never reach a later attempt's prompt: the
+            # session carries one in-flight prompt at a time.
             raise AcpTransportError("cancel does not belong to the in-flight prompt")
         if not self._child_alive() or session.generation != self._generation:
             raise AcpChildExited("ACP child is not the one that holds this session")
+        with self._state_lock:
+            if prompt is not None and not prompt.settled and not prompt.settlement_lost:
+                # Record intent BEFORE the notification can race a settlement;
+                # an end_turn arriving after this point is read as CANCELLED.
+                prompt.cancel_requested = True
+                prompt.cancel_requested_at = time.monotonic()
         self._write_notification("session/cancel", {"sessionId": session.acp_session_id})
         # Fire-and-forget by contract: no ack exists and none is invented. Only
         # the prompt response settles the run; observe remains the exit proof.
@@ -818,6 +836,12 @@ def _classify_prompt(prompt: _Prompt) -> tuple[str, str | None, bool]:
         return "FAILED", "MODEL_FAILED", True
     stop_reason = prompt.stop_reason
     if stop_reason == "end_turn":
+        if prompt.cancel_requested:
+            # rc.5 reports an aborted turn as ``end_turn``. A cancel notification
+            # was written for this prompt before settlement, so the only
+            # faithful reading is CANCELLED, even when tool calls completed
+            # while the cancel was in flight.
+            return "CANCELLED", None, True
         if not prompt.tool_calls:
             # rc.5 collapses blocked/aborted into end_turn; without tool-call
             # evidence this is UNKNOWN, never a manufactured success.

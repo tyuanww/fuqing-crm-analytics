@@ -130,6 +130,16 @@ class FakeAcpServer:
         if inflight is not None:
             inflight["respond"](stop_reason)
 
+    def tool_update(self, call_id="call-1", status="completed"):
+        """Emit one tool update on the in-flight prompt's stream, then return."""
+        with self._lock:
+            inflight = self._inflight
+        if inflight is None:
+            raise AssertionError("no in-flight prompt to attach a tool update to")
+        update = {"sessionUpdate": "tool_call" if status == "in_progress" else "tool_call_update",
+                  "toolCallId": call_id, "title": "native_query", "kind": "other", "status": status}
+        self.child._notify("session/update", {"sessionId": inflight["session_id"], "update": update})
+
     def server_request_id(self):
         with self._lock:
             self._server_request_id += 1
@@ -298,7 +308,7 @@ class FakeAcpChild:
             self._respond(message["id"], {"stopReason": stop_reason})
 
         with self.server._lock:
-            self.server._inflight = {"respond": respond}
+            self.server._inflight = {"respond": respond, "session_id": params["sessionId"]}
         mode = self.server.prompt_mode
         if mode in {"hang", "hang_ignore_cancel", "cancel_then_settle"}:
             return
@@ -553,6 +563,91 @@ def test_cancel_is_fire_and_forget_and_only_settlement_proves_exit(tmp_path):
         assert observe_until(receiver, payload, "CANCELLED")["execution_exited"] is True
         assert server.methods.count("session/cancel") == 0
         assert wait_until(lambda: server.cancels == 1)
+    finally:
+        receiver.close()
+
+
+def test_aborted_after_cancel_maps_to_cancelled(tmp_path):
+    """rc.5 reports an aborted turn as end_turn; the cancel record decides."""
+    server = FakeAcpServer()
+    server.prompt_mode = "hang_ignore_cancel"
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0)
+    try:
+        receiver.call("health", {})
+        payload = dispatch_payload()
+        receiver.call("dispatch", payload)
+        assert server.prompt_started.wait(5.0)
+        assert receiver.call("cancel", payload)["accepted"] is True
+        server.release("end_turn")
+        evidence = observe_until(receiver, payload, "CANCELLED")
+        assert evidence["execution_exited"] is True
+        assert evidence["successful_call_ids"] == []
+    finally:
+        receiver.close()
+
+
+def test_cancel_then_tool_call_then_end_turn_is_cancelled_never_succeeded(tmp_path):
+    # The dangerous race: the cancel is in flight, a tool completes, then the
+    # turn settles as a plain end_turn. Without the cancel record this would
+    # read as SUCCEEDED; it must read as CANCELLED.
+    server = FakeAcpServer()
+    server.prompt_mode = "hang_ignore_cancel"
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0)
+    try:
+        receiver.call("health", {})
+        payload = dispatch_payload()
+        receiver.call("dispatch", payload)
+        assert server.prompt_started.wait(5.0)
+        assert receiver.call("cancel", payload)["accepted"] is True
+        server.tool_update("call-1", "in_progress")
+        server.tool_update("call-1", "completed")
+        server.release("end_turn")
+        evidence = observe_until(receiver, payload, "CANCELLED")
+        assert evidence["execution_exited"] is True
+        assert evidence["successful_call_ids"] == ["call-1"]  # evidence kept, outcome truthful
+    finally:
+        receiver.close()
+
+
+def test_aborted_without_a_cancel_remains_the_documented_codec_loss(tmp_path):
+    # No cancel record exists, so an aborted turn is indistinguishable from a
+    # completed one over ACP (design §2/R3 accepted loss). This is not a success
+    # classification bug: it is the codec collapse the design lists.
+    server = FakeAcpServer()
+    server.prompt_mode = "end_turn"
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0)
+    try:
+        receiver.call("health", {})
+        payload = dispatch_payload()
+        receiver.call("dispatch", payload)
+        evidence = observe_until(receiver, payload, "SUCCEEDED")
+        assert evidence["execution_exited"] is True
+        assert evidence["successful_call_ids"] == ["call-1"]
+        assert server.cancels == 0
+    finally:
+        receiver.close()
+
+
+def test_a_normal_success_is_not_misclassified_by_a_previous_cancel(tmp_path):
+    server = FakeAcpServer()
+    server.prompt_mode = "hang_ignore_cancel"
+    receiver = AcpTransport(cwd=str(tmp_path), env={}, spawn=server.spawn, timeout=5.0)
+    try:
+        receiver.call("health", {})
+        first = dispatch_payload("native-1", attempt="attempt-1")
+        receiver.call("dispatch", first)
+        assert server.prompt_started.wait(5.0)
+        assert receiver.call("cancel", first)["accepted"] is True
+        server.release("cancelled")
+        assert observe_until(receiver, first, "CANCELLED")["execution_exited"] is True
+
+        server.prompt_mode = "end_turn"
+        second = dispatch_payload("native-2", attempt="attempt-2")
+        receiver.call("dispatch", second)
+        evidence = observe_until(receiver, second, "SUCCEEDED")
+        assert evidence["execution_exited"] is True
+        assert evidence["successful_call_ids"] == ["call-1"]
+        assert server.cancels == 1
     finally:
         receiver.close()
 
