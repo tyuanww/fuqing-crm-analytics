@@ -11,6 +11,7 @@ import os
 import sqlite3
 import stat
 from dataclasses import asdict
+from typing import TYPE_CHECKING
 from urllib.request import Request, build_opener, ProxyHandler, HTTPRedirectHandler
 
 from backend.contracts.analytics_query_run import (
@@ -22,9 +23,16 @@ from .access import AnalyticsError
 from .jobs import ExecutionObservation, TERMINAL
 from .runtime_ports import loopback_origin
 
+if TYPE_CHECKING:
+    # Type-only seam: this module is copied into the standalone first-purchase
+    # kernel by a pinned file list that does not include transport.py, so the
+    # interface must never become a runtime import here.
+    from .transport import HostTransport
+
 
 # Bridge operations the kernel calls. test_analytics_native_tools checks this set
-# against the shared binding table; runtime.py stays importable by the standalone
+# against the shared binding table, and test_analytics_transport checks it against
+# transport.TRANSPORT_OPERATIONS; runtime.py stays importable by the standalone
 # first-purchase kernel package, which ships an explicit file list.
 BRIDGE_OPERATIONS = frozenset({"health", "dispatch", "observe", "cancel", "identity"})
 
@@ -35,7 +43,11 @@ class _NoRedirect(HTTPRedirectHandler):
 
 
 class HostBridge:
-    """Explicit loopback bridge client. The origin comes from runtime setup or Config."""
+    """Concrete loopback HTTP transport for the five operations of HostTransport.
+
+    The origin comes from runtime setup or Config. It conforms to the seam
+    structurally (``transport.HostTransport``); no wire behavior changed.
+    """
 
     def __init__(self, origin: str, token: str):
         if not isinstance(token, str) or len(token) < 32:
@@ -59,8 +71,9 @@ class HostBridge:
 
 
 class RunDispatcher:
-    def __init__(self, store, resolve_actor, bridge, *, workers=None):
-        self.store, self.resolve_actor, self.bridge = store, resolve_actor, bridge
+    def __init__(self, store, resolve_actor, bridge: "HostTransport", *, workers=None):
+        self.store, self.resolve_actor = store, resolve_actor
+        self.bridge: "HostTransport" = bridge
         self.workers = workers
         self._lock = None
         self.ready = False

@@ -4,16 +4,23 @@ The Host keeps CRM credentials; this adapter caches neither them nor grants.
 An identity observation cannot be reused as a bearer token or reassigned owner.
 """
 import secrets
+from typing import TYPE_CHECKING
 
 from backend.contracts.analytics_first_purchase_analysis import FirstPurchaseSessionIdentity
 from backend.services.analytics.access import AnalyticsError, AnalyticsPrincipal
+
+if TYPE_CHECKING:
+    # Type-only seam: this module ships in the pinned standalone-kernel file
+    # list, which does not include transport.py.
+    from backend.services.analytics.transport import HostTransport
 
 QUERY_CAPABILITIES = frozenset({"run:create", "run:read", "run:cancel"})
 
 
 class NativeSessionIdentityResolver:
-    def __init__(self, bridge, session_id: str, gateway_token: str):
-        self.bridge, self.session_id, self._gateway_token = bridge, session_id, gateway_token
+    def __init__(self, bridge: "HostTransport", session_id: str, gateway_token: str):
+        self.bridge: "HostTransport" = bridge
+        self.session_id, self._gateway_token = session_id, gateway_token
 
     def resolve(self, authorization: str | None) -> AnalyticsPrincipal:
         if (not isinstance(authorization, str) or not authorization.isascii()
