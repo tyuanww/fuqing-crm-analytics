@@ -245,3 +245,60 @@ gh workflow run dsh-release-preflight.yml \
 - 不要为标题变更执行 composition reseal、重算 config lock 或改 `.ci` 封印；runtime 不在那 20 个成员内。
 - 不要复用已发布 tag 或覆盖同名 runtime 资产；每次标题变化都发新 tag。
 - 不要用 `scp`/`rsync` 搬 runtime 包，host 只从 immutable Release 下载并校验。
+
+## 11. 已验证参考 run（2026-11-06）
+
+这是一次**证据级**参考 run，用来让下一位 operator 对齐字段和字节；它没有创建 Git tag、GitHub Release 或 deployment，也没有发布或部署。
+
+| 对象 | 值 |
+|---|---|
+| run | `42145648868`，`.github/workflows/dsh-release-preflight.yml`，`workflow_dispatch` / `main`，success（`01:42:49Z` → `01:49:24Z`，约 6m35s） |
+| reviewed / source SHA | `bc4780cbdae84a76eb9f8d42833d60139ee77431` |
+| release_tag（仅输入名） | `dsh-0.21.0.0-r1`；无 tag / release / deployment |
+| preflight artifact | `13470047834`，177,817,330 B |
+| title provenance artifact | `13470102654`，1,358 B |
+| release-preflight.json | `release-preflight/v2`，`PASS`，6 assets，`tthw_ms` 354,613 |
+| runtime | `shinemage-dsh-upstream-runtime-b830ec95….tar.zst`，171,231,322 B，sha256 `506f908384a8479e7dece2833d43dfabf90024f7788e8a6e23de0fdc337cdc18` |
+| release-manifest | `release-manifest.v1.json`，431,270 B，sha256 `508d0452484d585e255c8b8e4636db517de69b5b70bec6f832cd47b9682c2330` |
+| release bundle | `dsh-0.21.0.0-r1.tar.zst`，6,623,914 B，sha256 `8bc95a7a1f4fbea8d6bee9f8562a6963245e95c83c76380c815f222b49ac5292` |
+| client_title_build | `REWRITTEN`，`伸美 AI 增长董事会`，13 files / 61 occurrences；builder `linux/x64`，node `v24.19.0`，pnpm `11.28.5`，offline |
+
+**逐字节检查**。按第 3–6 节下载后，在 `/tmp/c15-preflight` 与 `/tmp/c15-provenance` 上复跑；本次参考值应逐项命中：
+
+```bash
+cd /tmp/c15-preflight
+jq -e '.schema_version == "release-preflight/v2" and .status == "PASS"' release-preflight.json
+jq -e '.source_sha == "bc4780cbdae84a76eb9f8d42833d60139ee77431"' release-preflight.json
+jq -e '.release_tag == "dsh-0.21.0.0-r1"' release-preflight.json
+jq -e '(.assets | length) == 6' release-preflight.json
+jq -r '.assets[] | "\(.sha256)  \(.name)"' release-preflight.json | sha256sum -c -
+# macOS 用 shasum -a 256 -c -
+
+cd /tmp/c15-provenance
+provenance="$(ls -1 *.provenance.json)"
+jq -e '.client_title_build.status == "REWRITTEN"' "$provenance"
+jq -e '.client_title_build.title == "伸美 AI 增长董事会"' "$provenance"
+jq -e '.client_title_build.files == 13 and .client_title_build.occurrences == 61' "$provenance"
+jq -e '.client_title_build.prepared_source_tree.sha256 != .client_title_build.shipped_source_tree.sha256' "$provenance"
+jq -e '.client_title_build.build_record.environment.DSH_CLIENT_TITLE == "伸美 AI 增长董事会"' "$provenance"
+jq -e '.source_tree.sha256 == .client_title_build.shipped_source_tree.sha256' "$provenance"
+
+rm -rf /tmp/c15-runtime && mkdir -p /tmp/c15-runtime
+cd /tmp/c15-preflight
+zstd -dc shinemage-dsh-upstream-runtime-*.tar.zst | tar -xf - -C /tmp/c15-runtime
+cd /tmp/c15-runtime
+frontend_index="$(find . -path '*dsh-web-frontend/dist/index.html' -print -quit)"
+layout_client="$(find . -path '*dsh-client-ui-layout/lib/client.js' -print -quit)"
+test -n "$frontend_index" && test -n "$layout_client"
+grep -Fq '<title>伸美 AI 增长董事会</title>' "$frontend_index"
+! grep -Fq 'DeepSeek Harness' "$frontend_index"
+grep -Fq 'const productTitle = "伸美 AI 增长董事会";' "$layout_client"
+! grep -Fq 'DeepSeek Harness' "$layout_client"
+jq -e '.environment.DSH_CLIENT_TITLE == "伸美 AI 增长董事会"' .dsh-build/client-build-environment.json
+test "$(jq -r '.artifacts.sha256' .dsh-build/client-build-environment.json)" = \
+     "$(jq -r '.client_title_build.build_record.artifacts.sha256' "$provenance")"
+```
+
+本次参考 run 的结果：runtime `171,231,322 B` / `506f9083…`（`sha256sum -c SHA256SUMS` 三行全 OK）；`release-manifest.v1.json` 的 `upstream_runtime.sha256` 等于 provenance `archive.sha256`；`source_tree.sha256` 等于 `client_title_build.shipped_source_tree.sha256`；`find` 命中的是 `.runtime-external/apps/web/dist/index.html`，其 `<title>伸美 AI 增长董事会</title>` 命中、`DeepSeek Harness` 零命中；`.runtime-external/packages/client/ui-layout/lib/client.js` 的 `const productTitle = "伸美 AI 增长董事会";` 命中、零残留；`.dsh-build/client-build-environment.json` 的 `environment.DSH_CLIENT_TITLE` 为同一标题，`artifacts` 为 `{fileCount: 327, sha256: 7d54a34c…}`，与 provenance `build_record.artifacts` 一致。
+
+未发生：Git tag、GitHub Release、deployment、`dsh-release-evidence.yml` / `dsh-release-publish.yml`、host 重 pin、真机视觉。第 7–8 节仍是后续动作；不要把本 run 当作已发布或已验收。

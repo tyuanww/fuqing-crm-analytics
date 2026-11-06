@@ -1,6 +1,6 @@
 # 插件外置 P0-P4 作战计划（2026-11-04 基线）
 
-> 本文件是当前计划，不是历史快照。状态事实以 `origin/main` = `4ac78d409f2a39641345e590b59a16ec2691cedc`（2026-11-06 09:18 +08:00，#267）、PR #211/#216/#218/#222/#229/#230/#232/#234、#235–#255 与 #256–#268，以及本文引用的 CI run 为准；2026-11-04、2026-11-05 12:08 与 2026-11-05 22:10 的旧快照保留在 2.1、2.2、2.3 与 5.5。执行前先按第 6 节重新核对；状态变化时追加记录，不要改写已经发生的证据。2026-11-05 owner 已批准 D1–D4 与 P3-3 五项，执行依据见 5.1 与 5.1.1，切片状态见 C09；S0 与 #240–#255 的实况见 5.5，2026-11-06 的收口、独立验证与两个操作杠杆见 5.6。
+> 本文件是当前计划，不是历史快照。状态事实以 `origin/main` = `4ac78d409f2a39641345e590b59a16ec2691cedc`（2026-11-06 09:18 +08:00，#267）、PR #211/#216/#218/#222/#229/#230/#232/#234、#235–#255 与 #256–#268，以及本文引用的 CI run 为准；2026-11-04、2026-11-05 12:08 与 2026-11-05 22:10 的旧快照保留在 2.1、2.2、2.3 与 5.5。执行前先按第 6 节重新核对；状态变化时追加记录，不要改写已经发生的证据。2026-11-05 owner 已批准 D1–D4 与 P3-3 五项，执行依据见 5.1 与 5.1.1，切片状态见 C09；S0 与 #240–#255 的实况见 5.5，2026-11-06 的收口、独立验证与两个操作杠杆见 5.6，C15 带标题 preflight 的证据见 5.7。
 
 ## 1 目标与执行规则
 
@@ -39,9 +39,9 @@ P0 到 P4 是同一件事的五个阶段，不是五个独立项目。
 | P2b | tool policy 单源与官方工具漂移门禁 | 已完成 | #214 merged，head `6849fc4c`，merge `432cc03a`；CI `41828359712` success；`dsh-plugins/query-agent/src/tool-policy.ts` 加 `dsh-plugins/query-agent/config/{query-agent-tool-policy,dsh-official-tools}.v1.json`，68 个官方工具名，25 项行为逐条等价 |
 | P2c | component catalog 移出插件源码 | 已完成 | #212 merged，head `ec83fe52`，merge `dc9b8fba`；CI `41823447654` success；`backend/contracts/component-catalog.json` 7014 bytes、sha256 `8e2161fa…`，`board_spec.py` 导入期不再读 `dsh-plugins/` |
 | P2d | 生成物收进独立 contracts 包 | 已完成 | #216 merged `36111a90`，head `107d2324`；CI `41874816482` success；110 files +1800/−687；b0 / test / merge-gate 绿 |
-| P3 | 换私有协议为 rc.5 公开面 | 部分完成：P3-0/P3-1/P3-2/P3-5 已合并；P3-3 的 3a/3b/3c/3d-prep 与 #237 已合并，#249 把 `query` 家族钉在 bridge（G2 PASS）、#250 把 `rc5-shadow` 转 blocking、#251 加家族级 `cutover` 与真机证据启动门，cutover 仍待真机验收；P3-4 只剩 C15 的一次 dispatch rollout（#267 提供 `client_title` 输入）与 release-manifest / host 重 pin、真机视觉验收 | #218 merged `a2b9a546`，head `a823b0d9`，CI `41880532530` success（P3-0 影子门禁 + P3-1 disposer）；#222 merged `8da4b78e`，head `2df54efe`，CI `41895117591` success（P3-2 Config / typed tools + P3-5 TurnEndReason）；#237 merged `e09ff4f`，head `c85a988`（ACP C2 回调 + scoped env + lost-turn 回收 + 关停/profile 准入）；2026-11-05 owner 批准 D4 与 P3-3 五项，P3-4 按 D1–D3 执行；P3-3 切片见 C09；#249 merged `b97e8da0`、#250 merged `82916068`、#251 merged `bb8fb912`、#252 merged `60eee4cf`（G4）；C15 的 deployed 布局修正与 dispatch 输入见 #264/#267（5.6） |
+| P3 | 换私有协议为 rc.5 公开面 | 部分完成：P3-0/P3-1/P3-2/P3-5 已合并；P3-3 的 3a/3b/3c/3d-prep 与 #237 已合并，#249 把 `query` 家族钉在 bridge（G2 PASS）、#250 把 `rc5-shadow` 转 blocking、#251 加家族级 `cutover` 与真机证据启动门，cutover 仍待真机验收；P3-4 的带标题 dispatch 已于 2026-11-06 通过（5.7），剩 evidence/publish、release-manifest / host 重 pin 与真机视觉验收 | #218 merged `a2b9a546`，head `a823b0d9`，CI `41880532530` success（P3-0 影子门禁 + P3-1 disposer）；#222 merged `8da4b78e`，head `2df54efe`，CI `41895117591` success（P3-2 Config / typed tools + P3-5 TurnEndReason）；#237 merged `e09ff4f`，head `c85a988`（ACP C2 回调 + scoped env + lost-turn 回收 + 关停/profile 准入）；2026-11-05 owner 批准 D4 与 P3-3 五项，P3-4 按 D1–D3 执行；P3-3 切片见 C09；#249 merged `b97e8da0`、#250 merged `82916068`、#251 merged `bb8fb912`、#252 merged `60eee4cf`（G4）；C15 的 deployed 布局修正与 dispatch 输入见 #264/#267（5.6） |
 | P3-3 | 外部半换 ACP，`query` 家族留在 bridge | 3a/3b/3c/3d-prep 与 #237 已合并（#230/#232/#229/#234/#237）；#249 钉住 `query` 家族、#250 shadow 门禁 blocking、#251 家族级 cutover + 证据门；cutover 仍待真机验收；作者仓 workbench 已由 #17 一次性 land（`eef9e9e0`）并被 #255 重 pin；3e 可选未立项 | #230 merge `72239df2`（transport seam）、#232 merge `0eeb8faa`（ACP stdio transport）、#229 merge `4a926836`（offline shadow compare）、#234 merge `60d7f4e8`（profile generator + `acp_bindings` + cancel-aware settlement + deadline strategy）、#235 merge `d169809`（回填作者 pack、锁链与 sealed artifact）、#237 merge `e09ff4f`（binding-based C2 callback、scoped child env、lost/no-tool reclaim + slot release、dispatcher-owned shutdown、profile health）。真机验收清单见 [acp-cutover-acceptance.md](../operating/acp-cutover-acceptance.md)；默认 transport 仍 `bridge`，剩余构建项见该清单第 9 节；#251 新增 `cutover_acceptance` 启动门（`MANIFEST.sha256` 全量重算 + settle 回执 + 时效窗口，无 env 绕过），仓库内仍无真机证据根与 receipt |
-| P3-4 | 品牌与账号收口 | 部分完成：D2 hero/徽章与 D3 设置入口按现状接受，不再列为可完成项；D1 构建期标题代码侧已落地（#253/#264），dispatch 输入已由 #267 落地；品牌包侧步骤 1 已由 `dsh-shine-brand` main `6aa335d2` 删除运行期 `document.title` 赋值完成；剩一次带 `client_title` 的 dispatch、release-manifest / host 重 pin 与真机视觉验收 | 2026-11-05 决策见 5.1；C10 收口现状，C15 记录 resolver、rollout 文档与剩余步骤；步骤 1 回执与剩余项见 5.5，2026-11-06 的 #264/#267 见 5.6 |
+| P3-4 | 品牌与账号收口 | 部分完成：D2 hero/徽章与 D3 设置入口按现状接受，不再列为可完成项；D1 构建期标题代码侧已落地（#253/#264），dispatch 输入已由 #267 落地；品牌包侧步骤 1 已由 `dsh-shine-brand` main `6aa335d2` 删除运行期 `document.title` 赋值完成；步骤 2 的带标题 preflight dispatch 已于 2026-11-06 在证据级通过（run `42145648868`；`release_tag` 仅名字，未发布）；剩步骤 3 的 evidence/publish 与 release-manifest / host 重 pin、步骤 4 真机视觉验收 | 2026-11-05 决策见 5.1；C10 收口现状，C15 记录 resolver、rollout 文档与剩余步骤；步骤 1 回执见 5.5，#264/#267 见 5.6，titled preflight 证据见 5.7 |
 | P4 | 最后拆仓并删除主仓插件源码 | 部分完成：S0 已完成（kit 重 vendor、作者 main 归一、锁重 pin、reseal），S1–S5 未开工 | 无 S1–S5 分支、无 PR；S0 证据见 #248/#255 与 5.5；`deletion_gate=BLOCKED`，唯一原因为 `real_host_acceptance_not_recorded`；`remote_main_not_verified` 已关闭；#262 的 fail-closed flip 与 acceptance verifier 已就绪但尚未 flip；#268 每周检查 artifact 到期；硬依赖 P3-3 cutover 真机验收、C15 dispatch rollout 与删除门禁（G0/G1/G6 已 PASS，G3 FAIL，G7 BLOCKED） |
 
 ### 2.1 写作时校正的六处事实
@@ -99,7 +99,7 @@ kit 0.1.1 → 10 个作者仓按 rc.5 重建 → 主仓锁链回填 + sealed art
 P3-0/P3-1 (#218) 与 P3-2/P3-5 (#222) 已合并
       |
       v
-P3-3（3a/3b/3c/3d-prep 与 #237 已合并，cutover 待真机验收；3e 可选）/ P3-4（D2/D3 接受现状，D1 代码侧与 dispatch 输入已落地、rollout 待一次带 `client_title` 的 dispatch 与 release 重 pin）→ P4 拆仓
+P3-3（3a/3b/3c/3d-prep 与 #237 已合并，cutover 待真机验收；3e 可选）/ P3-4（D2/D3 接受现状，D1 代码侧已落地，带标题 preflight 已通过（5.7）；rollout 待 publish / host 重 pin 与真机视觉）→ P4 拆仓
 ```
 
 ### 3.2 四个拒绝点
@@ -120,7 +120,7 @@ P3-3（3a/3b/3c/3d-prep 与 #237 已合并，cutover 待真机验收；3e 可选
 | W5 | 主仓锁链回填与 artifact 密封 | 主仓 `config/` 与 sealing 分支 | 已完成（artifact 现为 `13417537931`） | 共享热点，只能单 writer |
 | W6 | 交付层真实演练 T02/T03/T06/T07/T09/E1 | 隔离实例与文档 | 需授权或人工窗口 | 与插件代码无文件冲突 |
 
-结论。W1 到 W5 已随 P0 完成，W6 仍可并行。D1–D4 与 P3-3 五项已由 owner 决定（5.1/5.1.1）；P3-3 按 C09 的 3a–3d 主链推进，3a/3b/3c/3d-prep 与 #237 已合并，cutover 待真机验收，3e 可选；P3-4 只剩 C15 的 rollout（一次带 `client_title` 的 dispatch、manifest/host 重 pin、真机视觉验收）。P4 在 P3 与 10 作者仓迁移完成后启动。
+结论。W1 到 W5 已随 P0 完成，W6 仍可并行。D1–D4 与 P3-3 五项已由 owner 决定（5.1/5.1.1）；P3-3 按 C09 的 3a–3d 主链推进，3a/3b/3c/3d-prep 与 #237 已合并，cutover 待真机验收，3e 可选；P3-4 只剩 C15 的 rollout（带标题 dispatch 已于 2026-11-06 通过，见 5.7；剩 publish / host 重 pin 与真机视觉验收）。P4 在 P3 与 10 作者仓迁移完成后启动。
 
 ## 4 任务卡
 
@@ -386,12 +386,12 @@ shine-brand 品牌 token 与 mark/name slot 保留
 账号菜单保持当前实现（sidebar.footer.action 自绘 + aria-label 兜底）
 设置页保持当前实现（settings.section 可用，程序化打开无公共 API）
 hero 标题与预览徽章保留现有 DOM 处理，不列为完成项
-标题按 D1 走 C15 的构建期方案；C15 代码侧与 dispatch 输入已落地但默认不启用，品牌包的运行期赋值已删除，rollout 仍待一次 dispatch 与真机验收
+标题按 D1 走 C15 的构建期方案；C15 代码侧与 dispatch 输入已落地但默认不启用，品牌包的运行期赋值已删除，带标题 dispatch 已于 2026-11-06 通过（5.7），仍待 publish / host 重 pin 与真机视觉验收
 ```
 
 **验收** D2/D3 在文档中明确为“接受现状”，不再以删除 DOM 选择器作为完成条件；C15 默认不启用阶段 `document.title` 仍不被导航抢回；品牌包的运行期赋值已删除，rollout 完成前保留 `DSH_CLIENT_TITLE` 未启用时的回退路径；rc.5 真实 shell 下品牌展示、账号菜单、设置页维持可用。
 
-**阻塞** D1 的 rollout（一次带 `client_title` 的 dispatch、runtime 重 pin 与真机视觉）；D2/D3 无阻塞。
+**阻塞** D1 的 rollout（titled dispatch 已完成，剩 publish / runtime 重 pin 与真机视觉）；D2/D3 无阻塞。
 
 **授权** 业务接受品牌与账号能力降级；新增 shell 构建面需单独授权（C15）。
 
@@ -477,7 +477,7 @@ node --test scripts/ci/composition-pack-inputs.test.mjs
 
 **决策** 2026-11-05 owner 接受 build-time `DSH_CLIENT_TITLE`，不采用运行期插件 hook。
 
-**状态（2026-11-06）** 步骤 1 已完成：`tyuanww/dsh-shine-brand` main `6aa335d2`（PR #3，author commit `ff866cfc`）删除 `brand-surface.mjs` 的运行期 `document.title` 赋值，函数只读 `doc.title`；hero 标题、预览徽章与 icon 处理保留。主仓 `scripts/dsh-b0/leaf-pack-composition.integration.mjs` 随 #255 改为断言“不写标题”，标题写入计数仍保留。步骤 2–4（一次带 `client_title` 的 dispatch、release-manifest / host 重 pin、真机视觉）未做。2026-11-05 深夜对真实 rc.5 preflight payload 的只读探针发现 deployed 包定位缺陷，#264 修正 resolver 并补真实布局 fixture，见下文“deployed 布局”；#267（merge `4ac78d4`）增加 dispatch-only `client_title` 输入与 [client-title-rollout.md](../operating/client-title-rollout.md)，步骤 2 从手工改 workflow 变成一次带校验的 dispatch，但 dispatch 未执行，runtime 字节与 manifest 未变。
+**状态（2026-11-06）** 步骤 1 已完成：`tyuanww/dsh-shine-brand` main `6aa335d2`（PR #3，author commit `ff866cfc`）删除 `brand-surface.mjs` 的运行期 `document.title` 赋值，函数只读 `doc.title`；hero 标题、预览徽章与 icon 处理保留。主仓 `scripts/dsh-b0/leaf-pack-composition.integration.mjs` 随 #255 改为断言“不写标题”，标题写入计数仍保留。步骤 2 已于 2026-11-06 在证据级完成：带 `client_title` 的 preflight run `42145648868` 在 main `bc4780c` 上 success，artifact `13470047834` / `13470102654`，provenance 为 `REWRITTEN`（13 files / 61 occurrences），真实 deployed 字节含业务标题（见 5.7）；`release_tag` 只是 dispatch 输入名 `dsh-0.21.0.0-r1`，没有创建 tag/release，也没有发布或部署。步骤 3（evidence/publish + release-manifest / host 重 pin）与步骤 4（真机视觉）未做。2026-11-05 深夜对真实 rc.5 preflight payload 的只读探针发现 deployed 包定位缺陷，#264 修正 resolver 并补真实布局 fixture，见下文“deployed 布局”；#267（merge `4ac78d4`）增加 dispatch-only `client_title` 输入与 [client-title-rollout.md](../operating/client-title-rollout.md)，步骤 2 从手工改 workflow 变成一次带校验的 dispatch；该 dispatch 已于 2026-11-06 在证据级完成，见 5.7。
 
 **核验（2026-11-05，rc.5 `b830ec95`）** `DSH_CLIENT_TITLE` 是构建期值：`apps/web/vite.config.ts` 的 `clientDocumentTitle()` 把它写进初始 `<title>`，`packages/client/ui-layout/src/client/AppFrame.tsx` 把它作为 `productTitle` 传给 `DocumentTitle`（导航时重写 `document.title`）。官方构建经 `scripts/build.ts` 的 `official` profile 调 `scripts/client-build-environment.ts`，其中 `OFFICIAL_CLIENT_BUILD_ENVIRONMENT` 把 `DSH_CLIENT_TITLE` 固定为 `DeepSeek Harness`，且 `resolveClientBuildEnvironment` 对 `official` 之外的 profile 直接抛错。本仓 `scripts/dsh-b0/pipeline.mjs` 在固定 SHA 的干净 checkout 上跑 `pnpm run build:official`，`verifySource()` 拒绝本地改动。因此需要受控的 bundle-time 重写，而不是在 build env 里加变量。
 
@@ -495,13 +495,13 @@ node --test scripts/ci/composition-pack-inputs.test.mjs
 **剩余 rollout（#253 之外）**
 
 1. （已完成，2026-11-05）`tyuanww/dsh-shine-brand` 作者包重建：`main` `6aa335d2` 删除 `brand-surface.mjs` 的运行期 `document.title = PRODUCT_NAME` 赋值；#255 已重 pin 该 main，剩余步骤从 2 开始。
-2. 用 #267 的 `client_title` 输入 dispatch `dsh-release-preflight.yml`（真实 preflight build 是 CI-only，命令与校验见 [client-title-rollout.md](../operating/client-title-rollout.md)），确认 resolver 在真实 deployed 布局下找到两个包，并确认 deployed `<title>`、`productTitle`、`.dsh-build` record 与 provenance。
-3. runtime 重建后重 pin：新的 runtime archive 要更新 `release-manifest.v1.json` 的 `upstream_runtime`（name / bytes / sha256），host 部署侧按发布 asset 摘要固定的 runtime 也要同步重 pin。runtime **不在** 20 成员 `.ci` seal 内（`.ci/rc3-composition` 只有作者/domain pack 与 `.ci/rc3-composition.sha256`），所以标题变更不需要 composition reseal，也不重算 config lock（由后续授权流程执行）。
+2. （已完成，2026-11-06，证据级）用 #267 的 `client_title` 输入 dispatch `dsh-release-preflight.yml`：run `42145648868` success，`release_tag` `dsh-0.21.0.0-r1` 仅名字，artifact `13470047834` / `13470102654`；resolver 在真实 deployed 布局下找到两个包，deployed `<title>`、`productTitle`、`.dsh-build` record 与 provenance 已校验，逐字节命令见 [client-title-rollout.md](../operating/client-title-rollout.md) 第 11 节。该 dispatch 没有创建 tag/release。
+3. （未完成）发布与重 pin：用第 2 步的 artifact 走 `dsh-release-evidence.yml` / `dsh-release-publish.yml` 创建 immutable tag 与 release，再把 `release-manifest.v1.json` 的 `upstream_runtime`（name / bytes / sha256）与 host 部署侧按发布 asset 摘要固定的 runtime 同步重 pin。preflight 产物里的 manifest 已带新 runtime 摘要，但仓库固定值与 host 都未变。runtime **不在** 20 成员 `.ci` seal 内（`.ci/rc3-composition` 只有作者/domain pack 与 `.ci/rc3-composition.sha256`），所以标题变更不需要 composition reseal，也不重算 config lock（由后续授权流程执行）。
 4. 真机/真实 host 视觉验收：导航到会话后标题仍为业务品牌，且 `shine-brand` 不再抢回。
 
-**验收** rollout 完成后：构建产物 `index.html` 的 `<title>` 为业务品牌；`.dsh-build` 记录与产物摘要一致；导航后标题不再被抢回；删除 `shine-brand` 的 `document.title` 赋值不导致回归。#253/#264 只证明代码路径、真实布局 fixture 与默认不启用；真实 rc.5 构建仍未在本地实测。
+**验收** rollout 完成后：构建产物 `index.html` 的 `<title>` 为业务品牌；`.dsh-build` 记录与产物摘要一致；导航后标题不再被抢回；删除 `shine-brand` 的 `document.title` 赋值不导致回归。#253/#264 只证明代码路径、真实布局 fixture 与默认不启用；步骤 2 的 CI 构建已在 run `42145648868` 实测（5.7），但未发布、未部署、未做真机视觉。
 
-**阻塞** #264/#267 不做 repack，也不重建 runtime；一次带 `client_title` 的 dispatch（真实 rc.5 preflight build 为 CI-only）、`release-manifest.v1.json` / host 侧 runtime 摘要重 pin 与真机视觉验收需后续授权。**授权** runtime 重建 dispatch、manifest / host 重 pin 由后续流程批准；#264/#267 只改主仓 release 脚本、workflow 与文档。
+**阻塞** #264/#267 不做 repack；步骤 2 的 dispatch 已完成（5.7）。发布/evidence dispatch、`release-manifest.v1.json` / host 侧 runtime 摘要重 pin 与真机视觉验收仍需后续授权。**授权** evidence/publish、manifest / host 重 pin 由后续流程批准；本记录只改文档。
 
 ## 5 决策与授权记录
 
@@ -666,11 +666,41 @@ PR #215 已经修掉机械项（test 四片、pip 不触发 b0、path matrix 补
 **仍然未做**
 
 - G3 真机 ACP 验收 → `flip-deletion-gate.mjs --acceptance <root>`：当前无证据根，gate 保持 `BLOCKED`。
-- C15 一次带 `client_title` 的 dispatch → `release-manifest.v1.json` 的 `upstream_runtime` / host 侧 runtime 重 pin → 真机视觉验收。#267 只给入口与文档，未实际 dispatch。
+- C15 剩余 rollout：带标题 dispatch 已于 2026-11-06 通过（run `42145648868`，证据级，见 5.7，未发布）；剩 publish/evidence dispatch → `release-manifest.v1.json` 的 `upstream_runtime` / host 侧 runtime 重 pin → 真机视觉验收。
 - P4 S1–S5：等 gate `READY` 后按 contracts+board → 5 个 shine 壳 → knowledge/crm-knowledge → query-agent → analytics-workbench 最后；删除 `dsh-plugins/` 仍需单独授权与恢复 bundle。
 - C13 六项 T02/T03/T06/T07/T09/E1：均未开始，仍需人工窗口/授权。
 - query-agent 所有权：仍留在主仓 `dsh-plugins/query-agent`（配置型 bundle），P4 的删除顺序里单独决策，本轮未动。
 - 作者 artifact **2026-11-19** 到期；到期后必须重跑作者 push run 或重新密封，周报变红即按 [artifact-expiry.md](../operating/artifact-expiry.md) 的刷新步骤处理。
+
+### 5.7 2026-11-06 C15 带标题 preflight 证据级通过
+
+结论。C15 步骤 2（一次带 `client_title` 的真实 rc.5 preflight dispatch）已于 2026-11-06 在证据级完成：run `42145648868` 在 `main` / `bc4780c` 上 success（`01:42:49Z` → `01:49:24Z`，约 6m35s），`release-preflight.json` 为 `release-preflight/v2` / `PASS`，六个资产的 bytes/sha256 全部校验通过，title provenance 为 `REWRITTEN`。`release_tag` 只是 dispatch 输入的名字 `dsh-0.21.0.0-r1`：本 run 没有创建 Git tag、GitHub Release 或 deployment，也没有发布或部署。步骤 3（evidence/publish + release-manifest / host 重 pin）与步骤 4（真机视觉）仍未做。
+
+| 对象 | 值 |
+|---|---|
+| run | `42145648868`，`.github/workflows/dsh-release-preflight.yml`，`workflow_dispatch`，`main`，success |
+| reviewed / source SHA | `bc4780cbdae84a76eb9f8d42833d60139ee77431`（与 run head 一致） |
+| release_tag（仅名字） | `dsh-0.21.0.0-r1`；无 tag / release / deployment |
+| preflight artifact | `13470047834`，177,817,330 B |
+| title provenance artifact | `13470102654`，1,358 B |
+| preflight summary | `release-preflight/v2`，`PASS`，6 assets |
+| runtime | `shinemage-dsh-upstream-runtime-b830ec95….tar.zst`，171,231,322 B，sha256 `506f908384a8479e7dece2833d43dfabf90024f7788e8a6e23de0fdc337cdc18` |
+| release manifest | `release-manifest.v1.json`，431,270 B，sha256 `508d0452484d585e255c8b8e4636db517de69b5b70bec6f832cd47b9682c2330` |
+| release bundle | `dsh-0.21.0.0-r1.tar.zst`，6,623,914 B，sha256 `8bc95a7a1f4fbea8d6bee9f8562a6963245e95c83c76380c815f222b49ac5292` |
+| SHA256SUMS | 327 B，3 行（runtime / manifest / bundle），`sha256sum -c` 全 OK |
+
+**标题字节（真实 preflight 产物）**
+
+- `client_title_build.status = REWRITTEN`，`title = 伸美 AI 增长董事会`，`files = 13`，`occurrences = 61`；`prepared_source_tree` 与 `shipped_source_tree` 的 sha256/字节数不同（按设计）。
+- builder `linux/x64`，node `v24.19.0`，pnpm `11.28.5`（runtime build 用 pinned pnpm；run 顶层 setup 的 `11.28.2` 是另一个值），`network_mode = offline`。
+- 真实 runtime 字节：`.runtime-external/apps/web/dist/index.html` 的 `<title>伸美 AI 增长董事会</title>` 命中、`DeepSeek Harness` 零命中；`.runtime-external/packages/client/ui-layout/lib/client.js` 的 `const productTitle = "伸美 AI 增长董事会";` 命中、零残留；`.dsh-build/client-build-environment.json` 的 `DSH_CLIENT_TITLE` 为同一标题，`artifacts` 摘要与 provenance `build_record` 一致。逐字节命令与参考值见 [client-title-rollout.md](../operating/client-title-rollout.md) 第 11 节。
+
+**仍未做**
+
+- 步骤 3：`dsh-release-evidence.yml` / `dsh-release-publish.yml` → 创建 immutable tag 与 release → `release-manifest.v1.json` 的 `upstream_runtime` / host 侧 runtime 重 pin。preflight 产物里的 manifest 已带新 runtime 摘要，但仓库固定值与 host 都没变。
+- 步骤 4：真机 / 真实 host 视觉验收（hard reload、导航后标题不被抢回）。
+- runtime 不在 `.ci/rc3-composition` 的 20 个成员内，标题变更不需要 composition reseal，也不重算 config lock。
+- 本记录只追加证据：不创建 tag/release、不改 config/workflow/lock、不发布、不部署。
 
 ## 6 如何接续
 
@@ -683,7 +713,7 @@ gh pr checks <n> -R tyuanww/fuqing-crm-analytics
 git log --oneline origin/main -12
 ```
 
-3. 判断入口。P0、P2d、P3-0、P3-1、P3-2、P3-5 已完成；D1–D4 与 P3-3 五项已于 2026-11-05 决定，3a/3b/3c/3d-prep 与 #237 已合并，下一步按 C09 在 pinned rc.5 真机执行 [ACP 验收清单](../operating/acp-cutover-acceptance.md)，通过后再发起 cutover PR；P3-4 只剩 C15 的 rollout（一次带 `client_title` 的 dispatch、manifest/host 重 pin、真机视觉），然后 P4；#262 的 flip 工具只在 G3 通过后使用，不要提前改 gate。不要重开 #211/#216。
+3. 判断入口。P0、P2d、P3-0、P3-1、P3-2、P3-5 已完成；D1–D4 与 P3-3 五项已于 2026-11-05 决定，3a/3b/3c/3d-prep 与 #237 已合并，下一步按 C09 在 pinned rc.5 真机执行 [ACP 验收清单](../operating/acp-cutover-acceptance.md)，通过后再发起 cutover PR；P3-4 只剩 C15 的 rollout（带标题 dispatch 已通过，见 5.7；剩 publish / host 重 pin 与真机视觉），然后 P4；#262 的 flip 工具只在 G3 通过后使用，不要提前改 gate。不要重开 #211/#216。
 4. 需要并行时按 3.3 选通道。W1–W5 已完成，3.3 表里只剩 W6；C09 的 3a/3c/starlette rollout 是另外的并行切片，不占 W 通道。P3-3 与 P3-4 会改 `dsh-plugins/*/package.json` 与 profile，同一时刻只让一个 writer 动这些热点。
 5. 只写 `/tmp` 的准备工作已完成；后续写作者仓、主仓 `config/`、sealing 分支或删 `dsh-plugins/` 仍需单独授权。
 6. 每完成一张卡，把 PR 号、run id、artifact、摘要写回本文件的对应卡片或追加“执行记录”，不要覆盖旧证据。
@@ -727,5 +757,6 @@ git log --oneline origin/main -12
 | 作者 artifact（2026-11-05 re-vendor 后） | 14 天有效，**2026-11-19 到期**（workbench `42031523764` 等四个 push run） |
 | main（2026-11-06 当前） | `4ac78d409f2a39641345e590b59a16ec2691cedc`（#267） |
 | 独立 B0（2026-11-06） | run `42090078241`，head `4ac78d40`，`b0-contract-build` success |
+| C15 titled preflight（2026-11-06） | run `42145648868`，head `bc4780c`，success；artifact `13470047834` / `13470102654`；`release_tag` `dsh-0.21.0.0-r1` 仅名字（无 tag/release/deployment） |
 | 删除门禁与 closure（2026-11-06） | #262 flip/verifier；closure receipt `56e88c8d…` / run `42055263505`；gate `BLOCKED`，唯一原因 `real_host_acceptance_not_recorded` |
 | artifact 到期周报（2026-11-06） | #268；作者 artifact 2026-11-19，sealed artifact 2027-02-03 |
