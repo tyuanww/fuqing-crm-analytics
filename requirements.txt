@@ -7,12 +7,12 @@
 
 # 数据处理 (核心)
 duckdb>=1.5.6          # 本地分析型数据库（生产升级 1.5.6 见 docs/maintenance/duckdb-backup-upgrade-checklist.md，更新此文件不会自动升级现役环境）
-pandas>=3.0.6           # 兼容性支持
-numpy>=2.5.3           # 数值计算
+pandas>=3.1.1           # 兼容性支持
+numpy>=2.5.4           # 数值计算
 
 # Web 框架
-fastapi>=0.141.1,<0.141.2  # 现代异步 Web 框架（锁定本次通过验证的 0.141.1）
-uvicorn>=0.27.0         # ASGI 服务器
+fastapi>=0.162.0,<0.162.1  # 现代异步 Web 框架（锁定本次通过验证的 0.141.1）
+uvicorn>=0.54.0         # ASGI 服务器
 httpx>=0.28.1          # ONLYOFFICE 异步回调与保存命令；精确版本见 lock
 # starlette 经 fastapi 传递安装；下限对齐 lock 的 1.10.0，FastAPI 0.141.1 锁定在本次升级范围
 starlette>=1.10.0
@@ -29,24 +29,24 @@ python-pptx>=0.6.0      # PPT 生成
 openai>=3.42.0           # OpenAI API（ad-hoc / 可选脚本；非核心 request 路径）
 
 # 工具
-python-dotenv>=1.2.3    # 环境变量管理
+python-dotenv>=1.2.4    # 环境变量管理
 pydantic>=2.13.5         # 数据验证
 python-dateutil>=4.0.0  # 日期处理
-pyarrow>=26.0.0         # Arrow 格式支持
+pyarrow>=26.0.1         # Arrow 格式支持
 bcrypt>=4.0.0           # 密码哈希（routers/auth.py token 认证）
-xxhash>=4.0.1           # 文件指纹（scripts/etl/config.py lazy import, parquet cache）
+xxhash>=4.0.2           # 文件指纹（scripts/etl/config.py lazy import, parquet cache）
 psutil>=5.9.0           # 内存监控（scripts/etl/benchmark_memory.py）
-packaging>=24.0         # 版本比较（backend/tests Version 解析）
+packaging>=26.3         # 版本比较（backend/tests Version 解析）
 pyyaml>=6.0.3           # Pydantic v2 间接 import（lock PyYAML, B2 import check）
 # 安全相关传递依赖下限（uvicorn/httpx/requests 树）
-click>=8.5.0
-idna>=3.19
+click>=8.5.1
+idna>=3.20
 urllib3>=2.8.0
-certifi>=2026.10.19
+certifi>=2026.10.23
 
 # 开发工具
-pytest>=9.1.1           # 测试框架
+pytest>=9.2.0           # 测试框架
 pytest-xdist>=3.8.0     # 并行测试 (pytest -n auto)
 black>=26.10.1           # 代码格式化
-ruff>=0.16.9            # lint（CI 与 requirements-lock 对齐）
-python-multipart>=0.0.32
+ruff>=0.17.4            # lint（CI 与 requirements-lock 对齐）
+python-multipart>=0.0.33
