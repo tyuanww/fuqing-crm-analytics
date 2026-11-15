@@ -1,15 +1,15 @@
 # Production-only closure receipt
 
-Machine-checked evidence for the `deletion_gate` reason
-`production_only_closure_not_recorded`. It records one rehearsal of
+Machine-checked evidence for the production-only closure condition
+(the gate reason once labelled `production_only_closure_not_recorded`). It records one rehearsal of
 `origin/main` with the ten P4 source trees removed: profile inputs, the
 composition manifest, the pack readers, the backend/kernel imports, a
 production-only install, the sealed consumer install and the release payload
 all passed. It deliberately does **not** clear `remote_main_not_verified`
 and does not claim a real production host.
 
-- Tested ref: `origin/main`
-- Commit: `d53a573dd8274786a2a0ca2890fa66ddd1c68c53` (2026-11-05T23:24:01+08:00)
+- Tested ref: `HEAD`
+- Commit: `e6af4ecff8cc32142fafeac2c95f535e7476e74c` (2026-11-15T10:21:02+08:00)
 - Verdict: **PASS**
 - Install mode: `PRODUCTION_ONLY`
 - Absence boundary: S1/S2/S3/S5 delete exactly the ten plugin source trees; dsh-plugins/{contracts,plugin-kit} stay in main, query-agent stays under the S4 retention decision, and locks, manifests, profiles, packs and release scripts are retained.
@@ -38,10 +38,10 @@ and does not claim a real production host.
 
 | Input | Path / id | SHA-256 |
 |---|---|---|
-| lock | `config/shinemage-composition-packs.lock.json` | `81a10f70e7f4a220676cdfb0e15a4422e6ceef65988cf0406452bd965adb2842` |
-| manifest | `config/shinemage-composition-pack-manifest.v1.json` | `29055f92d0ac8d739a01091a4252470e6b8b4ab747cc1c10203ca22dc40f5931` |
-| artifact lock | `config/shinemage-composition-artifact.lock.json` | `5fcd381b564bc60fcf0e0f83d54f863199b262c2414b9b9f4b9e1d67a28e0493` |
-| sealed artifact | `id 13417537931 / run 42035243845` | `b1fb2976c6299136224240422f5f64a701e36100ecd73ef40b234a235b358589` |
+| lock | `config/shinemage-composition-packs.lock.json` | `82fdae800c582e9f55d8ab03e3529ce3e0e4973e0f5b14421a395ebe3187ade3` |
+| manifest | `config/shinemage-composition-pack-manifest.v1.json` | `f952bb193af9710592631c3b8850d0c737db12328c843af75c8cbb5360d4762f` |
+| artifact lock | `config/shinemage-composition-artifact.lock.json` | `eeabcc0f3ba7307d0484c682dfdb9e8e57eeb8645529224d15ddc851e61018af` |
+| sealed artifact | `id 14142656552 / run 43667164993` | `9ed0741d172ecfdc69fd0a7e1ded9066fb86dfca3f9129ff7397549971c7e52d` |
 
 ## Environment
 
@@ -49,15 +49,15 @@ and does not claim a real production host.
 |---|---|
 | node | `v24.19.0` |
 | pnpm | `11.28.2` |
-| python | `3.14.10` |
-| platform | `linux` |
-| arch | `x64` |
+| python | `3.14.8` |
+| platform | `darwin` |
+| arch | `arm64` |
 | install_mode | `PRODUCTION_ONLY` |
-| commit_date | `2026-11-05T23:24:01+08:00` |
+| commit_date | `2026-11-15T10:21:02+08:00` |
 
 ## What this proves
 
-- `git archive` of `d53a573dd8274786a2a0ca2890fa66ddd1c68c53` contains no `.git` and no untracked files; the rehearsal never touched the caller's worktree.
+- `git archive` of `e6af4ecff8cc32142fafeac2c95f535e7476e74c` contains no `.git` and no untracked files; the rehearsal never touched the caller's worktree.
 - The ten deleted trees were removed from the temp copy with `rm -rf`; the retained `contracts`, `plugin-kit` and `query-agent` trees were asserted to survive.
 - Both profile digests, the business-profile re-derivation, the source-manifest/lock binding and all nine pack manifest/pack digests were read from the locks, not from plugin source.
 - The pack readers and 16 backend/kernel modules imported from the copied tree with plugin sources absent.
@@ -88,9 +88,9 @@ absence, lock and import checks; a committed receipt must be a full PASS.
 {
   "schema_version": "shinemage-production-only-closure-receipt/v1",
   "verdict": "PASS",
-  "ref": "origin/main",
-  "commit": "d53a573dd8274786a2a0ca2890fa66ddd1c68c53",
-  "tree": "4bd688483683bfac5f924789da27a68573ec0056",
+  "ref": "HEAD",
+  "commit": "e6af4ecff8cc32142fafeac2c95f535e7476e74c",
+  "tree": "24f5952d60aed057ad16ceb167d8b4edbfe61d22",
   "absence": {
     "simulated_absent": [
       "analytics-workbench",
@@ -114,22 +114,22 @@ absence, lock and import checks; a committed receipt must be a full PASS.
   "inputs": {
     "lock": {
       "path": "config/shinemage-composition-packs.lock.json",
-      "sha256": "81a10f70e7f4a220676cdfb0e15a4422e6ceef65988cf0406452bd965adb2842"
+      "sha256": "82fdae800c582e9f55d8ab03e3529ce3e0e4973e0f5b14421a395ebe3187ade3"
     },
     "manifest": {
       "path": "config/shinemage-composition-pack-manifest.v1.json",
-      "sha256": "29055f92d0ac8d739a01091a4252470e6b8b4ab747cc1c10203ca22dc40f5931"
+      "sha256": "f952bb193af9710592631c3b8850d0c737db12328c843af75c8cbb5360d4762f"
     },
     "artifact_lock": {
       "path": "config/shinemage-composition-artifact.lock.json",
-      "sha256": "5fcd381b564bc60fcf0e0f83d54f863199b262c2414b9b9f4b9e1d67a28e0493",
-      "id": 13417537931,
-      "run_id": 42035243845,
-      "head_sha": "b29a84f3ac18ab2b499e8752fada47fbe4feed76",
-      "artifact_sha256": "b1fb2976c6299136224240422f5f64a701e36100ecd73ef40b234a235b358589",
-      "composition_lock_sha256": "81a10f70e7f4a220676cdfb0e15a4422e6ceef65988cf0406452bd965adb2842"
+      "sha256": "eeabcc0f3ba7307d0484c682dfdb9e8e57eeb8645529224d15ddc851e61018af",
+      "id": 14142656552,
+      "run_id": 43667164993,
+      "head_sha": "93dae0ab0538eca6f2d3565b5f30d32f330e6d66",
+      "artifact_sha256": "9ed0741d172ecfdc69fd0a7e1ded9066fb86dfca3f9129ff7397549971c7e52d",
+      "composition_lock_sha256": "82fdae800c582e9f55d8ab03e3529ce3e0e4973e0f5b14421a395ebe3187ade3"
     },
-    "artifact_zip_sha256": "b1fb2976c6299136224240422f5f64a701e36100ecd73ef40b234a235b358589",
+    "artifact_zip_sha256": "9ed0741d172ecfdc69fd0a7e1ded9066fb86dfca3f9129ff7397549971c7e52d",
     "profiles": [
       {
         "name": "crm",
@@ -146,73 +146,73 @@ absence, lock and import checks; a committed receipt must be a full PASS.
       {
         "id": "@shine-mage/dsh-analytics-workbench-b0",
         "directory": "analytics-workbench",
-        "sha": "ae922fa3ff80c238d47bee7c8cbed1705b55f836",
-        "manifest_sha256": "735092d62e77b7533435aa475c4b297913e1f3b9f832efa70f20a2eb8ca061af",
-        "pack_sha256": "f83a65a48900b6b51a9b59ceb8ea6bbb0a4d456800c41499f72651d8155c7017"
+        "sha": "58ce1e54ff676e839ebc1d6aff9723dafc286142",
+        "manifest_sha256": "1a8cc2ded52e0fc80acfdf797a3d1f4dc3243c117f922dd07627f4d7bb8250e8",
+        "pack_sha256": "efead1c1ac3ac4ca5fc2f4f0f57e7e78bd346ed2e351372f8236fd5440f40e1c"
       },
       {
         "id": "@shine-mage/dsh-crm-knowledge",
         "directory": "crm-knowledge",
-        "sha": "86ff10b9926c4e393829ad3bccbfad43a028158f",
-        "manifest_sha256": "fc760439b84a9576a34cb324b06937c11c4aa5de70286ccf831a2db1893e9cfe",
-        "pack_sha256": "aede350861b4d94002fd2e1bf15630408ad0c24d578b03fc48250bb3f2d7da03"
+        "sha": "825d4d535ac6531feed9d5117686affae49496c5",
+        "manifest_sha256": "967d3606bf9422ca0e16bc0587a4d0eb9d966932fbd2b84db7eb6cf4745c7821",
+        "pack_sha256": "4ca494fc1beaca021bbc55c394b2e8e875ad37c8ccdc3cad966832395dda49e3"
       },
       {
         "id": "@shine-mage/dsh-knowledge",
         "directory": "knowledge",
-        "sha": "902a1b41307c0c88a3b29c91294ca416bc0d00b7",
-        "manifest_sha256": "6f5e1e8c3a6a6183829717dfeb5cffbace0911d5c07ad1244b1dd04b8cd60c4e",
-        "pack_sha256": "69c65831b9daa55e7fa063729bf7ff8ddf1cbe83b62cfd16e5224e5181814b56"
+        "sha": "62631fb00e8ec0a4a84478fcdb6fd4bba62b5f1a",
+        "manifest_sha256": "14ef5f0020325cd456971d5b91a872e6bf4d5b560d598577bd0b2fb00c21e079",
+        "pack_sha256": "47a56c197c5f93613b07fd8c9363cc48a5a5accd891d388d32e634f08905108e"
       },
       {
         "id": "@shine-mage/dsh-shine-board",
         "directory": "shine-board",
-        "sha": "97885ddfdfca8efa779c06b00e9ee61d0d05dbf9",
-        "manifest_sha256": "948df5481cb287a79d2564b8d3b0481b11f53d01d231e3c0738da9986b421705",
+        "sha": "d8cc64dd453a4d74ef3a7076cc72313a5b02095b",
+        "manifest_sha256": "0dc9ac849110809b2579cb37aa929333b97693270d788cbafc654d82303f0e43",
         "pack_sha256": "a6133269183215f7bb32f40f81e7e42f65e2b0f31c9536bef7f06673215ca38c"
       },
       {
         "id": "@shine-mage/dsh-shine-crowd-action",
         "directory": "shine-crowd-action",
-        "sha": "dc6f0d2c2bf18eb6d29cb1117c004b462485a0d2",
-        "manifest_sha256": "c5d64539536619fa62e9144c6ed89d9ba7fa74c4b03711e7e4be6c20e2c13aa4",
+        "sha": "0b282378ec17227f9527c3d42ad9e37d680f08ba",
+        "manifest_sha256": "01bfeec9f0297aa09c48129e0d1ffc2945de83dd278d9b12cbf3c5f3f4ae0f42",
         "pack_sha256": "2106f688733f304cb9bf50237f4b22f3b35e4fefdeea7d15f1efd5b296963401"
       },
       {
         "id": "@shine-mage/dsh-shine-query",
         "directory": "shine-query",
-        "sha": "7202f182af696f11b6b7691fbff7f626e2ee711c",
-        "manifest_sha256": "5f8734a04350ee43be1525b775657ec609c729db739833824953bdcebcc5d99c",
+        "sha": "1e3bebd67c25cb67899133257e3e4c63ad770a43",
+        "manifest_sha256": "d6ed52af7d5135b914f89ba8d751d753665c3518ad8c7981480baca6086a6160",
         "pack_sha256": "404308bfab66b329096c55fdca6432ea738eceb6bfa027fc48281a6bd4b85eb1"
       },
       {
         "id": "@shine-mage/dsh-shine-funnel",
         "directory": "shine-funnel",
-        "sha": "c3dd9d3c107abe1cb7c558e9230fb4aa2b91a3c9",
-        "manifest_sha256": "7bf222d844250313ad9070ac6987e9b4f006ef12482108f1a855e8420cec7c8e",
+        "sha": "9ac830734b20c1fc4424b22c85068734da4d9f33",
+        "manifest_sha256": "99802cc1507b452c37f1fe778170f155941b5b6108263ec8279c7ede6e160f73",
         "pack_sha256": "17494d3b28292348f7141a477b92cd0bc6a6c6c570a310e7890413981338ee94"
       },
       {
         "id": "@shine-mage/dsh-shine-waterfall",
         "directory": "shine-waterfall",
-        "sha": "d5d2c6fcb4aa08fc9b57969e94bb38d269c992cd",
-        "manifest_sha256": "53dd522e3bfb4dfc523f809ccd8a1e5d3f602140cb3ede5b9394e420297d6cb5",
+        "sha": "ec5292277122137cdf0df24dfdab0c75d15708c6",
+        "manifest_sha256": "dcbd76457ea1eab14b5b05ca4c2fb521859b1c7d394590f4e6802dd9e6fcaf39",
         "pack_sha256": "aee1fa8a33669468cd92a243ed85feb78e50d5bfc7d84dc88ad58bc701d37fee"
       },
       {
         "id": "@shine-mage/dsh-shine-brand",
         "directory": "shine-brand",
-        "sha": "6aa335d29d59c21034b41103ed7858b5b912aca7",
-        "manifest_sha256": "5dd648753a257fbef9d96b3188d52f5338c46f01c1642c1b179a1aa5ce36d7b7",
-        "pack_sha256": "47a6450505b7b9148de735481483d66a4278e59696549bdc505465a6a5fad8a8"
+        "sha": "bcc9f1cd99e588f244858b7b5769c42d435ca9a3",
+        "manifest_sha256": "d331f992a7cf8c5ccc4d14dacdfba67f2fe4b14f77ca9398345d649d096645c2",
+        "pack_sha256": "8eb1d8e1356989d85edd77296181d980dbf520ac577110a013b32e1f2e8a43d2"
       }
     ],
     "domains": [
       {
         "package": "@shine-mage/board-components",
         "directory": "board-components",
-        "sha": "4245aa811771f45d847bc7644234fabe5a6eee45",
-        "manifest_sha256": "99989ec7207286ad37ab863236a0a87146b55aa2d12d2731325aa75018ee0265",
+        "sha": "59280a250416eec23f727d4f3ffb0ca38b65794c",
+        "manifest_sha256": "2f535724fa0f631869c8882b725bb9ce901a6502f8a974b1525daebe12d51f14",
         "pack_sha256": "66d53381095e93f38dbaa7385780f20b677f68ca2692702cb270849f3392853e"
       }
     ]
@@ -220,11 +220,11 @@ absence, lock and import checks; a committed receipt must be a full PASS.
   "environment": {
     "node": "v24.19.0",
     "pnpm": "11.28.2",
-    "python": "3.14.10",
-    "platform": "linux",
-    "arch": "x64",
+    "python": "3.14.8",
+    "platform": "darwin",
+    "arch": "arm64",
     "install_mode": "PRODUCTION_ONLY",
-    "commit_date": "2026-11-05T23:24:01+08:00"
+    "commit_date": "2026-11-15T10:21:02+08:00"
   },
   "checks": [
     {
@@ -289,8 +289,8 @@ absence, lock and import checks; a committed receipt must be a full PASS.
     }
   ],
   "composition": {
-    "lock_sha256": "81a10f70e7f4a220676cdfb0e15a4422e6ceef65988cf0406452bd965adb2842",
-    "source_manifest_sha256": "29055f92d0ac8d739a01091a4252470e6b8b4ab747cc1c10203ca22dc40f5931",
+    "lock_sha256": "82fdae800c582e9f55d8ab03e3529ce3e0e4973e0f5b14421a395ebe3187ade3",
+    "source_manifest_sha256": "f952bb193af9710592631c3b8850d0c737db12328c843af75c8cbb5360d4762f",
     "profiles": [
       {
         "name": "crm",
@@ -306,74 +306,74 @@ absence, lock and import checks; a committed receipt must be a full PASS.
     "plugins": [
       {
         "id": "@shine-mage/dsh-analytics-workbench-b0",
-        "source_sha": "ae922fa3ff80c238d47bee7c8cbed1705b55f836",
+        "source_sha": "58ce1e54ff676e839ebc1d6aff9723dafc286142",
         "version": "0.0.0-b0",
-        "manifest_sha256": "735092d62e77b7533435aa475c4b297913e1f3b9f832efa70f20a2eb8ca061af",
-        "pack_sha256": "f83a65a48900b6b51a9b59ceb8ea6bbb0a4d456800c41499f72651d8155c7017"
+        "manifest_sha256": "1a8cc2ded52e0fc80acfdf797a3d1f4dc3243c117f922dd07627f4d7bb8250e8",
+        "pack_sha256": "efead1c1ac3ac4ca5fc2f4f0f57e7e78bd346ed2e351372f8236fd5440f40e1c"
       },
       {
         "id": "@shine-mage/dsh-crm-knowledge",
-        "source_sha": "86ff10b9926c4e393829ad3bccbfad43a028158f",
+        "source_sha": "825d4d535ac6531feed9d5117686affae49496c5",
         "version": "0.0.0-crm.5",
-        "manifest_sha256": "fc760439b84a9576a34cb324b06937c11c4aa5de70286ccf831a2db1893e9cfe",
-        "pack_sha256": "aede350861b4d94002fd2e1bf15630408ad0c24d578b03fc48250bb3f2d7da03"
+        "manifest_sha256": "967d3606bf9422ca0e16bc0587a4d0eb9d966932fbd2b84db7eb6cf4745c7821",
+        "pack_sha256": "4ca494fc1beaca021bbc55c394b2e8e875ad37c8ccdc3cad966832395dda49e3"
       },
       {
         "id": "@shine-mage/dsh-knowledge",
-        "source_sha": "902a1b41307c0c88a3b29c91294ca416bc0d00b7",
+        "source_sha": "62631fb00e8ec0a4a84478fcdb6fd4bba62b5f1a",
         "version": "0.0.0-candidate.1",
-        "manifest_sha256": "6f5e1e8c3a6a6183829717dfeb5cffbace0911d5c07ad1244b1dd04b8cd60c4e",
-        "pack_sha256": "69c65831b9daa55e7fa063729bf7ff8ddf1cbe83b62cfd16e5224e5181814b56"
+        "manifest_sha256": "14ef5f0020325cd456971d5b91a872e6bf4d5b560d598577bd0b2fb00c21e079",
+        "pack_sha256": "47a56c197c5f93613b07fd8c9363cc48a5a5accd891d388d32e634f08905108e"
       },
       {
         "id": "@shine-mage/dsh-shine-board",
-        "source_sha": "97885ddfdfca8efa779c06b00e9ee61d0d05dbf9",
+        "source_sha": "d8cc64dd453a4d74ef3a7076cc72313a5b02095b",
         "version": "0.0.0-b0",
-        "manifest_sha256": "948df5481cb287a79d2564b8d3b0481b11f53d01d231e3c0738da9986b421705",
+        "manifest_sha256": "0dc9ac849110809b2579cb37aa929333b97693270d788cbafc654d82303f0e43",
         "pack_sha256": "a6133269183215f7bb32f40f81e7e42f65e2b0f31c9536bef7f06673215ca38c"
       },
       {
         "id": "@shine-mage/dsh-shine-crowd-action",
-        "source_sha": "dc6f0d2c2bf18eb6d29cb1117c004b462485a0d2",
+        "source_sha": "0b282378ec17227f9527c3d42ad9e37d680f08ba",
         "version": "0.0.0-b0",
-        "manifest_sha256": "c5d64539536619fa62e9144c6ed89d9ba7fa74c4b03711e7e4be6c20e2c13aa4",
+        "manifest_sha256": "01bfeec9f0297aa09c48129e0d1ffc2945de83dd278d9b12cbf3c5f3f4ae0f42",
         "pack_sha256": "2106f688733f304cb9bf50237f4b22f3b35e4fefdeea7d15f1efd5b296963401"
       },
       {
         "id": "@shine-mage/dsh-shine-query",
-        "source_sha": "7202f182af696f11b6b7691fbff7f626e2ee711c",
+        "source_sha": "1e3bebd67c25cb67899133257e3e4c63ad770a43",
         "version": "0.0.0-b0",
-        "manifest_sha256": "5f8734a04350ee43be1525b775657ec609c729db739833824953bdcebcc5d99c",
+        "manifest_sha256": "d6ed52af7d5135b914f89ba8d751d753665c3518ad8c7981480baca6086a6160",
         "pack_sha256": "404308bfab66b329096c55fdca6432ea738eceb6bfa027fc48281a6bd4b85eb1"
       },
       {
         "id": "@shine-mage/dsh-shine-funnel",
-        "source_sha": "c3dd9d3c107abe1cb7c558e9230fb4aa2b91a3c9",
+        "source_sha": "9ac830734b20c1fc4424b22c85068734da4d9f33",
         "version": "0.0.0-b0",
-        "manifest_sha256": "7bf222d844250313ad9070ac6987e9b4f006ef12482108f1a855e8420cec7c8e",
+        "manifest_sha256": "99802cc1507b452c37f1fe778170f155941b5b6108263ec8279c7ede6e160f73",
         "pack_sha256": "17494d3b28292348f7141a477b92cd0bc6a6c6c570a310e7890413981338ee94"
       },
       {
         "id": "@shine-mage/dsh-shine-waterfall",
-        "source_sha": "d5d2c6fcb4aa08fc9b57969e94bb38d269c992cd",
+        "source_sha": "ec5292277122137cdf0df24dfdab0c75d15708c6",
         "version": "0.0.0-b0",
-        "manifest_sha256": "53dd522e3bfb4dfc523f809ccd8a1e5d3f602140cb3ede5b9394e420297d6cb5",
+        "manifest_sha256": "dcbd76457ea1eab14b5b05ca4c2fb521859b1c7d394590f4e6802dd9e6fcaf39",
         "pack_sha256": "aee1fa8a33669468cd92a243ed85feb78e50d5bfc7d84dc88ad58bc701d37fee"
       },
       {
         "id": "@shine-mage/dsh-shine-brand",
-        "source_sha": "6aa335d29d59c21034b41103ed7858b5b912aca7",
+        "source_sha": "bcc9f1cd99e588f244858b7b5769c42d435ca9a3",
         "version": "0.0.0-b0",
-        "manifest_sha256": "5dd648753a257fbef9d96b3188d52f5338c46f01c1642c1b179a1aa5ce36d7b7",
-        "pack_sha256": "47a6450505b7b9148de735481483d66a4278e59696549bdc505465a6a5fad8a8"
+        "manifest_sha256": "d331f992a7cf8c5ccc4d14dacdfba67f2fe4b14f77ca9398345d649d096645c2",
+        "pack_sha256": "8eb1d8e1356989d85edd77296181d980dbf520ac577110a013b32e1f2e8a43d2"
       }
     ],
     "domains": [
       {
         "package": "@shine-mage/board-components",
-        "source_sha": "4245aa811771f45d847bc7644234fabe5a6eee45",
+        "source_sha": "59280a250416eec23f727d4f3ffb0ca38b65794c",
         "manifest": "domain/board-components-pack.json",
-        "manifest_sha256": "99989ec7207286ad37ab863236a0a87146b55aa2d12d2731325aa75018ee0265",
+        "manifest_sha256": "2f535724fa0f631869c8882b725bb9ce901a6502f8a974b1525daebe12d51f14",
         "pack_sha256": "66d53381095e93f38dbaa7385780f20b677f68ca2692702cb270849f3392853e"
       }
     ],
@@ -383,74 +383,74 @@ absence, lock and import checks; a committed receipt must be a full PASS.
     }
   },
   "release_payload": {
-    "files": 1647,
-    "bytes": 24307197,
+    "files": 1656,
+    "bytes": 24413803,
     "profile_pack_snapshot": {
       "path": "shinemage-release-pack-inputs.json",
-      "sha256": "b8d69e799f07ee83cab4bd192244eb5da6cae27622fb83ca8dcb154c58614dff"
+      "sha256": "23e8212441334d06934d4349ef383e475aa94d065c5694d451a01d49cd133303"
     },
     "plugins": [
       {
         "id": "@shine-mage/dsh-crm-knowledge",
-        "source_sha": "86ff10b9926c4e393829ad3bccbfad43a028158f",
+        "source_sha": "825d4d535ac6531feed9d5117686affae49496c5",
         "version": "0.0.0-crm.5",
-        "manifest_sha256": "fc760439b84a9576a34cb324b06937c11c4aa5de70286ccf831a2db1893e9cfe",
-        "pack_sha256": "aede350861b4d94002fd2e1bf15630408ad0c24d578b03fc48250bb3f2d7da03"
+        "manifest_sha256": "967d3606bf9422ca0e16bc0587a4d0eb9d966932fbd2b84db7eb6cf4745c7821",
+        "pack_sha256": "4ca494fc1beaca021bbc55c394b2e8e875ad37c8ccdc3cad966832395dda49e3"
       },
       {
         "id": "@shine-mage/dsh-knowledge",
-        "source_sha": "902a1b41307c0c88a3b29c91294ca416bc0d00b7",
+        "source_sha": "62631fb00e8ec0a4a84478fcdb6fd4bba62b5f1a",
         "version": "0.0.0-candidate.1",
-        "manifest_sha256": "6f5e1e8c3a6a6183829717dfeb5cffbace0911d5c07ad1244b1dd04b8cd60c4e",
-        "pack_sha256": "69c65831b9daa55e7fa063729bf7ff8ddf1cbe83b62cfd16e5224e5181814b56"
+        "manifest_sha256": "14ef5f0020325cd456971d5b91a872e6bf4d5b560d598577bd0b2fb00c21e079",
+        "pack_sha256": "47a56c197c5f93613b07fd8c9363cc48a5a5accd891d388d32e634f08905108e"
       },
       {
         "id": "@shine-mage/dsh-analytics-workbench-b0",
-        "source_sha": "ae922fa3ff80c238d47bee7c8cbed1705b55f836",
+        "source_sha": "58ce1e54ff676e839ebc1d6aff9723dafc286142",
         "version": "0.0.0-b0",
-        "manifest_sha256": "735092d62e77b7533435aa475c4b297913e1f3b9f832efa70f20a2eb8ca061af",
-        "pack_sha256": "f83a65a48900b6b51a9b59ceb8ea6bbb0a4d456800c41499f72651d8155c7017"
+        "manifest_sha256": "1a8cc2ded52e0fc80acfdf797a3d1f4dc3243c117f922dd07627f4d7bb8250e8",
+        "pack_sha256": "efead1c1ac3ac4ca5fc2f4f0f57e7e78bd346ed2e351372f8236fd5440f40e1c"
       },
       {
         "id": "@shine-mage/dsh-shine-brand",
-        "source_sha": "6aa335d29d59c21034b41103ed7858b5b912aca7",
+        "source_sha": "bcc9f1cd99e588f244858b7b5769c42d435ca9a3",
         "version": "0.0.0-b0",
-        "manifest_sha256": "5dd648753a257fbef9d96b3188d52f5338c46f01c1642c1b179a1aa5ce36d7b7",
-        "pack_sha256": "47a6450505b7b9148de735481483d66a4278e59696549bdc505465a6a5fad8a8"
+        "manifest_sha256": "d331f992a7cf8c5ccc4d14dacdfba67f2fe4b14f77ca9398345d649d096645c2",
+        "pack_sha256": "8eb1d8e1356989d85edd77296181d980dbf520ac577110a013b32e1f2e8a43d2"
       },
       {
         "id": "@shine-mage/dsh-shine-waterfall",
-        "source_sha": "d5d2c6fcb4aa08fc9b57969e94bb38d269c992cd",
+        "source_sha": "ec5292277122137cdf0df24dfdab0c75d15708c6",
         "version": "0.0.0-b0",
-        "manifest_sha256": "53dd522e3bfb4dfc523f809ccd8a1e5d3f602140cb3ede5b9394e420297d6cb5",
+        "manifest_sha256": "dcbd76457ea1eab14b5b05ca4c2fb521859b1c7d394590f4e6802dd9e6fcaf39",
         "pack_sha256": "aee1fa8a33669468cd92a243ed85feb78e50d5bfc7d84dc88ad58bc701d37fee"
       },
       {
         "id": "@shine-mage/dsh-shine-crowd-action",
-        "source_sha": "dc6f0d2c2bf18eb6d29cb1117c004b462485a0d2",
+        "source_sha": "0b282378ec17227f9527c3d42ad9e37d680f08ba",
         "version": "0.0.0-b0",
-        "manifest_sha256": "c5d64539536619fa62e9144c6ed89d9ba7fa74c4b03711e7e4be6c20e2c13aa4",
+        "manifest_sha256": "01bfeec9f0297aa09c48129e0d1ffc2945de83dd278d9b12cbf3c5f3f4ae0f42",
         "pack_sha256": "2106f688733f304cb9bf50237f4b22f3b35e4fefdeea7d15f1efd5b296963401"
       },
       {
         "id": "@shine-mage/dsh-shine-query",
-        "source_sha": "7202f182af696f11b6b7691fbff7f626e2ee711c",
+        "source_sha": "1e3bebd67c25cb67899133257e3e4c63ad770a43",
         "version": "0.0.0-b0",
-        "manifest_sha256": "5f8734a04350ee43be1525b775657ec609c729db739833824953bdcebcc5d99c",
+        "manifest_sha256": "d6ed52af7d5135b914f89ba8d751d753665c3518ad8c7981480baca6086a6160",
         "pack_sha256": "404308bfab66b329096c55fdca6432ea738eceb6bfa027fc48281a6bd4b85eb1"
       },
       {
         "id": "@shine-mage/dsh-shine-board",
-        "source_sha": "97885ddfdfca8efa779c06b00e9ee61d0d05dbf9",
+        "source_sha": "d8cc64dd453a4d74ef3a7076cc72313a5b02095b",
         "version": "0.0.0-b0",
-        "manifest_sha256": "948df5481cb287a79d2564b8d3b0481b11f53d01d231e3c0738da9986b421705",
+        "manifest_sha256": "0dc9ac849110809b2579cb37aa929333b97693270d788cbafc654d82303f0e43",
         "pack_sha256": "a6133269183215f7bb32f40f81e7e42f65e2b0f31c9536bef7f06673215ca38c"
       },
       {
         "id": "@shine-mage/dsh-shine-funnel",
-        "source_sha": "c3dd9d3c107abe1cb7c558e9230fb4aa2b91a3c9",
+        "source_sha": "9ac830734b20c1fc4424b22c85068734da4d9f33",
         "version": "0.0.0-b0",
-        "manifest_sha256": "7bf222d844250313ad9070ac6987e9b4f006ef12482108f1a855e8420cec7c8e",
+        "manifest_sha256": "99802cc1507b452c37f1fe778170f155941b5b6108263ec8279c7ede6e160f73",
         "pack_sha256": "17494d3b28292348f7141a477b92cd0bc6a6c6c570a310e7890413981338ee94"
       }
     ],
