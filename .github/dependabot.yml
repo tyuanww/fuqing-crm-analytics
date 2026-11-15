@@ -49,6 +49,12 @@ updates:
     ignore:
       - dependency-name: "typescript"
         versions: [">=7.0.0 <8.0.0"]
+      # Tailwind v4 is a breaking PostCSS/config migration, not a routine bump:
+      # the PostCSS plugin moved to @tailwindcss/postcss and the JS config is
+      # replaced by a CSS-first one (closed PR #274). Keep the v3 pin until the
+      # migration lands as its own task; no auto-merge.
+      - dependency-name: "tailwindcss"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
