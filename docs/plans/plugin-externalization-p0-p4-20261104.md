@@ -702,6 +702,20 @@ PR #215 已经修掉机械项（test 四片、pip 不触发 b0、path matrix 补
 - runtime 不在 `.ci/rc3-composition` 的 20 个成员内，标题变更不需要 composition reseal，也不重算 config lock。
 - 本记录只追加证据：不创建 tag/release、不改 config/workflow/lock、不发布、不部署。
 
+### 5.8 2026-11-15 作者 artifact 到期决定（允许过期）
+
+**观测（2026-11-15T01:02Z）。** 5 个作者 evidence archive 仍在，到期窗口 `2026-11-19T12:53:52Z` 至 `2026-11-19T13:01:12Z`：`13416002428`（domain，`shinemage-board-components`）、`13415588775`（brand）、`13416776446`（crm）、`13416602588`（workbench）、`13416851263`（public workbench）。sealed composition artifact `13417537931` 到期 `2027-02-03T13:22:50Z`。9 个 formal-pack artifact 与作者 evidence 同一窗口到期，只在 reseal 时使用。
+
+**决定。** 允许 5 个作者 evidence archive 在 2026-11-19 到期。本轮不重跑作者 push run，不改任何 lock 或 pin，不做 reseal。
+
+**依据。** 产品仍钉 DSH `0.2.1-rc.5`（`b830ec95`），到 2026-11-15 没有新的升级决定。当前没有需要从作者 artifact 回读的复验，G3 真机验收使用 sealed artifact `13417537931` 与 pinned rc.5 宿主。本机桌面 app 随 nightly 更新到 `0.2.2-rc.2` 不改变产品 pin。
+
+**影响。** 2026-11-19 之后，按 id 接收作者证据的步骤会在 `Receive fixed ...` 或 `Prepare sealed independent plugin packs` 处 404，涉及 `lint.yml` 的 `b0-contract-build`（仅 b0 相关路径变化时运行）、`dsh-b0.yml` 的手工 dispatch 与 `dsh-release-preflight`。artifact 到期周报从 2026-11-16 09:00（Asia/Shanghai）的周一运行起转红，属预期信号，不是脚本故障。
+
+**恢复。** 按 [artifact-expiry.md](../operating/artifact-expiry.md) 的「过期后怎么刷新」重跑原始作者 push run（`42031523764`、`42031515425`、`42031506827`、`42030897866`），用 receiver 输出回填新 `archive.artifact_id`，随 PR 提交。刷新走 `gh run rerun`，不需要旧 artifact 还在。若以后需要 reseal，9 个 formal-pack artifact 同样按 `source_sha` 重跑作者 run。
+
+**未做。** 没有 lock、pin、workflow、作者仓或 runtime 变更；本节只追加决定记录。
+
 ## 6 如何接续
 
 1. 先读 `AGENTS.md`、本文件、`STATUS.md`、`docs/operating/verification.md`，再读 #211/#216/#218/#222 的 body（均已合并）。不要只读会话摘要。
