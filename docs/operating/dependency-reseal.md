@@ -19,8 +19,10 @@ helper 顺序执行：
 2. `service-manifest-pins.mjs --write`，再 `--check`，仍有 `SERVICE_DEPENDENCY_*` drift 就失败；
 3. 从当前 `config/shinemage-composition-packs.lock.json` 与 `config/shinemage-composition-pack-manifest.v1.json` **推导** 20 个 `.ci` 成员的路径、文件名和期望摘要，字节优先取 `--packs`、未变的 pack 取密封分支，重建 `codex/rc3-composition-artifact-20261024`（固定身份 + 目标 commit 日期，同一输入产生同一 commit/tree），只对该分支 `--force-with-lease` 推送，触发 push workflow；
 4. 等 workflow SUCCESS，用 `composition-pack-inputs.mjs --artifact-lock` 下载并验证 20 个成员、sha256、run/head 绑定，并校验 sealed head 的 `requirements-lock.txt` 能对上当前 service recipes；
-5. 改写 `config/shinemage-composition-artifact.lock.json`，把 `scripts/release/runtime-host-evidence.mjs` 的 `RUNTIME_HOST_SOURCE` 移到新 sealed head；
-6. 打印每个改动文件与 old/new artifact id、run、head。
+5. **先把旧 sealed head 固定下来**：若旧 head 与新 head 不同，确保保留分支 `codex/rc3-composition-artifact-retained-<old-head>` 指向旧 head（幂等：已指向旧 head 就不动；同名但指向别的 commit 则 fail-closed，绝不用 force 移动），再改写 `config/shinemage-composition-artifact.lock.json`，把 `scripts/release/runtime-host-evidence.mjs` 的 `RUNTIME_HOST_SOURCE` 移到新 sealed head；
+6. 打印每个改动文件与 old/new artifact id、run、head，以及 retained ref（`RESPIN_SUMMARY retained_ref ...`）。
+
+为什么需要 step 5 的保留分支：sealing commit 的 parent 是目标 commit，不是上一个 sealed head，因此 sealing 分支 `--force-with-lease` 推送后旧 head 立即脱离所有 ref。而**重签前已经开着的 PR** 仍把旧 head 写在自己的 `RUNTIME_HOST_SOURCE` 里，release preflight 会对每个 open PR 的该 pin 做 `git ls-tree`；旧 head 不可达时这些 PR 会一直红到 reseal PR 合并。保留分支让 preflight 和回滚取证都还能读到旧 head，并且不改 sealing 分支的单写者/force-with-lease 语义。
 
 ### 作者 pack 变了（repack）
 
@@ -67,6 +69,7 @@ node scripts/release/rebuild-seal-members.mjs --check --packs /tmp/author-packs 
 - `--check` 输出 `RESPIN_CHECK_OK`；`rebuild-seal-members.mjs --check` 输出 `SEAL_REBUILD_CHECK_OK`；
 - PR 的 `b0-contract-build` SUCCESS，且 `test` / `dependency-audit` 绿；
 - lock 的 `id/runId/headSha` 与 run 页面一致，`RUNTIME_HOST_SOURCE` 等于 `headSha`；
+- 输出 `RESPIN_SUMMARY retained_ref codex/rc3-composition-artifact-retained-<old-head> created head=<old-head>`（重跑为 `already-present`；旧 head 未变时 `skipped=head-unchanged`；旧 head 已不可达时 `skipped=head-unavailable`），且 `git ls-remote origin refs/heads/codex/rc3-composition-artifact-retained-<old-head>` 等于旧 head；
 - 不带 `--dry-run` 的 run 已证明远端 artifact 可下载、digest 与 run/head 绑定。
 
 ## Dependabot 分支
@@ -118,6 +121,9 @@ B0 未绿前不要合并。
 | `RESPIN_SEALED_*` / `RESPIN_SEALED_INPUT` / `RESPIN_SOURCE_TARGET_LOCK` | 真正不一致：`--packs` 提供的 manifest/tarball 与 lock/manifest 摘要不符、成员数/校验和异常，或 sealed head 的 lock 对不上 recipe；核对 pack 来源与 lock，不要手改 `.ci` |
 | `RESPIN_DEPENDENT_LOCK_UNSUPPORTED` | 有新的 `config/*.json` 嵌了旧 artifact id/head；先扩展 helper 的依赖锁改写，再重签 |
 | `RESPIN_SEALING_RUN_FAILED` | 打开 run 日志；sealing 分支已推到失败 head，修因后重跑 helper（force-with-lease 会覆盖该专用分支） |
+| `RESPIN_RETAINED_REF_CONFLICT` | 同名保留分支已存在却指向别的 commit。不要 `--force` 改它（那是取证证据）：人工确认旧 head 是否已被别的 ref 覆盖后，改用正确名字/重建保留分支，再重跑 helper |
+| `RESPIN_RETAINED_REF_PUSH` / `RESPIN_RETAINED_REF_LOOKUP` | 保留分支的远端读写失败（网络/权限/远端拒绝）。修好后重跑 helper：已指向旧 head 的 ref 走幂等 `already-present`，不会重复创建 |
+| `RESPIN_SUMMARY retained_ref skipped=head-unavailable` | 旧 head 已不在本地对象库，且按 sha 也拉不回来（更早的重签已把它丢掉）。无法补建保留分支，helper 照常推进；重签前就已开着、且仍 pin 该 head 的 PR 本来已经会红，需要时单独重签/更新该 PR |
 | `RESPIN_ARTIFACT_VERIFY` / `RESPIN_ARTIFACT_MISSING` | workflow 未产出 20 成员 artifact 或下载/校验失败；重跑 sealing workflow，不要把旧 artifact 写回 lock |
 | 已推送错误 lock、尚未合并 | `git checkout -- config/shinemage-composition-artifact.lock.json scripts/release/runtime-host-evidence.mjs services/`，在正确的 commit 上重跑 helper；旧 artifact 保留 90 天可回溯，不要手写 id |
 | 已合并且 B0 红 | revert 该 PR 的 lock/pin 提交，从 revert commit 重跑 helper 重新密封；不要改历史 artifact |
@@ -125,9 +131,10 @@ B0 未绿前不要合并。
 ## 边界
 
 - helper 现在从当前锁**重建** `.ci` 成员，而不是整树复制旧字节：路径、文件名和摘要来自 `config/*lock*.json` + source manifest；字节来自 `--packs`（变化的作者 pack）或密封分支（未变的 pack）。同一输入产生同一 20 成员 tree/sums。
-- helper 不改依赖版本、pack sha、`config/*lock*.json` 内容或作者 pack 字节，只重建专用 sealing 分支并回填 lock/pin。
-- 触发 workflow、下载 artifact 是 live-only，需要仓库 push 权限和 `gh` 认证；作者 formal-pack 下载也不在 helper 内（lock 里没有 author artifact id）。
+- helper 不改依赖版本、pack sha、`config/*lock*.json` 内容或作者 pack 字节，只重建专用 sealing 分支、保留旧 sealed head 并回填 lock/pin。
+- 保留分支只建一条：`codex/rc3-composition-artifact-retained-<old-head>`，普通 push（绝不 force），旧 head 与新 head 相同、无旧 lock、或旧 head 已不可达时跳过；不碰其它 ref，也不改 sealing 分支的单写者/force-with-lease 语义。
+- 触发 workflow、下载 artifact 是 live-only，需要仓库 push 权限和 `gh` 认证；作者 formal-pack 下载也不在 helper 内（lock 里没有 author artifact id）。保留分支的远端创建同样是 live-only。
 - 单元测试只覆盖确定性部分：
-  `node --test scripts/release/respin-composition-artifact.test.mjs`（lock/pin 改写、20 成员摘要、stale source-target 拒绝、`--dry-run` 不写文件、确定性 sealing commit）；
+  `node --test scripts/release/respin-composition-artifact.test.mjs`（lock/pin 改写、20 成员摘要、stale source-target 拒绝、`--dry-run` 不写文件、确定性 sealing commit、保留分支命名/幂等/同 head 跳过/冲突拒绝与本地 bare origin fixture）；
   `node --test scripts/release/rebuild-seal-members.test.mjs`（成员路径/字节推导、partial `--packs` 回退、stale 分支检测、drift 检测、dry-run 不写、幂等重跑、真不一致拒绝）。
 - `--check` 是离线检查，不证明远端 artifact 仍存在或未过期；以 live run 和 PR 的 B0 为准。
