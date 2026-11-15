@@ -7,10 +7,10 @@ import { dirname, join } from 'node:path';
 import { promisify } from 'node:util';
 import test from 'node:test';
 import {
-  ARTIFACT_LOCK, COMPOSITION_LOCK, COMPOSITION_MANIFEST, RUNTIME_HOST_SOURCE_PATH, SEALED_DIR, SEALED_SUMS,
-  SEALING_BRANCH, SEALING_WORKFLOW, buildSealedSums, buildSealingCommit, checkState, nextRuntimeHostSource,
-  rewriteArtifactLock, rewriteRuntimeHostSource, runtimeHostSource, sealedHeadCoversTarget, verifySealedMembers,
-  verifySourceTargetLock,
+  ARTIFACT_LOCK, COMPOSITION_LOCK, COMPOSITION_MANIFEST, RETAINED_REF_PREFIX, RUNTIME_HOST_SOURCE_PATH, SEALED_DIR,
+  SEALED_SUMS, SEALING_BRANCH, SEALING_WORKFLOW, buildSealedSums, buildSealingCommit, checkState, nextRuntimeHostSource,
+  planSealedHeadRetention, retainSupersededSealedHead, retainedHeadRefName, rewriteArtifactLock,
+  rewriteRuntimeHostSource, runtimeHostSource, sealedHeadCoversTarget, verifySealedMembers, verifySourceTargetLock,
 } from './respin-composition-artifact.mjs';
 
 const exec = promisify(execFile);
@@ -272,4 +272,90 @@ test('sealing branch rebuild is deterministic, carries the target lock and is id
   assert.equal(second.changed, false);
   assert.equal((await exec('git', ['--git-dir', origin, 'rev-parse', `refs/heads/${SEALING_BRANCH}`])).stdout.trim(), first.head);
   assert.equal((await git(repo, ['worktree', 'list'])).split('\n').length, 1);
+});
+
+test('retained ref name carries the superseded head and rejects a malformed head', () => {
+  const oldHead = 'a'.repeat(40);
+  assert.equal(retainedHeadRefName(oldHead), `${RETAINED_REF_PREFIX}${oldHead}`);
+  assert.equal(RETAINED_REF_PREFIX, 'codex/rc3-composition-artifact-retained-');
+  for (const bad of ['abc', '', undefined, 'A'.repeat(40)]) {
+    assert.throws(() => retainedHeadRefName(bad), error => error.code === 'RESPIN_RETAINED_REF_INVALID');
+  }
+});
+
+test('sealed head retention is idempotent, skips an unchanged head and refuses a conflicting ref', () => {
+  const oldHead = 'a'.repeat(40);
+  const newHead = 'b'.repeat(40);
+  const ref = `${RETAINED_REF_PREFIX}${oldHead}`;
+
+  assert.deepEqual(planSealedHeadRetention({ oldHead, newHead }),
+    { action: 'create', ref, head: oldHead });
+  assert.deepEqual(planSealedHeadRetention({ oldHead, newHead, existing: null }),
+    { action: 'create', ref, head: oldHead });
+  assert.deepEqual(planSealedHeadRetention({ oldHead, newHead, existing: oldHead }),
+    { action: 'present', ref, head: oldHead });
+  assert.deepEqual(planSealedHeadRetention({ oldHead, newHead: oldHead }),
+    { action: 'skip', reason: 'head-unchanged', ref, head: oldHead });
+  assert.deepEqual(planSealedHeadRetention({ oldHead: null, newHead }),
+    { action: 'skip', reason: 'no-previous-head', ref: null, head: null });
+  assert.throws(
+    () => planSealedHeadRetention({ oldHead, newHead, existing: 'c'.repeat(40) }),
+    error => error.code === 'RESPIN_RETAINED_REF_CONFLICT' && error.message.includes(ref));
+});
+
+test('retention keeps the superseded sealed head on one extra ref and never moves a conflict', async t => {
+  const origin = await root(t);
+  const repo = await root(t);
+  await exec('git', ['init', '--bare', '-q', origin]);
+  await exec('git', ['-c', 'init.defaultBranch=main', 'init', '-q', repo]);
+  await git(repo, ['config', 'user.name', 'Respin Test']);
+  await git(repo, ['config', 'user.email', 'respin@example.invalid']);
+  await git(repo, ['remote', 'add', 'origin', origin]);
+  await put(join(repo, 'README.md'), 'old seal\n');
+  await git(repo, ['add', '-A']);
+  await git(repo, ['commit', '-q', '-m', 'old sealed head']);
+  const oldHead = await git(repo, ['rev-parse', 'HEAD']);
+  await git(repo, ['push', '-q', '-u', 'origin', 'main']);
+
+  // Skip paths never look at the remote: unchanged head and no previous head.
+  const unchanged = await retainSupersededSealedHead({ root: repo, oldHead, newHead: oldHead });
+  assert.equal(unchanged.action, 'skip');
+  assert.equal(unchanged.reason, 'head-unchanged');
+  const absent = await retainSupersededSealedHead({ root: repo, oldHead: null, newHead: 'b'.repeat(40) });
+  assert.equal(absent.action, 'skip');
+  assert.equal(absent.reason, 'no-previous-head');
+
+  await put(join(repo, 'README.md'), 'new seal\n');
+  await git(repo, ['add', '-A']);
+  await git(repo, ['commit', '-q', '-m', 'new sealed head']);
+  await git(repo, ['push', '-q', 'origin', 'main']);
+  const created = await retainSupersededSealedHead({ root: repo, oldHead, newHead: 'b'.repeat(40) });
+  assert.equal(created.action, 'create');
+  assert.equal(created.ref, `${RETAINED_REF_PREFIX}${oldHead}`);
+  const remoteRef = `refs/heads/${created.ref}`;
+  assert.equal((await exec('git', ['--git-dir', origin, 'rev-parse', remoteRef])).stdout.trim(), oldHead);
+
+  // Re-running the reseal is the idempotent `present` path.
+  const present = await retainSupersededSealedHead({ root: repo, oldHead, newHead: 'b'.repeat(40) });
+  assert.equal(present.action, 'present');
+
+  // Only the retention ref was added; main and every other ref are untouched.
+  const refs = (await exec('git', ['--git-dir', origin, 'for-each-ref', '--format=%(refname)'])).stdout
+    .trim().split('\n').sort();
+  assert.deepEqual(refs, ['refs/heads/main', remoteRef].sort());
+
+  // A same-named ref pointing elsewhere is never force-moved.
+  const otherHead = (await exec('git', ['-C', repo, 'rev-parse', 'HEAD'])).stdout.trim();
+  await exec('git', ['--git-dir', origin, 'update-ref', remoteRef, otherHead]);
+  await rejectsCode(() => retainSupersededSealedHead({ root: repo, oldHead, newHead: 'b'.repeat(40) }),
+    'RESPIN_RETAINED_REF_CONFLICT');
+  assert.equal((await exec('git', ['--git-dir', origin, 'rev-parse', remoteRef])).stdout.trim(), otherHead);
+
+  // A lock naming an already-dropped head cannot be retained; the skip is
+  // recorded instead of blocking the reseal.
+  const unavailable = await retainSupersededSealedHead({ root: repo, oldHead: 'd'.repeat(40), newHead: 'b'.repeat(40) });
+  assert.equal(unavailable.action, 'skip');
+  assert.equal(unavailable.reason, 'head-unavailable');
+  assert.equal((await exec('git', ['--git-dir', origin, 'for-each-ref', '--format=%(refname)'])).stdout
+    .trim().split('\n').sort().length, 2);
 });

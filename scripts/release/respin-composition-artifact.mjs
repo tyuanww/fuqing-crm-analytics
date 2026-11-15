@@ -12,8 +12,15 @@
  *   2. run the service-manifest SSOT generator with --write and re-check;
  *   3. rebuild the dedicated sealing branch from the target commit and push it;
  *   4. wait for the push-triggered sealing workflow, verify the artifact;
- *   5. update the artifact lock and move RUNTIME_HOST_SOURCE to the sealed head;
+ *   5. retain the superseded sealed head, update the artifact lock and move
+ *      RUNTIME_HOST_SOURCE to the sealed head;
  *   6. print every changed file and the old/new ids.
+ *
+ * Step 5 retains the old head because the sealing commit's parent is the target
+ * commit, not the previous sealed head: the sealing branch push therefore drops
+ * the old head, while open PRs opened before the reseal still pin it in
+ * `RUNTIME_HOST_SOURCE` and the release preflight `git ls-tree`s it. The
+ * retention ref is `codex/rc3-composition-artifact-retained-<old-head>`.
  *
  * Usage:
  *   node scripts/release/respin-composition-artifact.mjs
@@ -54,6 +61,7 @@ export { COMPOSITION_LOCK, COMPOSITION_MANIFEST, SEALED_DIR, SEALED_MEMBER_COUNT
 export const SEALING_WORKFLOW = '.github/workflows/rc3-composition-artifact.yml';
 export const ARTIFACT_LOCK = 'config/shinemage-composition-artifact.lock.json';
 export const RUNTIME_HOST_SOURCE_PATH = 'scripts/release/runtime-host-evidence.mjs';
+export const RETAINED_REF_PREFIX = 'codex/rc3-composition-artifact-retained-';
 export const DEFAULT_REPOSITORY = 'tyuanww/fuqing-crm-analytics';
 export const PIN_GENERATOR = fileURLToPath(new URL('../crm-calibration/service-manifest-pins.mjs', import.meta.url));
 export const COMPOSITION_INPUTS = fileURLToPath(new URL('../ci/composition-pack-inputs.mjs', import.meta.url));
@@ -230,6 +238,86 @@ export async function rewriteRuntimeHostSource({ root = ROOT, headSha }) {
   }
   await writeFile(path, next.text, { mode: 0o644 });
   return { path: RUNTIME_HOST_SOURCE_PATH, changed: true, oldHeadSha: next.oldSha, newHeadSha: next.newSha };
+}
+
+// --- superseded sealed head retention ---------------------------------------
+
+/**
+ * The sealing commit's parent is the target commit, not the previous sealed
+ * head, so the next `--force-with-lease` push of the dedicated sealing branch
+ * drops the old head. Open PRs opened before the reseal still pin that head in
+ * `RUNTIME_HOST_SOURCE`, and the release preflight `git ls-tree`s it, so it has
+ * to stay reachable until those PRs merge (and as rollback evidence). A plain
+ * retention branch under a name that carries the old head does that without
+ * changing the dedicated sealing branch at all.
+ */
+export function retainedHeadRefName(headSha) {
+  assertCode(SHA40.test(headSha ?? ''), 'RETAINED_REF_INVALID', String(headSha ?? 'absent'));
+  return `${RETAINED_REF_PREFIX}${headSha}`;
+}
+
+/**
+ * Decide what retaining `oldHead` needs. Pure so the naming/idempotency rules
+ * are unit-tested; the caller performs the live remote lookup and push.
+ *
+ * `existing` is the sha the retention ref currently points at, or null. A ref
+ * that already points at the old head makes the reseal idempotent (`present`);
+ * a ref that points anywhere else is never force-moved (`RETAINED_REF_CONFLICT`)
+ * because that would move evidence under a name claiming a different head.
+ */
+export function planSealedHeadRetention({ oldHead, newHead, existing = null }) {
+  if (oldHead === undefined || oldHead === null || oldHead === '') {
+    return { action: 'skip', reason: 'no-previous-head', ref: null, head: null };
+  }
+  const ref = retainedHeadRefName(oldHead);
+  if (newHead !== undefined && newHead !== null) {
+    assertCode(SHA40.test(newHead), 'RETAINED_REF_INVALID', String(newHead));
+  }
+  if (oldHead === newHead) return { action: 'skip', reason: 'head-unchanged', ref, head: oldHead };
+  assertCode(!existing || existing === oldHead, 'RETAINED_REF_CONFLICT',
+    `${ref} already points at ${existing}, not ${oldHead}; refusing to force-move it`);
+  return { action: existing ? 'present' : 'create', ref, head: oldHead };
+}
+
+async function remoteRefHead(root, branch) {
+  const fullRef = `refs/heads/${branch}`;
+  const result = await run('git', ['-C', root, 'ls-remote', '--exit-code', 'origin', fullRef]);
+  if (result.code === 2) return null;
+  assertCode(result.code === 0, 'RETAINED_REF_LOOKUP', result.stderr.toString().trim() || `git ls-remote ${fullRef}`);
+  const line = result.stdout.trim().split('\n')[0] ?? '';
+  const match = /^([a-f0-9]{40})\t(.+)$/.exec(line);
+  assertCode(match && match[2] === fullRef, 'RETAINED_REF_LOOKUP', line || 'empty');
+  return match[1];
+}
+
+/**
+ * Ensure `oldHead` stays reachable before the artifact lock and
+ * `RUNTIME_HOST_SOURCE` move to `newHead`. Idempotent: an existing retention ref
+ * at the old head is a no-op; a conflicting one fails closed. The push is a
+ * plain (never forced) branch update to that one ref, so it can neither rewrite
+ * another ref nor move the dedicated sealing branch.
+ */
+export async function retainSupersededSealedHead({ root = ROOT, oldHead, newHead }) {
+  const planned = planSealedHeadRetention({ oldHead, newHead });
+  if (planned.action === 'skip') return planned;
+  const existing = await remoteRefHead(root, planned.ref);
+  const plan = planSealedHeadRetention({ oldHead, newHead, existing });
+  if (plan.action === 'present') return plan;
+  if ((await gitQuiet(root, ['cat-file', '-e', `${oldHead}^{commit}`])) !== 0) {
+    // The sealing-branch fetch usually brings the old head; a lock that still
+    // names an already-dropped head cannot be retained at all. Record the skip
+    // instead of blocking the reseal on evidence that is already gone.
+    await run('git', ['-C', root, 'fetch', '--no-tags', 'origin', oldHead]);
+  }
+  if ((await gitQuiet(root, ['cat-file', '-e', `${oldHead}^{commit}`])) !== 0) {
+    return { ...plan, action: 'skip', reason: 'head-unavailable' };
+  }
+  const pushed = await run('git', ['-C', root, '-c', 'core.hooksPath=/dev/null', 'push',
+    'origin', `${oldHead}:refs/heads/${plan.ref}`]);
+  assertCode(pushed.code === 0, 'RETAINED_REF_PUSH', pushed.stderr.toString().trim());
+  const retained = await remoteRefHead(root, plan.ref);
+  assertCode(retained === oldHead, 'RETAINED_REF_PUSH', `${plan.ref} -> ${retained} != ${oldHead}`);
+  return plan;
 }
 
 // --- sealed member verification --------------------------------------------
@@ -794,6 +882,10 @@ async function main(argv = process.argv.slice(2)) {
     assertCode(dependents.length === 0, 'DEPENDENT_LOCK_UNSUPPORTED',
       `update or teach this helper about ${dependents.join(', ')}`);
   }
+  // Keep the superseded sealed head reachable before the lock/pin moves to the
+  // new head: open PRs opened before this reseal still pin it and preflight
+  // `git ls-tree`s it. Idempotent; a conflicting ref fails closed.
+  const retention = await retainSupersededSealedHead({ root, oldHead, newHead: sealing.head });
   const lockChange = await rewriteArtifactLock({ root, sealed });
   changes.push({ ...lockChange, detail: `artifact id ${lockChange.oldId} -> ${lockChange.newId}, head ${lockChange.oldHeadSha} -> ${lockChange.newHeadSha}` });
   const runtime = await rewriteRuntimeHostSource({ root, headSha: sealing.head });
@@ -804,6 +896,12 @@ async function main(argv = process.argv.slice(2)) {
   summarizeChanges(changes.filter(change => change.changed !== false));
   console.log(`RESPIN_SUMMARY artifact ${oldId} -> ${sealed.id} head ${oldHead} -> ${sealing.head}`);
   console.log(`RESPIN_SUMMARY runtime_host_source ${runtime.oldHeadSha} -> ${runtime.newHeadSha}`);
+  if (retention.action === 'skip') {
+    console.log(`RESPIN_SUMMARY retained_ref skipped=${retention.reason}`);
+  } else {
+    console.log(`RESPIN_SUMMARY retained_ref ${retention.ref}`
+      + ` ${retention.action === 'present' ? 'already-present' : 'created'} head=${retention.head}`);
+  }
   console.log(`RESPIN_SUMMARY run=${sealing.changed ? 'https://github.com/' + repository + '/actions/runs/' + runRow.id : 'reused'}`);
   console.log('RESPIN_NEXT commit the changed files with the dependency PR, then watch B0');
   return 0;
