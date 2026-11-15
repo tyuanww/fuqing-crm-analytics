@@ -115,10 +115,13 @@ export async function createTargetFixture(directory) {
     'crash-reconcile-idempotency-and-unknown', 'old-service-readonly-fallback', 'candidate-forward-fix',
     'synthetic-backup-cold-restore', 'unsupported-old-write-detected', 'baseline-unknown-schema',
     'candidate-unknown-schema', 'input-and-installed-artifact-integrity'];
+  // The observation records the packed candidate's dependency count, exactly as
+  // the verifier re-derives it; derive it from the fixture artifacts so a
+  // reviewed closure change cannot leave a stale literal behind.
   await json(join(result, 'receipt.json'), { schema_version: 'shinemage-service-target-acceptance-observation/v1',
     status: 'PASS', scope: 'actual-wsl2-isolated-synthetic-http', input_sha256: hash(await readFile(join(input, 'input-manifest.json'))),
     release_ready: false, activation: 'BLOCKED', supply_chain: 'NOT_RUN', production_identity: 'NOT_RUN', journal_binding: 'NOT_RUN',
-    observations: cases.map(name => ({ case: name, status: 'PASS', ...(name.endsWith('cold-install') ? { dependencies: 13 } : {}),
+    observations: cases.map(name => ({ case: name, status: 'PASS', ...(name.endsWith('cold-install') ? { dependencies: Object.keys(artifacts.candidate.installed).length } : {}),
       ...(name === 'old-service-readonly-fallback' || name.endsWith('unknown-schema') ? { database_unchanged: true } : {}),
       ...(name.endsWith('unknown-schema') ? { rejected: true } : {}),
       ...(name === 'unsupported-old-write-detected' ? { downgrade: 'BLOCKED_PROVENANCE_NOT_PRESERVED' } : {}) })),
