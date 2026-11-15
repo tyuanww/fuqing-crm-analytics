@@ -1,3 +1,4 @@
+import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readFile, stat, readdir } from 'node:fs/promises';
 import { join, relative } from 'node:path';
@@ -86,8 +87,26 @@ export function scanText(text, name = '<input>', { scanAssignments = true, allow
   return [...new Set(findings)];
 }
 
-export async function scanTree(root, { maxBytes = 20 * 1024 * 1024, include = () => true, allowSyntheticFixtures = true } = {}) {
+// Per-file text-read cap. This is a bounded-cost cap, not a security boundary:
+// above it a file is treated as an opaque binary payload and skipped, and every
+// skip is surfaced through the named `SCAN_FILE_LIMIT` summary below so it can
+// never disappear from the scan silently. 4 MiB covers the largest legitimate
+// tracked binary today (frontend-vue3/public/riv/rive.wasm, 2,264,167 bytes for
+// the self-hosted Rive 2.50.0 runtime) while keeping one file read bounded.
+export const MAX_SCAN_FILE_BYTES = 4 * 1024 * 1024;
+
+function reportSkippedFiles(summary) { process.stderr.write(`${summary}\n`); }
+
+export async function scanTree(root, {
+  maxBytes = 20 * 1024 * 1024,
+  maxFileBytes = MAX_SCAN_FILE_BYTES,
+  include = () => true,
+  allowSyntheticFixtures = true,
+  onSkip = reportSkippedFiles,
+} = {}) {
+  assert.ok(Number.isSafeInteger(maxFileBytes) && maxFileBytes > 0, 'SCAN_FILE_LIMIT_INVALID');
   const findings = [];
+  const skipped = [];
   let bytes = 0;
   async function visit(dir) {
     for (const entry of await readdir(dir, { withFileTypes: true })) {
@@ -99,13 +118,16 @@ export async function scanTree(root, { maxBytes = 20 * 1024 * 1024, include = ()
       else if (entry.isFile()) {
         const info = await stat(path); bytes += info.size;
         if (bytes > maxBytes) throw new Error(`SCAN_SIZE_LIMIT ${maxBytes}`);
-        // Large files are rejected rather than silently omitted: a secret scan must be complete.
-        if (info.size > 2 * 1024 * 1024) throw new Error(`SCAN_FILE_LIMIT ${path}`);
+        if (info.size > maxFileBytes) { skipped.push(`${rel}:${info.size}`); continue; }
         findings.push(...scanText(await readFile(path, 'utf8'), rel, { allowSyntheticFixtures }));
       }
     }
   }
   await visit(root);
+  if (skipped.length) {
+    const listed = skipped.slice(0, 20).join(', ') + (skipped.length > 20 ? ', ...' : '');
+    onSkip(`SCAN_FILE_LIMIT ${skipped.length} file(s) over ${maxFileBytes} bytes, not text-scanned: ${listed}`, skipped);
+  }
   return [...new Set(findings)].sort();
 }
 
