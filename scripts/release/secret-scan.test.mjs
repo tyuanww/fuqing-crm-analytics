@@ -6,7 +6,9 @@ import test from 'node:test';
 import { MAX_SCAN_FILE_BYTES, scanTree } from './secret-scan.mjs';
 
 const MIB = 1024 * 1024;
-const SECRET = 'const api_key = "live-token-0123456789abcdef";';
+// Built at runtime: the repository secret scan reads this file as plain text,
+// so the fixture must not itself contain an assignment-shaped live literal.
+const SECRET = ['const', 'api_key', '=', '"live-token-0123456789abcdef";'].join(' ');
 
 /** Deterministic byte content of exactly `size` bytes: `prefix` then 'A'. */
 function padded(prefix, size) {
