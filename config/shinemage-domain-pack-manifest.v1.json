@@ -2,9 +2,9 @@
   "schema_version": "shinemage-domain-pack-manifest/v1",
   "package": "@shine-mage/board-components",
   "repository": "tyuanww/shinemage-board-components",
-  "reviewed_sha": "4245aa811771f45d847bc7644234fabe5a6eee45",
+  "reviewed_sha": "59280a250416eec23f727d4f3ffb0ca38b65794c",
   "version": "0.1.0",
-  "manifest_sha256": "99989ec7207286ad37ab863236a0a87146b55aa2d12d2731325aa75018ee0265",
+  "manifest_sha256": "2f535724fa0f631869c8882b725bb9ce901a6502f8a974b1525daebe12d51f14",
   "pack_sha256": "66d53381095e93f38dbaa7385780f20b677f68ca2692702cb270849f3392853e",
   "pack_bytes": 1951,
   "builder": {

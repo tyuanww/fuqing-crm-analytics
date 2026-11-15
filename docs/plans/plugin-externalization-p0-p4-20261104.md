@@ -1,6 +1,6 @@
 # 插件外置 P0-P4 作战计划（2026-11-04 基线）
 
-> 本文件是当前计划，不是历史快照。状态事实以 `origin/main` = `4ac78d409f2a39641345e590b59a16ec2691cedc`（2026-11-06 09:18 +08:00，#267）、PR #211/#216/#218/#222/#229/#230/#232/#234、#235–#255 与 #256–#268，以及本文引用的 CI run 为准；2026-11-04、2026-11-05 12:08 与 2026-11-05 22:10 的旧快照保留在 2.1、2.2、2.3 与 5.5。执行前先按第 6 节重新核对；状态变化时追加记录，不要改写已经发生的证据。2026-11-05 owner 已批准 D1–D4 与 P3-3 五项，执行依据见 5.1 与 5.1.1，切片状态见 C09；S0 与 #240–#255 的实况见 5.5，2026-11-06 的收口、独立验证与两个操作杠杆见 5.6，C15 带标题 preflight 的证据见 5.7。
+> 本文件是当前计划，不是历史快照。状态事实以 `origin/main` = `4ac78d409f2a39641345e590b59a16ec2691cedc`（2026-11-06 09:18 +08:00，#267）、PR #211/#216/#218/#222/#229/#230/#232/#234、#235–#255 与 #256–#268，以及本文引用的 CI run 为准；2026-11-04、2026-11-05 12:08 与 2026-11-05 22:10 的旧快照保留在 2.1、2.2、2.3 与 5.5。执行前先按第 6 节重新核对；状态变化时追加记录，不要改写已经发生的证据。2026-11-05 owner 已批准 D1–D4 与 P3-3 五项，执行依据见 5.1 与 5.1.1，切片状态见 C09；S0 与 #240–#255 的实况见 5.5，2026-11-06 的收口、独立验证与两个操作杠杆见 5.6，C15 带标题 preflight 的证据见 5.7，2026-11-15 的 90 天保留、作者 main 重 pin 与 reseal 见 5.8（取代 #278 的允许过期决定）。
 
 ## 1 目标与执行规则
 
@@ -702,6 +702,30 @@ PR #215 已经修掉机械项（test 四片、pip 不触发 b0、path matrix 补
 - runtime 不在 `.ci/rc3-composition` 的 20 个成员内，标题变更不需要 composition reseal，也不重算 config lock。
 - 本记录只追加证据：不创建 tag/release、不改 config/workflow/lock、不发布、不部署。
 
+### 5.8 2026-11-15 作者 artifact 保留 90 天：重 pin 作者 main 并重新密封（取代 #278 的“允许过期”决定）
+
+**结论。** 2026-11-15 的 5 个作者 evidence archive 到期问题不是“可以允许过期”，根因是作者仓 workflow 的 artifact `retention-days` 只有 14 天。10 个作者仓已把该值改成 90 天并各产生一个 workflow-only 的 main 提交；对应的 post-merge push run 重新生成了 evidence archive、public-contract archive 与 formal pack，全部 90 天有效（`2027-02-13` 到期）。主仓据此把 9 个插件锁与 domain 的 `source_sha` 重 pin 到新作者 main，重新密封 sealed composition artifact，并把 4 个 evidence 归档换成 2027-02 到期的新 artifact。PR #279。
+
+**观测（2026-11-15，live `gh api`）。** 新作者 main：workbench `58ce1e54`、crm `825d4d53`、knowledge `62631fb0`、board `d8cc64dd`、crowd `0b282378`、query `1e3bebd6`、funnel `9ac83073`、waterfall `ec529227`、brand `bcc9f1cd`、board-components `59280a25`。每个 head 相对 2026-11-05 的 pin 都只多一个 workflow 文件改动（`retention-days: 14 -> 90`）。旧锁 pin 的 5 个 evidence archive 到期窗口 `2026-11-19T12:53Z`–`13:01Z`（见 #278 的观测）；旧 sealed artifact `13417537931` 到期 `2027-02-03`。
+
+| 锁 | 新 push run | 新 artifact | bytes | 到期 |
+|---|---|---|---|---|
+| `workbench-author-evidence` | 43666287344 | 14142283629 | 654,532 | 2027-02-13 |
+| `domain-author-evidence` | 43666031273 | 14141963989 | 11,361 | 2027-02-13 |
+| `public-contract-inputs#workbench` | 43666287344 | 14141964897 | 66,272 | 2027-02-13 |
+| `public-contract-inputs#crm` | 43666292126 | 14141984712 | 2,788 | 2027-02-13 |
+| `public-contract-inputs#brand` | 43666306523 | 14141869690 | 1,740 | 2027-02-13 |
+
+**包内容不变、摘要移动。** workflow-only 改动不动任何插件或 library 文件：9 个插件 formal pack 与 domain content pack 解包后的树逐字节相同。但 formal pack 的 receipt/provenance 固定 git `source_sha`，且 `pnpm pack` 的目录/`package.json` mtime 会在重打时变化，所以 9 个 fail-closed 字段必然移动：9 个 `manifest_sha256` 全部按新 formal pack 更新，`pack_sha256` 在 workbench/crm/knowledge/brand 四个 pack 上移动（其余 5 个 tarball 字节相同），domain `pack_sha256` 保持 `66d53381…`（content pack 字节相同）。因为 receiver 用 `receipt.source_sha` 绑定 lock `source_sha`，只改 `source_sha` 而保留旧 manifest 摘要会让 `CI_COMPOSITION_SOURCE_MISMATCH`/`DOMAIN_PACK_SOURCE_SHA_MISMATCH` 失败；因此摘要必须随新 formal pack 一起重 pin，这不是放宽校验。
+
+**reseal。** 用 `respin-composition-artifact.mjs --packs <新 formal packs>` 从 `3ae0f12` 重建密封分支：sealing head `93dae0ab0538eca6f2d3565b5f30d32f330e6d66`（旧 `b29a84f3…`），run `43667164993` success，artifact `14142656552`，sha256 `9ed0741d172ecfdc69fd0a7e1ded9066fb86dfca3f9129ff7397549971c7e52d`，838,638 B，20 成员，canonical sums `79ddab49…`，`2027-02-13` 到期；`RUNTIME_HOST_SOURCE` 移到 `93dae0ab…`；`config/shinemage-composition-artifact.lock.json` 的 `composition_lock_sha256` = `82fdae80…`。`config/shinemage-domain-pack-manifest.v1.json` 的 `reviewed_sha` 与 composition manifest `domains[0]` 同步到 `59280a25…`，domain 的推导 pack manifest 只改 `source_sha`/provenance `git_sha`（content pack 字节未变）。
+
+**验证。** 用 GitHub 接收器重新下载并校验三份 evidence archive（`workbench-author-evidence.mjs`、`domain-author-evidence.mjs`、`public-contract-inputs.mjs` 全部 exit 0）；`node --test scripts/ci/{workbench-author-evidence,domain-author-evidence,public-contract-inputs}.test.mjs` 66/66；`composition-pack-inputs.mjs --artifact-lock … --manifest …` 对新 sealed artifact 校验 `lock_sha256 = 82fdae80…`、9 插件 + domain 的 `source_sha`/摘要全部等于新锁；`respin-composition-artifact.mjs --check` 打印 `RESPIN_CHECK_OK`；`rebuild-seal-members.mjs --check` 打印 `SEAL_REBUILD_CHECK_OK`（20 成员）。删除门禁保持 `BLOCKED`，唯一原因仍是 `real_host_acceptance_not_recorded`：本 PR 不 flip gate、不改 workflow、不发布、不部署。
+
+**周报阈值行为。** `artifact-expiry.yml` 仍每周一 01:00 UTC 跑 `check-artifact-expiry.mjs`，默认 7 天窗口：exit 0 = 全部在窗口外，exit 1 = 至少一个在 7 天内或已过期，exit 2 = lock/token/API/id 失败。重 pin 后 6 个被锁 artifact 统一 `2027-02-13` 到期（约 90 天），所以周报从现在到 `2027-02-06` 前保持绿色，随后按既定语义转红提醒；阈值和退出码没有放宽。
+
+**#278 处置。** 本记录取代 #278 的“允许过期”决定。#278 的前提（作者 artifact 只能 14 天、刷新代价高）已被作者仓 90 天保留直接消除；#278 应关闭而不合并，其观测表作为 2026-11-15 的历史保留在 #278 自身。主仓未改写 #278 分支，也未在本 PR 里关闭它。
+
 ## 6 如何接续
 
 1. 先读 `AGENTS.md`、本文件、`STATUS.md`、`docs/operating/verification.md`，再读 #211/#216/#218/#222 的 body（均已合并）。不要只读会话摘要。
@@ -760,3 +784,9 @@ git log --oneline origin/main -12
 | C15 titled preflight（2026-11-06） | run `42145648868`，head `bc4780c`，success；artifact `13470047834` / `13470102654`；`release_tag` `dsh-0.21.0.0-r1` 仅名字（无 tag/release/deployment） |
 | 删除门禁与 closure（2026-11-06） | #262 flip/verifier；closure receipt `56e88c8d…` / run `42055263505`；gate `BLOCKED`，唯一原因 `real_host_acceptance_not_recorded` |
 | artifact 到期周报（2026-11-06） | #268；作者 artifact 2026-11-19，sealed artifact 2027-02-03 |
+| main（2026-11-15，PR #279） | 重 pin 前 `ee4f1f4aa4ecdd425c065742308703cc84c5ab9e`；分支 `codex/retention-refill-20261115` |
+| 作者 main（2026-11-15 90 天保留） | workbench `58ce1e54`、crm `825d4d53`、knowledge `62631fb0`、board `d8cc64dd`、crowd `0b282378`、query `1e3bebd6`、funnel `9ac83073`、waterfall `ec529227`、brand `bcc9f1cd`；domain `59280a25` |
+| composition lock（2026-11-15） | `82fdae800c582e9f55d8ab03e3529ce3e0e4973e0f5b14421a395ebe3187ade3`（9 插件 + domain 全按新 formal pack 重 pin） |
+| sealed artifact（2026-11-15） | `14142656552`（`9ed0741d…`，838,638 B，20 成员，run `43667164993`，head `93dae0ab…`，2027-02-13 过期） |
+| 作者 artifact（2026-11-15 90 天保留后） | **90 天有效，2027-02-13 到期**（run `43666287344` / `43666292126` / `43666306523` / `43666031273` 等） |
+| 删除门禁（2026-11-15） | 仍 `BLOCKED`，唯一原因 `real_host_acceptance_not_recorded`；本轮未 flip、未发布 |
